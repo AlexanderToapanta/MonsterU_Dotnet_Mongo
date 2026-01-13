@@ -1,0 +1,250 @@
+﻿@model IEnumerable<dynamic>
+@{
+ ViewBag.Title = "Administrar Carreras";
+ Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container mt-3">
+ <h3 class="mb-3"><i class="fas fa-graduation-cap me-2"></i>Administrar Carreras</h3>
+
+ <div class="card">
+ <div class="card-body">
+ <div class="table-responsive">
+ <table class="table table-striped table-hover" id="datalist">
+ <thead>
+ <tr>
+ <th style="width:30px"><input type="checkbox" id="selectAll" /></th>
+ <th>ID</th>
+ <th>Nombre</th>
+ <th>Créditos Máx.</th>
+ <th>Créditos Mín.</th>
+ </tr>
+ </thead>
+ <tbody>
+ @if (Model != null)
+ {
+ foreach (var item in Model)
+ {
+ var id = item.mecarrId ?? item.MECARR_ID ?? item.Id ?? "";
+ var nombre = item.mecarrNombre ?? item.MECARR_NOMBRE ?? item.Nombre ?? "";
+ var maxCred = item.mecarrMaxCred ?? item.MECARR_MAXCRED ?? item.MaxCred ?? "";
+ var minCred = item.mecarrMinCred ?? item.MECARR_MINCRED ?? item.MinCred ?? "";
+
+ <tr data-id="@id" data-nombre="@nombre" data-maxcred="@maxCred" data-mincred="@minCred">
+ <td><input type="checkbox" class="row-select" /></td>
+ <td>@id</td>
+ <td>@nombre</td>
+ <td>@maxCred</td>
+ <td>@minCred</td>
+ </tr>
+ }
+ }
+ else
+ {
+ <tr><td colspan="5">No hay registros.</td></tr>
+ }
+ </tbody>
+ </table>
+ </div>
+
+ <div class="mt-3 d-flex gap-2">
+ <button id="createButton" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#createModal">
+ <i class="fas fa-plus me-1"></i>Crear
+ </button>
+
+ <button id="viewButton" class="btn btn-info" data-bs-toggle="modal" data-bs-target="#viewModal" disabled>
+ <i class="fas fa-eye me-1"></i>Ver
+ </button>
+
+ <button id="editButton" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#editModal" disabled>
+ <i class="fas fa-edit me-1"></i>Editar
+ </button>
+
+ <button id="deleteButton" class="btn btn-danger" disabled>
+ <i class="fas fa-trash me-1"></i>Eliminar
+ </button>
+ </div>
+ </div>
+ </div>
+</div>
+
+<!-- Create Modal -->
+<div class="modal fade" id="createModal" tabindex="-1" aria-labelledby="createModalLabel" aria-hidden="true">
+ <div class="modal-dialog">
+ <div class="modal-content">
+ <form method="post" action="@Url.Action("Crear", "ControladorCarrera")">
+ @Html.AntiForgeryToken()
+ <div class="modal-header">
+ <h5 class="modal-title" id="createModalLabel">Crear Carrera</h5>
+ <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+ </div>
+ <div class="modal-body">
+ <div class="mb-3">
+ <label class="form-label">ID</label>
+ <input type="text" name="MECARR_ID" class="form-control" required />
+ </div>
+ <div class="mb-3">
+ <label class="form-label">Nombre</label>
+ <input type="text" name="MECARR_NOMBRE" class="form-control" required />
+ </div>
+ <div class="mb-3">
+ <label class="form-label">Créditos Máx.</label>
+ <input type="number" name="MECARR_MAXCRED" class="form-control" />
+ </div>
+ <div class="mb-3">
+ <label class="form-label">Créditos Mín.</label>
+ <input type="number" name="MECARR_MINCRED" class="form-control" />
+ </div>
+ </div>
+ <div class="modal-footer">
+ <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+ <button type="submit" class="btn btn-success">Guardar</button>
+ </div>
+ </form>
+ </div>
+ </div>
+</div>
+
+<!-- View Modal -->
+<div class="modal fade" id="viewModal" tabindex="-1" aria-hidden="true">
+ <div class="modal-dialog">
+ <div class="modal-content">
+ <div class="modal-header">
+ <h5 class="modal-title">Ver Carrera</h5>
+ <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+ </div>
+ <div class="modal-body">
+ <dl class="row">
+ <dt class="col-sm-4">ID</dt>
+ <dd class="col-sm-8" id="view-id"></dd>
+
+ <dt class="col-sm-4">Nombre</dt>
+ <dd class="col-sm-8" id="view-nombre"></dd>
+
+ <dt class="col-sm-4">Créditos Máx.</dt>
+ <dd class="col-sm-8" id="view-maxcred"></dd>
+
+ <dt class="col-sm-4">Créditos Mín.</dt>
+ <dd class="col-sm-8" id="view-mincred"></dd>
+ </dl>
+ </div>
+ <div class="modal-footer">
+ <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+ </div>
+ </div>
+ </div>
+</div>
+
+<!-- Edit Modal -->
+<div class="modal fade" id="editModal" tabindex="-1" aria-hidden="true">
+ <div class="modal-dialog">
+ <div class="modal-content">
+ <form method="post" action="@Url.Action("Editar", "ControladorCarrera")">
+ @Html.AntiForgeryToken()
+ <div class="modal-header">
+ <h5 class="modal-title">Editar Carrera</h5>
+ <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+ </div>
+ <div class="modal-body">
+ <input type="hidden" name="MECARR_ID" id="edit-id" />
+ <div class="mb-3">
+ <label class="form-label">Nombre</label>
+ <input type="text" name="MECARR_NOMBRE" id="edit-nombre" class="form-control" required />
+ </div>
+ <div class="mb-3">
+ <label class="form-label">Créditos Máx.</label>
+ <input type="number" name="MECARR_MAXCRED" id="edit-maxcred" class="form-control" />
+ </div>
+ <div class="mb-3">
+ <label class="form-label">Créditos Mín.</label>
+ <input type="number" name="MECARR_MINCRED" id="edit-mincred" class="form-control" />
+ </div>
+ </div>
+ <div class="modal-footer">
+ <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+ <button type="submit" class="btn btn-primary">Guardar cambios</button>
+ </div>
+ </form>
+ </div>
+ </div>
+</div>
+
+<!-- Delete Confirmation Form (posted by script) -->
+<form id="deleteForm" method="post" action="@Url.Action("EliminarMultiple", "ControladorCarrera")">
+ @Html.AntiForgeryToken()
+ <input type="hidden" name="ids" id="delete-ids" />
+</form>
+
+@section Scripts {
+ <script>
+ $(function () {
+ function updateButtons() {
+ var selected = $('#datalist tbody tr').has('input.row-select:checked');
+ var count = selected.length;
+ $('#viewButton').prop('disabled', count !==1);
+ $('#editButton').prop('disabled', count !==1);
+ $('#deleteButton').prop('disabled', count ===0);
+ }
+
+ // row click toggles checkbox
+ $('#datalist tbody').on('click', 'tr', function (e) {
+ if (e.target.type !== 'checkbox' && e.target.tagName !== 'A' && !$(e.target).closest('.btn').length) {
+ var cb = $(this).find('input.row-select');
+ cb.prop('checked', !cb.prop('checked'));
+ }
+ $(this).toggleClass('table-active', $(this).find('input.row-select').prop('checked'));
+ updateButtons();
+ });
+
+ // checkbox click stops row click propagation
+ $('#datalist').on('click', 'input.row-select', function (e) {
+ e.stopPropagation();
+ $(this).closest('tr').toggleClass('table-active', $(this).prop('checked'));
+ updateButtons();
+ });
+
+ $('#selectAll').on('change', function () {
+ var checked = $(this).prop('checked');
+ $('input.row-select').prop('checked', checked).trigger('change');
+ });
+
+ // View / Edit populate modal fields from first selected row
+ function getFirstSelectedData() {
+ var row = $('#datalist tbody tr').has('input.row-select:checked').first();
+ return {
+ id: row.data('id'),
+ nombre: row.data('nombre'),
+ maxcred: row.data('maxcred'),
+ mincred: row.data('mincred')
+ };
+ }
+
+ $('#viewButton').on('click', function () {
+ var d = getFirstSelectedData();
+ $('#view-id').text(d.id);
+ $('#view-nombre').text(d.nombre);
+ $('#view-maxcred').text(d.maxcred);
+ $('#view-mincred').text(d.mincred);
+ });
+
+ $('#editButton').on('click', function () {
+ var d = getFirstSelectedData();
+ $('#edit-id').val(d.id);
+ $('#edit-nombre').val(d.nombre);
+ $('#edit-maxcred').val(d.maxcred);
+ $('#edit-mincred').val(d.mincred);
+ });
+
+ $('#deleteButton').on('click', function () {
+ var ids = [];
+ $('#datalist tbody tr').has('input.row-select:checked').each(function () {
+ ids.push($(this).data('id'));
+ });
+ if (ids.length ===0) return;
+ if (!confirm('¿Seguro que desea eliminar los registros seleccionados?')) return;
+ $('#delete-ids').val(ids.join(','));
+ $('#deleteForm').submit();
+ });
+ });
+ </script>
+}

@@ -1,0 +1,543 @@
+﻿@{
+    ViewBag.Title = "Asignación de Opciones a Roles";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div style="padding:20px; max-width:1400px; margin:0 auto;">
+    <h3>Asignación de Opciones a Roles</h3>
+    <p style="color: #7f8c8d; margin-bottom: 20px;">
+        En esta sección puede asignar opciones del sistema (menús) a los diferentes roles de usuario.
+    </p>
+
+    <
+    <div class="mb-4">
+        <label class="form-label fw-bold">Seleccionar Rol:</label>
+        <div class="input-group" style="max-width: 400px;">
+            @Html.DropDownList("rolId",
+                ViewBag.RolesSelectList as SelectList,
+                "-- Seleccione un rol --",
+                new
+                     {
+                    @class = "form-select",
+                    id = "rolSel",
+                    onchange = "cargarAsignacionesPorRol()"
+                })
+        </div>
+    </div>
+
+    <!-- Panel de información del rol seleccionado -->
+    <div id="panelInfo" class="card" style="display: none; margin-bottom: 20px;">
+        <div class="card-header">
+            <h5 class="mb-0">Información del Rol</h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <table class="table table-borderless">
+                        <tr>
+                            <td style="font-weight:bold; width:150px;">ID del Rol:</td>
+                            <td id="rolIdInfo"></td>
+                        </tr>
+                        <tr>
+                            <td style="font-weight:bold;">Nombre del Rol:</td>
+                            <td id="rolNombreInfo"></td>
+                        </tr>
+                        <tr>
+                            <td style="font-weight:bold;">Descripción:</td>
+                            <td id="rolDescripcionInfo"></td>
+                        </tr>
+                        <tr>
+                            <td style="font-weight:bold;">Estadísticas:</td>
+                            <td>
+                                <span id="estadisticasInfo" style="color: #2c3e50; font-weight: bold;"></span>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- DOS TABLAS PARA ASIGNACIÓN DE OPCIONES -->
+    <div id="panelAsignacion" style="margin-top:20px; display: none;">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Asignación de Opciones al Rol</h5>
+            </div>
+            <div class="card-body">
+
+                <div class="row">
+
+                    <!-- TABLA IZQUIERDA: Opciones NO asignadas -->
+                    <div class="col-md-5" style="border: 1px solid #ddd; padding: 15px; border-radius: 5px;">
+                        <h4 style="color: #e74c3c; margin-top: 0;">
+                            Opciones DISPONIBLES (<span id="contadorNoAsignadas">0</span>)
+                        </h4>
+
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-hover" id="tblOpcionesNoAsignadas">
+                                <thead class="thead-dark">
+                                    <tr>
+                                        <th style="width:50px;">
+                                            <input type="checkbox" id="checkAllNoAsignadas" onchange="toggleAllNoAsignadas(this)">
+                                        </th>
+                                        <th style="width:80px;">Código</th>
+                                        <th>Nombre de Opción</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tblOpcionesNoAsignadasBody">
+                                    <!-- Las opciones se cargarán aquí dinámicamente -->
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div style="text-align: center; margin-top: 10px;">
+                            <button id="btnAsignarSeleccionadas" class="btn btn-success"
+                                    onclick="asignarOpcionesSeleccionadas()"
+                                    style="min-width: 200px;" disabled>
+                                <i class="fas fa-arrow-right"></i> Asignar Seleccionadas
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- BOTONES CENTRALES -->
+                    <div class="col-md-2" style="display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 10px; padding: 0 10px;">
+                        <button id="btnAsignarIndividual" class="btn btn-success"
+                                onclick="asignarOpcionesSeleccionadas()"
+                                style="min-width: 120px;" disabled>
+                            <i class="fas fa-arrow-right"></i> Asignar
+                        </button>
+
+                        <button id="btnRetirarIndividual" class="btn btn-warning"
+                                onclick="retirarOpcionesSeleccionadas()"
+                                style="min-width: 120px;" disabled>
+                            <i class="fas fa-arrow-left"></i> Retirar
+                        </button>
+
+                        <hr style="width:100%; margin: 10px 0;" />
+
+                        <button class="btn btn-info" onclick="$('#modalAsignacionRapida').modal('show');"
+                                style="min-width: 120px;">
+                            <i class="fas fa-bolt"></i> Asignación Rápida
+                        </button>
+                    </div>
+
+                    <!-- TABLA DERECHA: Opciones ASIGNADAS -->
+                    <div class="col-md-5" style="border: 1px solid #ddd; padding: 15px; border-radius: 5px;">
+                        <h4 style="color: #27ae60; margin-top: 0;">
+                            Opciones ASIGNADAS (<span id="contadorAsignadas">0</span>)
+                        </h4>
+
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-hover" id="tblOpcionesAsignadas">
+                                <thead class="thead-dark">
+                                    <tr>
+                                        <th style="width:50px;">
+                                            <input type="checkbox" id="checkAllAsignadas" onchange="toggleAllAsignadas(this)">
+                                        </th>
+                                        <th style="width:80px;">Código</th>
+                                        <th>Nombre</th>
+                                        <th style="width:120px;">Fecha Asignación</th>
+                                        <th style="width:100px;">Estado</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tblOpcionesAsignadasBody">
+                                    <!-- Las opciones asignadas se cargarán aquí dinámicamente -->
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div style="text-align: center; margin-top: 10px;">
+                            <button id="btnRetirarSeleccionadas" class="btn btn-warning"
+                                    onclick="retirarOpcionesSeleccionadas()"
+                                    style="min-width: 200px;" disabled>
+                                <i class="fas fa-arrow-left"></i> Retirar Seleccionadas
+                            </button>
+                        </div>
+                    </div>
+
+                </div>
+
+                <div style="margin-top: 20px; text-align: center; color: #7f8c8d; font-style: italic;">
+                    Seleccione opciones y use los botones para asignar/retirar del rol
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- Botones de acción -->
+    <div style="margin-top:20px; display: flex; justify-content: center; gap: 15px;">
+        <button id="btnGuardar" class="btn btn-primary"
+                onclick="guardarCambios()"
+                style="min-width: 200px;" disabled>
+            <i class="fas fa-save"></i> Guardar Cambios
+        </button>
+
+        <button id="btnLimpiar" class="btn btn-secondary"
+                onclick="limpiarSeleccion()"
+                style="min-width: 200px;">
+            <i class="fas fa-refresh"></i> Limpiar Selección
+        </button>
+    </div>
+</div>
+
+<!-- Modal para Asignación Rápida -->
+<div class="modal fade" id="modalAsignacionRapida" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Asignación Rápida</h5>
+                <button type="button" class="close" data-dismiss="modal">
+                    <span>&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label style="font-weight:bold;">Rol:</label>
+                    @Html.DropDownList("modalRolId",
+                        ViewBag.RolesSelectList as SelectList,
+                        "-- Seleccione un rol --",
+                        new
+                             {
+                            @class = "form-control",
+                            id = "modalRolSelect"
+                        })
+                </div>
+                <div class="form-group">
+                    <label style="font-weight:bold;">Opción:</label>
+                    <select id="modalOpcionSelect" class="form-control">
+                        <option value="">-- Seleccione una opción --</option>
+                        <!-- Las opciones se cargarán dinámicamente -->
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                    <i class="fas fa-times"></i> Cancelar
+                </button>
+                <button type="button" class="btn btn-primary" onclick="asignarOpcionRapida()">
+                    <i class="fas fa-check"></i> Asignar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Toast para mensajes -->
+<div class="position-fixed bottom-0 right-0 p-3" style="z-index: 9999">
+    <div id="toastContainer"></div>
+</div>
+
+@section Scripts {
+    <script>
+        let rolSeleccionado = null;
+        let opcionesSeleccionadasNoAsignadas = new Set();
+        let opcionesSeleccionadasAsignadas = new Set();
+
+        // Cargar asignaciones cuando se selecciona un rol
+        function cargarAsignacionesPorRol() {
+            rolSeleccionado = $('#rolSel').val();
+
+            if (rolSeleccionado) {
+                // Mostrar panel de información
+                $('#panelInfo').show();
+                $('#panelAsignacion').show();
+
+                // Obtener detalles del rol
+                $.ajax({
+                    url: '@Url.Action("CargarOpcionesPorRol", "ControladorOpRoles")',
+                    type: 'POST',
+                    data: { XEROL_ID: rolSeleccionado },
+                    success: function (response) {
+                        if (response.success) {
+                            mostrarInformacionRol(response.data, response.rolNombre);
+                            mostrarOpcionesNoAsignadas(response.data);
+                            $('#btnGuardar').prop('disabled', false);
+                        } else {
+                            mostrarError(response.message);
+                        }
+                    },
+                    error: function (xhr, status, error) {
+                        mostrarError('Error al cargar asignaciones: ' + error);
+                    }
+                });
+            } else {
+                $('#panelInfo').hide();
+                $('#panelAsignacion').hide();
+                $('#btnGuardar').prop('disabled', true);
+            }
+        }
+
+        // Mostrar información del rol
+        function mostrarInformacionRol(opcionesConEstado, rolNombre) {
+            // Obtener rol del dropdown
+            const rolTexto = $('#rolSel option:selected').text();
+            const rolId = rolSeleccionado;
+
+            $('#rolIdInfo').text(rolId);
+            $('#rolNombreInfo').text(rolNombre);
+
+            // Contar opciones asignadas
+            const opcionesAsignadas = opcionesConEstado ? opcionesConEstado.filter(o => o.ASIGNADO).length : 0;
+            const totalOpciones = opcionesConEstado ? opcionesConEstado.length : 0;
+
+            $('#estadisticasInfo').text(
+                `Opciones disponibles: ${totalOpciones - opcionesAsignadas} | Opciones asignadas: ${opcionesAsignadas}`
+            );
+        }
+
+        // Mostrar opciones no asignadas
+        function mostrarOpcionesNoAsignadas(opcionesConEstado) {
+            const tbodyNoAsignadas = $('#tblOpcionesNoAsignadasBody');
+            const tbodyAsignadas = $('#tblOpcionesAsignadasBody');
+
+            tbodyNoAsignadas.empty();
+            tbodyAsignadas.empty();
+
+            opcionesSeleccionadasNoAsignadas.clear();
+            opcionesSeleccionadasAsignadas.clear();
+
+            if (opcionesConEstado && opcionesConEstado.length > 0) {
+                let contadorNoAsignadas = 0;
+                let contadorAsignadas = 0;
+
+                opcionesConEstado.forEach(function (opcion) {
+                    if (opcion.ASIGNADO) {
+                        // Opción asignada
+                        contadorAsignadas++;
+                        const fechaAsignacion = opcion.XROP_FECHA_ASIG ?
+                            new Date(opcion.XROP_FECHA_ASIG).toLocaleDateString('es-ES') : 'N/A';
+                        const estado = opcion.XROP_FECHA_RETIRO ? 'Retirada' : 'Activa';
+                        const colorEstado = opcion.XROP_FECHA_RETIRO ? '#e74c3c' : '#27ae60';
+
+                        const filaAsignada = `
+                            <tr>
+                                <td>
+                                    <input type="checkbox" class="opcion-checkbox-asignada"
+                                           data-opcion-id="${opcion.XEOPC_ID}"
+                                           onchange="toggleOpcionAsignada('${opcion.XEOPC_ID}', this)">
+                                </td>
+                                <td>${opcion.XEOPC_ID}</td>
+                                <td>${opcion.XEOPC_NOMBRE}</td>
+                                <td>${fechaAsignacion}</td>
+                                <td style="color: ${colorEstado}; font-weight: bold;">${estado}</td>
+                            </tr>
+                        `;
+                        tbodyAsignadas.append(filaAsignada);
+                    } else {
+                        // Opción no asignada
+                        contadorNoAsignadas++;
+                        const filaNoAsignada = `
+                            <tr>
+                                <td>
+                                    <input type="checkbox" class="opcion-checkbox-no-asignada"
+                                           data-opcion-id="${opcion.XEOPC_ID}"
+                                           onchange="toggleOpcionNoAsignada('${opcion.XEOPC_ID}', this)">
+                                </td>
+                                <td>${opcion.XEOPC_ID}</td>
+                                <td>${opcion.XEOPC_NOMBRE}</td>
+                            </tr>
+                        `;
+                        tbodyNoAsignadas.append(filaNoAsignada);
+                    }
+                });
+
+                $('#contadorNoAsignadas').text(contadorNoAsignadas);
+                $('#contadorAsignadas').text(contadorAsignadas);
+            } else {
+                tbodyNoAsignadas.append('<tr><td colspan="3" class="text-center">No hay opciones disponibles</td></tr>');
+                tbodyAsignadas.append('<tr><td colspan="5" class="text-center">No hay opciones asignadas</td></tr>');
+                $('#contadorNoAsignadas').text('0');
+                $('#contadorAsignadas').text('0');
+            }
+
+            actualizarBotones();
+        }
+
+        // Resto del JavaScript permanece igual...
+        // (Las funciones toggleAllNoAsignadas, toggleAllAsignadas, etc.)
+
+        function toggleAllNoAsignadas(checkbox) {
+            $('.opcion-checkbox-no-asignada').prop('checked', checkbox.checked);
+            $('.opcion-checkbox-no-asignada').each(function() {
+                const opcionId = $(this).data('opcion-id');
+                if (checkbox.checked) {
+                    opcionesSeleccionadasNoAsignadas.add(opcionId);
+                } else {
+                    opcionesSeleccionadasNoAsignadas.delete(opcionId);
+                }
+            });
+            actualizarBotones();
+        }
+
+        function toggleAllAsignadas(checkbox) {
+            $('.opcion-checkbox-asignada').prop('checked', checkbox.checked);
+            $('.opcion-checkbox-asignada').each(function() {
+                const opcionId = $(this).data('opcion-id');
+                if (checkbox.checked) {
+                    opcionesSeleccionadasAsignadas.add(opcionId);
+                } else {
+                    opcionesSeleccionadasAsignadas.delete(opcionId);
+                }
+            });
+            actualizarBotones();
+        }
+
+        function toggleOpcionNoAsignada(opcionId, checkbox) {
+            if ($(checkbox).is(':checked')) {
+                opcionesSeleccionadasNoAsignadas.add(opcionId);
+            } else {
+                opcionesSeleccionadasNoAsignadas.delete(opcionId);
+                $('#checkAllNoAsignadas').prop('checked', false);
+            }
+            actualizarBotones();
+        }
+
+        function toggleOpcionAsignada(opcionId, checkbox) {
+            if ($(checkbox).is(':checked')) {
+                opcionesSeleccionadasAsignadas.add(opcionId);
+            } else {
+                opcionesSeleccionadasAsignadas.delete(opcionId);
+                $('#checkAllAsignadas').prop('checked', false);
+            }
+            actualizarBotones();
+        }
+
+        function actualizarBotones() {
+            const tieneSeleccionNoAsignadas = opcionesSeleccionadasNoAsignadas.size > 0;
+            const tieneSeleccionAsignadas = opcionesSeleccionadasAsignadas.size > 0;
+
+            $('#btnAsignarSeleccionadas').prop('disabled', !tieneSeleccionNoAsignadas);
+            $('#btnAsignarIndividual').prop('disabled', !tieneSeleccionNoAsignadas);
+            $('#btnRetirarSeleccionadas').prop('disabled', !tieneSeleccionAsignadas);
+            $('#btnRetirarIndividual').prop('disabled', !tieneSeleccionAsignadas);
+        }
+
+        function asignarOpcionesSeleccionadas() {
+            if (!rolSeleccionado || opcionesSeleccionadasNoAsignadas.size === 0) {
+                mostrarError('Seleccione al menos una opción para asignar');
+                return;
+            }
+
+            const opcionesArray = Array.from(opcionesSeleccionadasNoAsignadas);
+
+            $.ajax({
+                url: '@Url.Action("AsignarOpcion", "ControladorOpRoles")',
+                type: 'POST',
+                traditional: true,
+                data: {
+                    XEROL_ID: rolSeleccionado,
+                    XEOPC_ID: opcionesArray[0] // Solo la primera si hay múltiples
+                },
+                success: function (response) {
+                    if (response.success) {
+                        mostrarExito(response.message);
+                        cargarAsignacionesPorRol(); // Recargar datos
+                    } else {
+                        mostrarError(response.message);
+                    }
+                },
+                error: function (xhr, status, error) {
+                    mostrarError('Error al asignar opciones: ' + error);
+                }
+            });
+        }
+
+        function retirarOpcionesSeleccionadas() {
+            if (!rolSeleccionado || opcionesSeleccionadasAsignadas.size === 0) {
+                mostrarError('Seleccione al menos una opción para retirar');
+                return;
+            }
+
+            const opcionesArray = Array.from(opcionesSeleccionadasAsignadas);
+
+            $.ajax({
+                url: '@Url.Action("RetirarOpcion", "ControladorOpRoles")',
+                type: 'POST',
+                traditional: true,
+                data: {
+                    XEROL_ID: rolSeleccionado,
+                    XEOPC_ID: opcionesArray[0] // Solo la primera si hay múltiples
+                },
+                success: function (response) {
+                    if (response.success) {
+                        mostrarExito(response.message);
+                        cargarAsignacionesPorRol(); // Recargar datos
+                    } else {
+                        mostrarError(response.message);
+                    }
+                },
+                error: function (xhr, status, error) {
+                    mostrarError('Error al retirar opciones: ' + error);
+                }
+            });
+        }
+
+        function guardarCambios() {
+            if (!rolSeleccionado) {
+                mostrarError('Por favor seleccione un rol primero');
+                return;
+            }
+
+            mostrarExito('Los cambios se aplicaron en tiempo real. No necesita guardar manualmente.');
+        }
+
+        function limpiarSeleccion() {
+            $('#rolSel').val('');
+            rolSeleccionado = null;
+            opcionesSeleccionadasNoAsignadas.clear();
+            opcionesSeleccionadasAsignadas.clear();
+            $('#panelInfo').hide();
+            $('#panelAsignacion').hide();
+            $('#btnGuardar').prop('disabled', true);
+            $('.opcion-checkbox-no-asignada').prop('checked', false);
+            $('.opcion-checkbox-asignada').prop('checked', false);
+            $('#checkAllNoAsignadas').prop('checked', false);
+            $('#checkAllAsignadas').prop('checked', false);
+            actualizarBotones();
+        }
+
+        // Funciones auxiliares para mostrar mensajes
+        function mostrarToast(mensaje, tipo = 'success') {
+            const toastId = 'toast-' + Date.now();
+            const toast = `
+                <div id="${toastId}" class="toast" role="alert" data-delay="5000">
+                    <div class="toast-header ${tipo === 'success' ? 'bg-success text-white' : 'bg-danger text-white'}">
+                        <strong class="mr-auto">${tipo === 'success' ? 'Éxito' : 'Error'}</strong>
+                        <button type="button" class="ml-2 mb-1 close" data-dismiss="toast">
+                            <span>&times;</span>
+                        </button>
+                    </div>
+                    <div class="toast-body">
+                        ${mensaje}
+                    </div>
+                </div>
+            `;
+
+            $('#toastContainer').append(toast);
+            $(`#${toastId}`).toast('show');
+
+            // Remover toast después de cerrar
+            $(`#${toastId}`).on('hidden.bs.toast', function () {
+                $(this).remove();
+            });
+        }
+
+        function mostrarExito(mensaje) {
+            mostrarToast(mensaje, 'success');
+        }
+
+        function mostrarError(mensaje) {
+            mostrarToast(mensaje, 'error');
+        }
+
+        // Inicialización
+        $(document).ready(function() {
+            // Configurar modal
+            $('#modalAsignacionRapida').on('show.bs.modal', function () {
+                $('#modalRolSelect').val($('#rolSel').val());
+            });
+        });
+    </script>
+}

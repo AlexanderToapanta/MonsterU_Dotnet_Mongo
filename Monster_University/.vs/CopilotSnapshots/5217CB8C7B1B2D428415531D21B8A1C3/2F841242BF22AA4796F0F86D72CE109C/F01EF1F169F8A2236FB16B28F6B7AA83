@@ -1,0 +1,50 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Web.Mvc;
+
+namespace Monster_University.Controllers
+{
+ public class ControladorCarreraController : Controller
+ {
+ // GET: ControladorCarrera/Lista
+ public ActionResult Lista()
+ {
+ try
+ {
+ // Obtener lista desde la capa de datos si existe; por ahora devolvemos null para que la vista muestre "No hay registros"
+ List<dynamic> lista = null;
+ return View(lista);
+ }
+ catch (Exception ex)
+ {
+ ViewBag.Error = ex.Message;
+ return View(new List<dynamic>());
+ }
+ }
+
+ [HttpPost]
+ [ValidateAntiForgeryToken]
+ public ActionResult Crear(FormCollection form)
+ {
+ // Implementar lógica para crear carrera usando la capa de datos
+ TempData["SuccessMessage"] = "Carrera creada (simulado).";
+ return RedirectToAction("Lista");
+ }
+n [HttpPost]
+ [ValidateAntiForgeryToken]
+ public ActionResult Editar(FormCollection form)
+ {
+ // Implementar lógica para editar carrera usando la capa de datos
+ TempData["SuccessMessage"] = "Carrera editada (simulado).";
+ return RedirectToAction("Lista");
+ }
+n [HttpPost]
+ [ValidateAntiForgeryToken]
+ public ActionResult EliminarMultiple(string ids)
+ {
+ // Implementar lógica para eliminar múltiples registros por IDs
+ TempData["SuccessMessage"] = "Registros eliminados (simulado).";
+ return RedirectToAction("Lista");
+ }
+ }
+}

@@ -1,0 +1,428 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Schema Namespace="monster_universityModel" Alias="Self" annotation:UseStrongSpatialTypes="false" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm">
+  <EntityType Name="FEPAGO_PAGO">
+    <Key>
+      <PropertyRef Name="FEPAGO_ID" />
+    </Key>
+    <Property Name="FEPAGO_ID" Type="String" MaxLength="5" FixedLength="true" Unicode="false" Nullable="false" />
+    <Property Name="MECARR_ID" Type="String" MaxLength="5" FixedLength="true" Unicode="false" Nullable="false" />
+    <Property Name="MEEST_ID" Type="String" MaxLength="5" FixedLength="true" Unicode="false" Nullable="false" />
+    <Property Name="FEPAGO_MONTO" Type="Decimal" Precision="18" Scale="0" Nullable="false" />
+    <Property Name="FEPAGO_FECHA" Type="DateTime" Nullable="false" Precision="3" />
+    <Property Name="FEPAGO_REFE" Type="String" MaxLength="50" FixedLength="false" Unicode="false" Nullable="false" />
+    <Property Name="FEPAGO_ESTADO" Type="String" MaxLength="20" FixedLength="false" Unicode="false" Nullable="false" />
+    <NavigationProperty Name="MEEST_ESTUD" Relationship="Self.FK_FEPAGO_P_FR_MEEST__MEEST_ES" FromRole="FEPAGO_PAGO" ToRole="MEEST_ESTUD" />
+  </EntityType>
+  <EntityType Name="MEASIG_ASIGNA">
+    <Key>
+      <PropertyRef Name="MEASIG_ID" />
+    </Key>
+    <Property Name="MEASIG_ID" Type="String" MaxLength="5" FixedLength="false" Unicode="false" Nullable="false" />
+    <Property Name="MEASIG_NOMBRE" Type="String" MaxLength="30" FixedLength="false" Unicode="false" Nullable="false" />
+    <Property Name="MEASIG_NRC" Type="String" MaxLength="6" FixedLength="false" Unicode="false" Nullable="false" />
+    <Property Name="MEASIG_CREDITOS" Type="Int32" Nullable="false" />
+    <Property Name="MEASIG_DESCRIPCION" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
+    <NavigationProperty Name="MEGRP_GRUPO" Relationship="Self.FK_MEGRP_GR_MR_MEASIG_MEASIG_A" FromRole="MEASIG_ASIGNA" ToRole="MEGRP_GRUPO" />
+    <NavigationProperty Name="MEASIG_ASIGNA1" Relationship="Self.MR_MEASIG_MEASIG" FromRole="MEASIG_ASIGNA" ToRole="MEASIG_ASIGNA1" />
+    <NavigationProperty Name="MEASIG_ASIGNA2" Relationship="Self.MR_MEASIG_MEASIG" FromRole="MEASIG_ASIGNA1" ToRole="MEASIG_ASIGNA" />
+  </EntityType>
+  <EntityType Name="MECARR_CARRERA">
+    <Key>
+      <PropertyRef Name="MECARR_ID" />
+    </Key>
+    <Property Name="MECARR_ID" Type="String" MaxLength="5" FixedLength="true" Unicode="false" Nullable="false" />
+    <Property Name="MECARR_NOMBRE" Type="String" MaxLength="25" FixedLength="false" Unicode="false" Nullable="false" />
+    <Property Name="MECARR_MAX_CRED" Type="Int32" Nullable="false" />
+    <Property Name="MECARR_MIN_CRED" Type="Int32" Nullable="false" />
+    <NavigationProperty Name="MEEST_ESTUD" Relationship="Self.FK_MEEST_ES_MR_MECARR_MECARR_C" FromRole="MECARR_CARRERA" ToRole="MEEST_ESTUD" />
+  </EntityType>
+  <EntityType Name="MEEST_ESTUD">
+    <Key>
+      <PropertyRef Name="MECARR_ID" />
+      <PropertyRef Name="MEEST_ID" />
+    </Key>
+    <Property Name="MECARR_ID" Type="String" MaxLength="5" FixedLength="true" Unicode="false" Nullable="false" />
+    <Property Name="MEEST_ID" Type="String" MaxLength="5" FixedLength="true" Unicode="false" Nullable="false" />
+    <Property Name="XEUSU_ID" Type="String" MaxLength="5" FixedLength="true" Unicode="false" />
+    <Property Name="MEEST_NOMBRE" Type="String" MaxLength="25" FixedLength="false" Unicode="false" Nullable="false" />
+    <Property Name="MEEST_APELLIDO" Type="String" MaxLength="25" FixedLength="false" Unicode="false" Nullable="false" />
+    <Property Name="MEEST_CEDULA" Type="String" MaxLength="15" FixedLength="false" Unicode="false" Nullable="false" />
+    <Property Name="MEEST_EMAIL" Type="String" MaxLength="30" FixedLength="false" Unicode="false" Nullable="false" />
+    <Property Name="MEEST_FECHANA" Type="DateTime" Nullable="false" Precision="3" />
+    <Property Name="MEEST_PROMEDIO" Type="Decimal" Precision="18" Scale="0" Nullable="false" />
+    <NavigationProperty Name="FEPAGO_PAGO" Relationship="Self.FK_FEPAGO_P_FR_MEEST__MEEST_ES" FromRole="MEEST_ESTUD" ToRole="FEPAGO_PAGO" />
+    <NavigationProperty Name="MECARR_CARRERA" Relationship="Self.FK_MEEST_ES_MR_MECARR_MECARR_C" FromRole="MEEST_ESTUD" ToRole="MECARR_CARRERA" />
+    <NavigationProperty Name="XEUSU_USUAR" Relationship="Self.FK_MEEST_ES_XR_XEUSU__XEUSU_US" FromRole="MEEST_ESTUD" ToRole="XEUSU_USUAR" />
+    <NavigationProperty Name="XEUSU_USUAR1" Relationship="Self.FK_XEUSU_US_XR_XEUSU__MEEST_ES" FromRole="MEEST_ESTUD" ToRole="XEUSU_USUAR" />
+    <NavigationProperty Name="MEGRP_GRUPO" Relationship="Self.MR_MEEST_MEGRP" FromRole="MEEST_ESTUD" ToRole="MEGRP_GRUPO" />
+  </EntityType>
+  <EntityType Name="MEGRP_GRUPO">
+    <Key>
+      <PropertyRef Name="MEGRP_ID" />
+    </Key>
+    <Property Name="MEGRP_ID" Type="String" MaxLength="5" FixedLength="true" Unicode="false" Nullable="false" />
+    <Property Name="MEPERI_ID" Type="String" MaxLength="5" FixedLength="false" Unicode="false" />
+    <Property Name="PEPER_ID" Type="String" MaxLength="5" FixedLength="true" Unicode="false" Nullable="false" />
+    <Property Name="MEASIG_ID" Type="String" MaxLength="5" FixedLength="false" Unicode="false" Nullable="false" />
+    <Property Name="MEGRP_CODIGO" Type="String" MaxLength="20" FixedLength="false" Unicode="false" Nullable="false" />
+    <Property Name="MEGRP_AULA" Type="String" MaxLength="35" FixedLength="false" Unicode="false" Nullable="false" />
+    <Property Name="MEGRP_CUPO_MAX" Type="Int32" Nullable="false" />
+    <Property Name="MEGRP_CUPO_ACT" Type="Int32" Nullable="false" />
+    <NavigationProperty Name="MEASIG_ASIGNA" Relationship="Self.FK_MEGRP_GR_MR_MEASIG_MEASIG_A" FromRole="MEGRP_GRUPO" ToRole="MEASIG_ASIGNA" />
+    <NavigationProperty Name="MEPERI_PERIOD" Relationship="Self.FK_MEGRP_GR_MR_MEPERI_MEPERI_P" FromRole="MEGRP_GRUPO" ToRole="MEPERI_PERIOD" />
+    <NavigationProperty Name="PEPER_PERSON" Relationship="Self.FK_MEGRP_GR_MR_PEPER__PEPER_PE" FromRole="MEGRP_GRUPO" ToRole="PEPER_PERSON" />
+    <NavigationProperty Name="MEHOR_HORARIO" Relationship="Self.FK_MEHOR_HO_MR_MEGRP__MEGRP_GR" FromRole="MEGRP_GRUPO" ToRole="MEHOR_HORARIO" />
+    <NavigationProperty Name="MEEST_ESTUD" Relationship="Self.MR_MEEST_MEGRP" FromRole="MEGRP_GRUPO" ToRole="MEEST_ESTUD" />
+  </EntityType>
+  <EntityType Name="MEHOR_HORARIO">
+    <Key>
+      <PropertyRef Name="MEGRP_ID" />
+      <PropertyRef Name="MEHOR_ID" />
+    </Key>
+    <Property Name="MEGRP_ID" Type="String" MaxLength="5" FixedLength="true" Unicode="false" Nullable="false" />
+    <Property Name="MEHOR_ID" Type="String" MaxLength="5" FixedLength="true" Unicode="false" Nullable="false" />
+    <Property Name="MEHOR_DIA" Type="String" MaxLength="15" FixedLength="false" Unicode="false" Nullable="false" />
+    <Property Name="MEHOR_FECHA_I" Type="DateTime" Nullable="false" Precision="3" />
+    <Property Name="MEHOR_FECHA_F" Type="DateTime" Nullable="false" Precision="3" />
+    <NavigationProperty Name="MEGRP_GRUPO" Relationship="Self.FK_MEHOR_HO_MR_MEGRP__MEGRP_GR" FromRole="MEHOR_HORARIO" ToRole="MEGRP_GRUPO" />
+  </EntityType>
+  <EntityType Name="MEPERI_PERIOD">
+    <Key>
+      <PropertyRef Name="MEPERI_ID" />
+    </Key>
+    <Property Name="MEPERI_ID" Type="String" MaxLength="5" FixedLength="false" Unicode="false" Nullable="false" />
+    <Property Name="MEPERI_NOMBRE" Type="String" MaxLength="30" FixedLength="false" Unicode="false" Nullable="false" />
+    <Property Name="MEPERI_FECHAINI" Type="DateTime" Nullable="false" Precision="3" />
+    <Property Name="MEPERI_FECHAFIN" Type="DateTime" Nullable="false" Precision="3" />
+    <Property Name="MEPERI_ACTIVO" Type="Boolean" Nullable="false" />
+    <NavigationProperty Name="MEGRP_GRUPO" Relationship="Self.FK_MEGRP_GR_MR_MEPERI_MEPERI_P" FromRole="MEPERI_PERIOD" ToRole="MEGRP_GRUPO" />
+  </EntityType>
+  <EntityType Name="PEESC_ESTCIV">
+    <Key>
+      <PropertyRef Name="PEESC_ID" />
+    </Key>
+    <Property Name="PEESC_ID" Type="String" MaxLength="1" FixedLength="true" Unicode="false" Nullable="false" />
+    <Property Name="PEESC_DESCRI" Type="String" MaxLength="50" FixedLength="false" Unicode="false" Nullable="false" />
+    <NavigationProperty Name="PEPER_PERSON" Relationship="Self.FK_PEPER_PE_RE_PEESC__PEESC_ES" FromRole="PEESC_ESTCIV" ToRole="PEPER_PERSON" />
+  </EntityType>
+  <EntityType Name="PEPER_PERSON">
+    <Key>
+      <PropertyRef Name="PEPER_ID" />
+    </Key>
+    <Property Name="PEPER_ID" Type="String" MaxLength="5" FixedLength="true" Unicode="false" Nullable="false" />
+    <Property Name="PEESC_ID" Type="String" MaxLength="1" FixedLength="true" Unicode="false" />
+    <Property Name="XEUSU_ID" Type="String" MaxLength="5" FixedLength="true" Unicode="false" />
+    <Property Name="PESEX_ID" Type="String" MaxLength="1" FixedLength="false" Unicode="false" Nullable="false" />
+    <Property Name="PEPER_NOMBRE" Type="String" MaxLength="25" FixedLength="false" Unicode="false" Nullable="false" />
+    <Property Name="PEPER_APELLIDO" Type="String" MaxLength="25" FixedLength="false" Unicode="false" Nullable="false" />
+    <Property Name="PEPER_EMAIL" Type="String" MaxLength="30" FixedLength="false" Unicode="false" Nullable="false" />
+    <Property Name="PEPER_CEDULA" Type="String" MaxLength="15" FixedLength="false" Unicode="false" Nullable="false" />
+    <Property Name="PEPER_CELULAR" Type="String" MaxLength="15" FixedLength="false" Unicode="false" />
+    <Property Name="PEPER_TIPO" Type="String" MaxLength="30" FixedLength="false" Unicode="false" Nullable="false" />
+    <Property Name="PEPEPER_FECH_INGR" Type="DateTime" Nullable="false" Precision="3" />
+    <NavigationProperty Name="MEGRP_GRUPO" Relationship="Self.FK_MEGRP_GR_MR_PEPER__PEPER_PE" FromRole="PEPER_PERSON" ToRole="MEGRP_GRUPO" />
+    <NavigationProperty Name="PEESC_ESTCIV" Relationship="Self.FK_PEPER_PE_RE_PEESC__PEESC_ES" FromRole="PEPER_PERSON" ToRole="PEESC_ESTCIV" />
+    <NavigationProperty Name="PESEX_SEXO" Relationship="Self.FK_PEPER_PE_PR_PESEX__PESEX_SE" FromRole="PEPER_PERSON" ToRole="PESEX_SEXO" />
+    <NavigationProperty Name="XEUSU_USUAR" Relationship="Self.FK_PEPER_PE_XR_XEUSU__XEUSU_US" FromRole="PEPER_PERSON" ToRole="XEUSU_USUAR" />
+    <NavigationProperty Name="XEUSU_USUAR1" Relationship="Self.FK_XEUSU_US_XR_XEUSU__PEPER_PE" FromRole="PEPER_PERSON" ToRole="XEUSU_USUAR" />
+  </EntityType>
+  <EntityType Name="PESEX_SEXO">
+    <Key>
+      <PropertyRef Name="PESEX_ID" />
+    </Key>
+    <Property Name="PESEX_ID" Type="String" MaxLength="1" FixedLength="false" Unicode="false" Nullable="false" />
+    <Property Name="PESEX_DESCRI" Type="String" MaxLength="50" FixedLength="false" Unicode="false" Nullable="false" />
+    <NavigationProperty Name="PEPER_PERSON" Relationship="Self.FK_PEPER_PE_PR_PESEX__PESEX_SE" FromRole="PESEX_SEXO" ToRole="PEPER_PERSON" />
+  </EntityType>
+  <EntityType Name="XEAUD_AUDLOG">
+    <Key>
+      <PropertyRef Name="IDAUDITORIA" />
+    </Key>
+    <Property Name="IDAUDITORIA" Type="String" MaxLength="5" FixedLength="true" Unicode="false" Nullable="false" />
+    <Property Name="XEUSU_ID" Type="String" MaxLength="5" FixedLength="true" Unicode="false" Nullable="false" />
+    <Property Name="ACCION" Type="String" MaxLength="100" FixedLength="false" Unicode="false" Nullable="false" />
+    <Property Name="TABLAAFEC" Type="String" MaxLength="100" FixedLength="false" Unicode="false" Nullable="false" />
+    <Property Name="FILAID" Type="Int32" Nullable="false" />
+    <Property Name="FECHAHORA" Type="DateTime" Nullable="false" Precision="3" />
+    <Property Name="DETALLE" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" Nullable="false" />
+    <NavigationProperty Name="XEUSU_USUAR" Relationship="Self.FK_XEAUD_AU_XR_XEUSU__XEUSU_US" FromRole="XEAUD_AUDLOG" ToRole="XEUSU_USUAR" />
+  </EntityType>
+  <EntityType Name="XEROL_ROL">
+    <Key>
+      <PropertyRef Name="XEROL_ID" />
+    </Key>
+    <Property Name="XEROL_ID" Type="String" MaxLength="5" FixedLength="true" Unicode="false" Nullable="false" />
+    <Property Name="XEROL_NOMBRE" Type="String" MaxLength="30" FixedLength="false" Unicode="false" />
+    <Property Name="XEROL_DESCRI" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
+    <NavigationProperty Name="XEUSU_USUAR" Relationship="Self.XR_XEUSU_XEROL" FromRole="XEROL_ROL" ToRole="XEUSU_USUAR" />
+  </EntityType>
+  <EntityType Name="XEUSU_USUAR">
+    <Key>
+      <PropertyRef Name="XEUSU_ID" />
+    </Key>
+    <Property Name="XEUSU_ID" Type="String" MaxLength="5" FixedLength="true" Unicode="false" Nullable="false" />
+    <Property Name="PEPER_ID" Type="String" MaxLength="5" FixedLength="true" Unicode="false" />
+    <Property Name="MECARR_ID" Type="String" MaxLength="5" FixedLength="true" Unicode="false" />
+    <Property Name="MEEST_ID" Type="String" MaxLength="5" FixedLength="true" Unicode="false" />
+    <Property Name="XEUSU_NOMBRE" Type="String" MaxLength="100" FixedLength="false" Unicode="false" Nullable="false" />
+    <Property Name="XEUSU_CONTRA" Type="String" MaxLength="100" FixedLength="false" Unicode="false" Nullable="false" />
+    <Property Name="XEUSU_ESTADO" Type="String" MaxLength="30" FixedLength="false" Unicode="false" Nullable="false" />
+    <NavigationProperty Name="MEEST_ESTUD" Relationship="Self.FK_MEEST_ES_XR_XEUSU__XEUSU_US" FromRole="XEUSU_USUAR" ToRole="MEEST_ESTUD" />
+    <NavigationProperty Name="MEEST_ESTUD1" Relationship="Self.FK_XEUSU_US_XR_XEUSU__MEEST_ES" FromRole="XEUSU_USUAR" ToRole="MEEST_ESTUD" />
+    <NavigationProperty Name="PEPER_PERSON" Relationship="Self.FK_PEPER_PE_XR_XEUSU__XEUSU_US" FromRole="XEUSU_USUAR" ToRole="PEPER_PERSON" />
+    <NavigationProperty Name="PEPER_PERSON1" Relationship="Self.FK_XEUSU_US_XR_XEUSU__PEPER_PE" FromRole="XEUSU_USUAR" ToRole="PEPER_PERSON" />
+    <NavigationProperty Name="XEAUD_AUDLOG" Relationship="Self.FK_XEAUD_AU_XR_XEUSU__XEUSU_US" FromRole="XEUSU_USUAR" ToRole="XEAUD_AUDLOG" />
+    <NavigationProperty Name="XEROL_ROL" Relationship="Self.XR_XEUSU_XEROL" FromRole="XEUSU_USUAR" ToRole="XEROL_ROL" />
+  </EntityType>
+  <Association Name="FK_FEPAGO_P_FR_MEEST__MEEST_ES">
+    <End Role="MEEST_ESTUD" Type="Self.MEEST_ESTUD" Multiplicity="1" />
+    <End Role="FEPAGO_PAGO" Type="Self.FEPAGO_PAGO" Multiplicity="*" />
+    <ReferentialConstraint>
+      <Principal Role="MEEST_ESTUD">
+        <PropertyRef Name="MECARR_ID" />
+        <PropertyRef Name="MEEST_ID" />
+      </Principal>
+      <Dependent Role="FEPAGO_PAGO">
+        <PropertyRef Name="MECARR_ID" />
+        <PropertyRef Name="MEEST_ID" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
+  <Association Name="FK_MEGRP_GR_MR_MEASIG_MEASIG_A">
+    <End Role="MEASIG_ASIGNA" Type="Self.MEASIG_ASIGNA" Multiplicity="1" />
+    <End Role="MEGRP_GRUPO" Type="Self.MEGRP_GRUPO" Multiplicity="*" />
+    <ReferentialConstraint>
+      <Principal Role="MEASIG_ASIGNA">
+        <PropertyRef Name="MEASIG_ID" />
+      </Principal>
+      <Dependent Role="MEGRP_GRUPO">
+        <PropertyRef Name="MEASIG_ID" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
+  <Association Name="FK_MEEST_ES_MR_MECARR_MECARR_C">
+    <End Role="MECARR_CARRERA" Type="Self.MECARR_CARRERA" Multiplicity="1" />
+    <End Role="MEEST_ESTUD" Type="Self.MEEST_ESTUD" Multiplicity="*" />
+    <ReferentialConstraint>
+      <Principal Role="MECARR_CARRERA">
+        <PropertyRef Name="MECARR_ID" />
+      </Principal>
+      <Dependent Role="MEEST_ESTUD">
+        <PropertyRef Name="MECARR_ID" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
+  <Association Name="FK_MEEST_ES_XR_XEUSU__XEUSU_US">
+    <End Role="XEUSU_USUAR" Type="Self.XEUSU_USUAR" Multiplicity="0..1" />
+    <End Role="MEEST_ESTUD" Type="Self.MEEST_ESTUD" Multiplicity="*" />
+    <ReferentialConstraint>
+      <Principal Role="XEUSU_USUAR">
+        <PropertyRef Name="XEUSU_ID" />
+      </Principal>
+      <Dependent Role="MEEST_ESTUD">
+        <PropertyRef Name="XEUSU_ID" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
+  <Association Name="FK_XEUSU_US_XR_XEUSU__MEEST_ES">
+    <End Role="MEEST_ESTUD" Type="Self.MEEST_ESTUD" Multiplicity="0..1" />
+    <End Role="XEUSU_USUAR" Type="Self.XEUSU_USUAR" Multiplicity="*" />
+    <ReferentialConstraint>
+      <Principal Role="MEEST_ESTUD">
+        <PropertyRef Name="MECARR_ID" />
+        <PropertyRef Name="MEEST_ID" />
+      </Principal>
+      <Dependent Role="XEUSU_USUAR">
+        <PropertyRef Name="MECARR_ID" />
+        <PropertyRef Name="MEEST_ID" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
+  <Association Name="FK_MEGRP_GR_MR_MEPERI_MEPERI_P">
+    <End Role="MEPERI_PERIOD" Type="Self.MEPERI_PERIOD" Multiplicity="0..1" />
+    <End Role="MEGRP_GRUPO" Type="Self.MEGRP_GRUPO" Multiplicity="*" />
+    <ReferentialConstraint>
+      <Principal Role="MEPERI_PERIOD">
+        <PropertyRef Name="MEPERI_ID" />
+      </Principal>
+      <Dependent Role="MEGRP_GRUPO">
+        <PropertyRef Name="MEPERI_ID" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
+  <Association Name="FK_MEGRP_GR_MR_PEPER__PEPER_PE">
+    <End Role="PEPER_PERSON" Type="Self.PEPER_PERSON" Multiplicity="1" />
+    <End Role="MEGRP_GRUPO" Type="Self.MEGRP_GRUPO" Multiplicity="*" />
+    <ReferentialConstraint>
+      <Principal Role="PEPER_PERSON">
+        <PropertyRef Name="PEPER_ID" />
+      </Principal>
+      <Dependent Role="MEGRP_GRUPO">
+        <PropertyRef Name="PEPER_ID" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
+  <Association Name="FK_MEHOR_HO_MR_MEGRP__MEGRP_GR">
+    <End Role="MEGRP_GRUPO" Type="Self.MEGRP_GRUPO" Multiplicity="1" />
+    <End Role="MEHOR_HORARIO" Type="Self.MEHOR_HORARIO" Multiplicity="*" />
+    <ReferentialConstraint>
+      <Principal Role="MEGRP_GRUPO">
+        <PropertyRef Name="MEGRP_ID" />
+      </Principal>
+      <Dependent Role="MEHOR_HORARIO">
+        <PropertyRef Name="MEGRP_ID" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
+  <Association Name="FK_PEPER_PE_RE_PEESC__PEESC_ES">
+    <End Role="PEESC_ESTCIV" Type="Self.PEESC_ESTCIV" Multiplicity="0..1" />
+    <End Role="PEPER_PERSON" Type="Self.PEPER_PERSON" Multiplicity="*" />
+    <ReferentialConstraint>
+      <Principal Role="PEESC_ESTCIV">
+        <PropertyRef Name="PEESC_ID" />
+      </Principal>
+      <Dependent Role="PEPER_PERSON">
+        <PropertyRef Name="PEESC_ID" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
+  <Association Name="FK_PEPER_PE_PR_PESEX__PESEX_SE">
+    <End Role="PESEX_SEXO" Type="Self.PESEX_SEXO" Multiplicity="1" />
+    <End Role="PEPER_PERSON" Type="Self.PEPER_PERSON" Multiplicity="*" />
+    <ReferentialConstraint>
+      <Principal Role="PESEX_SEXO">
+        <PropertyRef Name="PESEX_ID" />
+      </Principal>
+      <Dependent Role="PEPER_PERSON">
+        <PropertyRef Name="PESEX_ID" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
+  <Association Name="FK_PEPER_PE_XR_XEUSU__XEUSU_US">
+    <End Role="XEUSU_USUAR" Type="Self.XEUSU_USUAR" Multiplicity="0..1" />
+    <End Role="PEPER_PERSON" Type="Self.PEPER_PERSON" Multiplicity="*" />
+    <ReferentialConstraint>
+      <Principal Role="XEUSU_USUAR">
+        <PropertyRef Name="XEUSU_ID" />
+      </Principal>
+      <Dependent Role="PEPER_PERSON">
+        <PropertyRef Name="XEUSU_ID" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
+  <Association Name="FK_XEUSU_US_XR_XEUSU__PEPER_PE">
+    <End Role="PEPER_PERSON" Type="Self.PEPER_PERSON" Multiplicity="0..1" />
+    <End Role="XEUSU_USUAR" Type="Self.XEUSU_USUAR" Multiplicity="*" />
+    <ReferentialConstraint>
+      <Principal Role="PEPER_PERSON">
+        <PropertyRef Name="PEPER_ID" />
+      </Principal>
+      <Dependent Role="XEUSU_USUAR">
+        <PropertyRef Name="PEPER_ID" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
+  <Association Name="FK_XEAUD_AU_XR_XEUSU__XEUSU_US">
+    <End Role="XEUSU_USUAR" Type="Self.XEUSU_USUAR" Multiplicity="1" />
+    <End Role="XEAUD_AUDLOG" Type="Self.XEAUD_AUDLOG" Multiplicity="*" />
+    <ReferentialConstraint>
+      <Principal Role="XEUSU_USUAR">
+        <PropertyRef Name="XEUSU_ID" />
+      </Principal>
+      <Dependent Role="XEAUD_AUDLOG">
+        <PropertyRef Name="XEUSU_ID" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
+  <Association Name="MR_MEASIG_MEASIG">
+    <End Role="MEASIG_ASIGNA" Type="Self.MEASIG_ASIGNA" Multiplicity="*" />
+    <End Role="MEASIG_ASIGNA1" Type="Self.MEASIG_ASIGNA" Multiplicity="*" />
+  </Association>
+  <Association Name="MR_MEEST_MEGRP">
+    <End Role="MEEST_ESTUD" Type="Self.MEEST_ESTUD" Multiplicity="*" />
+    <End Role="MEGRP_GRUPO" Type="Self.MEGRP_GRUPO" Multiplicity="*" />
+  </Association>
+  <Association Name="XR_XEUSU_XEROL">
+    <End Role="XEROL_ROL" Type="Self.XEROL_ROL" Multiplicity="*" />
+    <End Role="XEUSU_USUAR" Type="Self.XEUSU_USUAR" Multiplicity="*" />
+  </Association>
+  <EntityContainer Name="monster_universityEntities" annotation:LazyLoadingEnabled="true">
+    <EntitySet Name="FEPAGO_PAGO" EntityType="Self.FEPAGO_PAGO" />
+    <EntitySet Name="MEASIG_ASIGNA" EntityType="Self.MEASIG_ASIGNA" />
+    <EntitySet Name="MECARR_CARRERA" EntityType="Self.MECARR_CARRERA" />
+    <EntitySet Name="MEEST_ESTUD" EntityType="Self.MEEST_ESTUD" />
+    <EntitySet Name="MEGRP_GRUPO" EntityType="Self.MEGRP_GRUPO" />
+    <EntitySet Name="MEHOR_HORARIO" EntityType="Self.MEHOR_HORARIO" />
+    <EntitySet Name="MEPERI_PERIOD" EntityType="Self.MEPERI_PERIOD" />
+    <EntitySet Name="PEESC_ESTCIV" EntityType="Self.PEESC_ESTCIV" />
+    <EntitySet Name="PEPER_PERSON" EntityType="Self.PEPER_PERSON" />
+    <EntitySet Name="PESEX_SEXO" EntityType="Self.PESEX_SEXO" />
+    <EntitySet Name="XEAUD_AUDLOG" EntityType="Self.XEAUD_AUDLOG" />
+    <EntitySet Name="XEROL_ROL" EntityType="Self.XEROL_ROL" />
+    <EntitySet Name="XEUSU_USUAR" EntityType="Self.XEUSU_USUAR" />
+    <AssociationSet Name="FK_FEPAGO_P_FR_MEEST__MEEST_ES" Association="Self.FK_FEPAGO_P_FR_MEEST__MEEST_ES">
+      <End Role="MEEST_ESTUD" EntitySet="MEEST_ESTUD" />
+      <End Role="FEPAGO_PAGO" EntitySet="FEPAGO_PAGO" />
+    </AssociationSet>
+    <AssociationSet Name="FK_MEGRP_GR_MR_MEASIG_MEASIG_A" Association="Self.FK_MEGRP_GR_MR_MEASIG_MEASIG_A">
+      <End Role="MEASIG_ASIGNA" EntitySet="MEASIG_ASIGNA" />
+      <End Role="MEGRP_GRUPO" EntitySet="MEGRP_GRUPO" />
+    </AssociationSet>
+    <AssociationSet Name="FK_MEEST_ES_MR_MECARR_MECARR_C" Association="Self.FK_MEEST_ES_MR_MECARR_MECARR_C">
+      <End Role="MECARR_CARRERA" EntitySet="MECARR_CARRERA" />
+      <End Role="MEEST_ESTUD" EntitySet="MEEST_ESTUD" />
+    </AssociationSet>
+    <AssociationSet Name="FK_MEEST_ES_XR_XEUSU__XEUSU_US" Association="Self.FK_MEEST_ES_XR_XEUSU__XEUSU_US">
+      <End Role="XEUSU_USUAR" EntitySet="XEUSU_USUAR" />
+      <End Role="MEEST_ESTUD" EntitySet="MEEST_ESTUD" />
+    </AssociationSet>
+    <AssociationSet Name="FK_XEUSU_US_XR_XEUSU__MEEST_ES" Association="Self.FK_XEUSU_US_XR_XEUSU__MEEST_ES">
+      <End Role="MEEST_ESTUD" EntitySet="MEEST_ESTUD" />
+      <End Role="XEUSU_USUAR" EntitySet="XEUSU_USUAR" />
+    </AssociationSet>
+    <AssociationSet Name="FK_MEGRP_GR_MR_MEPERI_MEPERI_P" Association="Self.FK_MEGRP_GR_MR_MEPERI_MEPERI_P">
+      <End Role="MEPERI_PERIOD" EntitySet="MEPERI_PERIOD" />
+      <End Role="MEGRP_GRUPO" EntitySet="MEGRP_GRUPO" />
+    </AssociationSet>
+    <AssociationSet Name="FK_MEGRP_GR_MR_PEPER__PEPER_PE" Association="Self.FK_MEGRP_GR_MR_PEPER__PEPER_PE">
+      <End Role="PEPER_PERSON" EntitySet="PEPER_PERSON" />
+      <End Role="MEGRP_GRUPO" EntitySet="MEGRP_GRUPO" />
+    </AssociationSet>
+    <AssociationSet Name="FK_MEHOR_HO_MR_MEGRP__MEGRP_GR" Association="Self.FK_MEHOR_HO_MR_MEGRP__MEGRP_GR">
+      <End Role="MEGRP_GRUPO" EntitySet="MEGRP_GRUPO" />
+      <End Role="MEHOR_HORARIO" EntitySet="MEHOR_HORARIO" />
+    </AssociationSet>
+    <AssociationSet Name="FK_PEPER_PE_RE_PEESC__PEESC_ES" Association="Self.FK_PEPER_PE_RE_PEESC__PEESC_ES">
+      <End Role="PEESC_ESTCIV" EntitySet="PEESC_ESTCIV" />
+      <End Role="PEPER_PERSON" EntitySet="PEPER_PERSON" />
+    </AssociationSet>
+    <AssociationSet Name="FK_PEPER_PE_PR_PESEX__PESEX_SE" Association="Self.FK_PEPER_PE_PR_PESEX__PESEX_SE">
+      <End Role="PESEX_SEXO" EntitySet="PESEX_SEXO" />
+      <End Role="PEPER_PERSON" EntitySet="PEPER_PERSON" />
+    </AssociationSet>
+    <AssociationSet Name="FK_PEPER_PE_XR_XEUSU__XEUSU_US" Association="Self.FK_PEPER_PE_XR_XEUSU__XEUSU_US">
+      <End Role="XEUSU_USUAR" EntitySet="XEUSU_USUAR" />
+      <End Role="PEPER_PERSON" EntitySet="PEPER_PERSON" />
+    </AssociationSet>
+    <AssociationSet Name="FK_XEUSU_US_XR_XEUSU__PEPER_PE" Association="Self.FK_XEUSU_US_XR_XEUSU__PEPER_PE">
+      <End Role="PEPER_PERSON" EntitySet="PEPER_PERSON" />
+      <End Role="XEUSU_USUAR" EntitySet="XEUSU_USUAR" />
+    </AssociationSet>
+    <AssociationSet Name="FK_XEAUD_AU_XR_XEUSU__XEUSU_US" Association="Self.FK_XEAUD_AU_XR_XEUSU__XEUSU_US">
+      <End Role="XEUSU_USUAR" EntitySet="XEUSU_USUAR" />
+      <End Role="XEAUD_AUDLOG" EntitySet="XEAUD_AUDLOG" />
+    </AssociationSet>
+    <AssociationSet Name="MR_MEASIG_MEASIG" Association="Self.MR_MEASIG_MEASIG">
+      <End Role="MEASIG_ASIGNA" EntitySet="MEASIG_ASIGNA" />
+      <End Role="MEASIG_ASIGNA1" EntitySet="MEASIG_ASIGNA" />
+    </AssociationSet>
+    <AssociationSet Name="MR_MEEST_MEGRP" Association="Self.MR_MEEST_MEGRP">
+      <End Role="MEEST_ESTUD" EntitySet="MEEST_ESTUD" />
+      <End Role="MEGRP_GRUPO" EntitySet="MEGRP_GRUPO" />
+    </AssociationSet>
+    <AssociationSet Name="XR_XEUSU_XEROL" Association="Self.XR_XEUSU_XEROL">
+      <End Role="XEROL_ROL" EntitySet="XEROL_ROL" />
+      <End Role="XEUSU_USUAR" EntitySet="XEUSU_USUAR" />
+    </AssociationSet>
+  </EntityContainer>
+</Schema>

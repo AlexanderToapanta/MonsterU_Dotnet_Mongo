@@ -1,0 +1,883 @@
+﻿@model CapaModelo.Personal
+
+@{
+    ViewBag.Title = "Crear Personal";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<!-- Contenedor principal con imagen de fondo y overlay -->
+<div class="main-background">
+    <div class="background-overlay"></div>
+    <div class="dashboard-container">
+        <!-- Tarjeta de Crear Personal -->
+        <div class="card" style="margin-bottom: 20px; background: rgba(255,255,255,0.95);">
+            <div class="card-header" style="background: linear-gradient(135deg, #2a64c5 0%, #4a90e2 100%); color: white; border-radius: 10px 10px 0 0;">
+                <h3 class="mb-0">
+                    <i class="fas fa-user-plus me-2"></i>Crear Nueva Persona
+                </h3>
+                <p class="mb-0 mt-1" style="opacity: 0.9; font-size: 0.9rem;">
+                    Complete los datos para registrar una nueva persona en el sistema
+                </p>
+            </div>
+            <div class="card-body">
+                @if (!string.IsNullOrEmpty(ViewBag.Error))
+                {
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                        <i class="fas fa-exclamation-circle me-2"></i>@ViewBag.Error
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                }
+
+                @if (TempData["SuccessMessage"] != null)
+                {
+                    <div class="alert alert-success alert-dismissible fade show" role="alert">
+                        <i class="fas fa-check-circle me-2"></i>@TempData["SuccessMessage"]
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                }
+
+                @if (TempData["WarningMessage"] != null)
+                {
+                    <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                        <i class="fas fa-exclamation-triangle me-2"></i>@TempData["WarningMessage"]
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                }
+
+                @using (Html.BeginForm("crearpersonal", "ControladorPersonal", FormMethod.Post, new { id = "formCrearPersona", enctype = "multipart/form-data", @class = "needs-validation", @novalidate = "novalidate" }))
+                {
+                    @Html.AntiForgeryToken()
+
+                    <!-- SECCIÓN 1: Información Básica -->
+                    <div class="card mb-4">
+                        <div class="card-header bg-primary text-white">
+                            <h5 class="mb-0">
+                                <i class="fas fa-id-card me-2"></i>Datos Personales
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <!-- ID Persona (Generado automáticamente) -->
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold">
+                                            <i class="fas fa-key me-1"></i>ID Persona: <span class="text-danger">*</span>
+                                        </label>
+                                        <div class="input-group">
+                                            <input type="text" name="PEPER_ID" id="PEPER_ID"
+                                                   class="form-control bg-light"
+                                                   value="@ViewBag.IdGenerado"
+                                                   readonly
+                                                   placeholder="Se genera automáticamente">
+                                            <span class="input-group-text">
+                                                <i class="fas fa-key"></i>
+                                            </span>
+                                        </div>
+                                        <small class="text-muted">(Generado automáticamente)</small>
+                                    </div>
+                                </div>
+
+                                <!-- Fecha de Ingreso -->
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold">
+                                            <i class="fas fa-calendar-alt me-1"></i>Fecha de Ingreso: <span class="text-danger">*</span>
+                                        </label>
+                                        @Html.TextBoxFor(m => m.PEPEPER_FECH_INGR, "{0:yyyy-MM-dd}", new
+                                        {
+                                            @class = "form-control",
+                                            type = "date",
+                                            required = "required",
+                                            placeholder = "Seleccione fecha"
+                                        })
+                                        <small class="text-muted">(Fecha en que ingresó a la institución)</small>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Nombre y Apellido -->
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold">
+                                            <i class="fas fa-user me-1"></i>Nombre: <span class="text-danger">*</span>
+                                        </label>
+                                        @Html.TextBoxFor(m => m.PEPER_NOMBRE, new
+                                        {
+                                            @class = "form-control",
+                                            placeholder = "Ingrese el nombre",
+                                            maxlength = "25",
+                                            required = "required"
+                                        })
+                                        <small class="text-muted">(Máximo 25 caracteres)</small>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold">
+                                            <i class="fas fa-user me-1"></i>Apellido: <span class="text-danger">*</span>
+                                        </label>
+                                        @Html.TextBoxFor(m => m.PEPER_APELLIDO, new
+                                        {
+                                            @class = "form-control",
+                                            placeholder = "Ingrese el apellido",
+                                            maxlength = "25",
+                                            required = "required"
+                                        })
+                                        <small class="text-muted">(Máximo 25 caracteres)</small>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Fecha de Nacimiento y Celular -->
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold">
+                                            <i class="fas fa-birthday-cake me-1"></i>Fecha de Nacimiento:
+                                        </label>
+                                        @Html.TextBoxFor(m => m.PEPER_FECHA_NAC, "{0:yyyy-MM-dd}", new
+                                        {
+                                            @class = "form-control",
+                                            type = "date"
+                                        })
+                                        <small class="text-muted">(Opcional)</small>
+                                    </div>
+                                </div>
+
+                                
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Contenedor de pestañas -->
+                    <div class="tab-container mb-4">
+                        <!-- Botones de pestañas -->
+                        <div class="tab-buttons">
+                            <button type="button" class="tab-button active" onclick="showTab('datosPersonales')">
+                                <i class="fas fa-user-circle me-2"></i>📋 Datos Personales
+                            </button>
+                            <button type="button" class="tab-button" onclick="showTab('contactos')">
+                                <i class="fas fa-envelope me-2"></i>📧 Contactos
+                            </button>
+                        </div>
+
+                        <!-- Contenido de pestañas -->
+                        <div class="tab-content">
+                            <!-- Pestaña Datos Personales -->
+                            <div id="datosPersonales" class="tab-pane active">
+                                <div style="padding: 20px;">
+                                    <!-- Tipo de Persona -->
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold">
+                                            <i class="fas fa-user-tag me-1"></i>Tipo de Persona: <span class="text-danger">*</span>
+                                        </label>
+                                        <select name="PEPER_TIPO" class="form-control" required>
+                                            <option value="">Seleccione tipo</option>
+                                            <option value="Administrador del Sistema">Administrador del Sistema</option>
+                                            <option value="Docente">Docente</option>
+                                            <option value="Administrador de matriculas">Administrador de matrículas</option>
+                                            <option value="Secretaria Academica">Secretaría Académica</option>
+                                        </select>
+                                        @Html.HiddenFor(m => m.PEPER_TIPO, new { id = "PEPER_TIPO_Hidden" })
+                                    </div>
+
+                                    <!-- Cédula -->
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold">
+                                            <i class="fas fa-address-card me-1"></i>Cédula: <span class="text-danger">*</span>
+                                        </label>
+                                        @Html.TextBoxFor(m => m.PEPER_CEDULA, new
+                                        {
+                                            @class = "form-control",
+                                            placeholder = "Ej: 1234567890",
+                                            maxlength = "15",
+                                            required = "required"
+                                        })
+                                        <small class="text-muted">(Máximo 15 caracteres)</small>
+                                    </div>
+
+                                    <!-- Sexo -->
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold">
+                                            <i class="fas fa-venus-mars me-1"></i>Sexo: <span class="text-danger">*</span>
+                                        </label>
+                                        <div class="radio-group mt-2">
+                                            @if (ViewBag.Sexos != null)
+                                            {
+                                                foreach (var sexo in ViewBag.Sexos)
+                                                {
+                                                    <div class="form-check form-check-inline">
+                                                        <input class="form-check-input" type="radio"
+                                                               name="PESEX_ID" id="sexo_@sexo.PESEX_ID"
+                                                               value="@sexo.PESEX_ID" required>
+                                                        <label class="form-check-label" for="sexo_@sexo.PESEX_ID">
+                                                            @sexo.PESEX_DESCRI
+                                                        </label>
+                                                    </div>
+                                                }
+                                            }
+                                        </div>
+                                        @Html.HiddenFor(m => m.PESEX_ID, new { id = "PESEX_ID_Hidden" })
+                                    </div>
+
+                                    <!-- Estado Civil -->
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold">
+                                            <i class="fas fa-heart me-1"></i>Estado Civil:
+                                        </label>
+                                        <select name="PEESC_ID" class="form-control" id="PEESC_ID">
+                                            <option value="">Seleccione estado civil (opcional)</option>
+                                            @if (ViewBag.EstadosCiviles != null)
+                                            {
+                                                foreach (var estado in ViewBag.EstadosCiviles)
+                                                {
+                                                    <option value="@estado.PEESC_ID">@estado.PEESC_DESCRI</option>
+                                                }
+                                            }
+                                        </select>
+                                        @Html.HiddenFor(m => m.PEESC_ID, new { id = "PEESC_ID_Hidden" })
+                                    </div>
+
+                                    <!-- Imagen de perfil -->
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold">
+                                            <i class="fas fa-image me-1"></i>Imagen de Perfil:
+                                        </label>
+
+                                        <!-- FileUpload simple -->
+                                        <input type="file" name="imagenPersona" id="imagenPersona"
+                                               class="form-control"
+                                               accept=".jpg,.jpeg,.png,.gif"
+                                               style="margin-bottom: 10px;" />
+
+                                        <div style="display: flex; gap: 10px; margin-top: 10px;">
+                                            <!-- Botón Subir Imagen -->
+                                            <button type="button" class="btn btn-success" onclick="subirImagen()">
+                                                <i class="fas fa-upload me-1"></i>Subir Imagen
+                                            </button>
+
+                                            <!-- Botón Eliminar Imagen -->
+                                            <button type="button" class="btn btn-danger" onclick="eliminarImagen()"
+                                                    id="btnEliminarImagen" style="display: none;">
+                                                <i class="fas fa-trash me-1"></i>Eliminar Imagen
+                                            </button>
+                                        </div>
+
+                                        <small class="text-muted">(Opcional, máximo 1MB, formatos: JPG, PNG, GIF)</small>
+
+                                        <!-- Mensaje de imagen -->
+                                        <div id="mensajeImagen" class="mt-2"></div>
+
+                                        <!-- Información de la imagen subida -->
+                                        <div id="infoImagen" class="mt-2" style="display: none;">
+                                            <div style="padding: 8px; background-color: #f8f9fa; border-radius: 4px; font-size: 0.9rem;">
+                                                <span id="nombreArchivo"></span>
+                                            </div>
+                                        </div>
+
+                                        <!-- Vista previa de imagen -->
+                                        <div id="vistaPreviaImagen" class="mt-3 text-center" style="display: none;">
+                                            <img id="previewImage"
+                                                 width="150"
+                                                 height="150"
+                                                 style="border-radius: 8px; border: 2px solid #ddd;
+                                                        object-fit: cover; max-width: 150px; max-height: 150px;
+                                                        box-shadow: 0 2px 5px rgba(0,0,0,0.1);" />
+                                        </div>
+
+                                        <!-- Campo oculto para el nombre de la imagen -->
+                                        @Html.HiddenFor(m => m.PEPER_FOTO, new { id = "PEPER_FOTO" })
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Pestaña Contactos -->
+                            <div id="contactos" class="tab-pane">
+                                <div style="padding: 20px;">
+                                    <!-- Email -->
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold">
+                                            <i class="fas fa-at me-1"></i>Email: <span class="text-danger">*</span>
+                                        </label>
+                                        @Html.TextBoxFor(m => m.PEPER_EMAIL, new
+                                        {
+                                            @class = "form-control",
+                                            type = "email",
+                                            placeholder = "ejemplo@correo.com",
+                                            maxlength = "30",
+                                            required = "required"
+                                        })
+                                        <small class="text-muted">(Máximo 30 caracteres)</small>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label class="form-label fw-bold">
+                                                <i class="fas fa-phone me-1"></i>Celular:
+                                            </label>
+                                            @Html.TextBoxFor(m => m.PEPER_CELULAR, new
+                                            {
+                                                @class = "form-control",
+                                                placeholder = "Ej: 0991234567 (opcional)",
+                                                maxlength = "15"
+                                            })
+                                            <small class="text-muted">(Opcional, formato: 09XXXXXXXX)</small>
+                                        </div>
+                                    </div>
+
+                                    <!-- Nota informativa -->
+                                    <div class="form-help" style="margin-top: 20px; padding: 15px; background-color: #f8f9fa; border-left: 4px solid #17a2b8;">
+                                        <p><strong>📞 Información de contacto:</strong></p>
+                                        <p>• El celular ya fue completado en la sección de Información Básica</p>
+                                        <p>• Para modificar el celular, regrese a la sección superior</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Botones de acción -->
+                    <div class="text-center mt-4">
+                        <button type="submit" class="btn btn-success me-2" id="btnGuardar">
+                            <i class="fas fa-save me-1"></i>Crear Persona
+                        </button>
+                        <button type="button" class="btn btn-secondary me-2" id="btnLimpiar">
+                            <i class="fas fa-redo me-1"></i>Limpiar
+                        </button>
+                        @Html.ActionLink("Cancelar", "listapersonal", "ControladorPersonal", null,
+                            new { @class = "btn btn-outline-secondary", @style = "text-decoration: none;" })
+                    </div>
+                }
+            </div>
+        </div>
+
+        <!-- Información de Ayuda -->
+        <div class="card" style="background: rgba(255,255,255,0.95);">
+            <div class="card-header bg-info text-white">
+                <h4 class="mb-0">
+                    <i class="fas fa-info-circle me-2"></i>Información Importante
+                </h4>
+            </div>
+            <div class="card-body">
+                <div class="accordion" id="accordionInfo">
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="headingOne">
+                            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne">
+                                <i class="fas fa-id-card me-2"></i>Generación de Usuario Automático
+                            </button>
+                        </h2>
+                        <div id="collapseOne" class="accordion-collapse collapse show" data-bs-parent="#accordionInfo">
+                            <div class="accordion-body">
+                                <ul>
+                                    <li>Al crear una persona, se generará automáticamente un usuario en el sistema</li>
+                                    <li>El ID del usuario seguirá el formato: US001, US002, etc.</li>
+                                    <li>El nombre de usuario será: Primera letra del nombre + Apellido completo</li>
+                                    <li>La contraseña inicial será la <strong>cédula</strong> de la persona</li>
+                                    <li>El estado del usuario será <strong>ACTIVO</strong> por defecto</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="headingTwo">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo">
+                                <i class="fas fa-star me-2"></i>Campos Obligatorios
+                            </button>
+                        </h2>
+                        <div id="collapseTwo" class="accordion-collapse collapse" data-bs-parent="#accordionInfo">
+                            <div class="accordion-body">
+                                <p><strong>Los campos marcados con * son obligatorios:</strong></p>
+                                <ul>
+                                    <li><strong>ID Persona:</strong> Generado automáticamente</li>
+                                    <li><strong>Tipo de Persona:</strong> Seleccione el rol en la institución</li>
+                                    <li><strong>Nombre y Apellido:</strong> Máximo 25 caracteres cada uno</li>
+                                    <li><strong>Cédula:</strong> Máximo 15 caracteres</li>
+                                    <li><strong>Email:</strong> Formato válido de correo electrónico</li>
+                                    <li><strong>Fecha de Ingreso:</strong> Fecha en que ingresó a la institución</li>
+                                    <li><strong>Sexo:</strong> Seleccione una opción</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="headingThree">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree">
+                                <i class="fas fa-user-check me-2"></i>Datos Generados Automáticamente
+                            </button>
+                        </h2>
+                        <div id="collapseThree" class="accordion-collapse collapse" data-bs-parent="#accordionInfo">
+                            <div class="accordion-body">
+                                <p>Después de crear la persona, se generará:</p>
+                                <ul>
+                                    <li><strong>ID de Persona:</strong> PE001, PE002, etc.</li>
+                                    <li><strong>ID de Usuario:</strong> US001, US002, etc.</li>
+                                    <li><strong>Nombre de Usuario:</strong> Ej: JSmith (primera letra del nombre + apellido)</li>
+                                    <li><strong>Contraseña:</strong> La cédula de la persona</li>
+                                    <li><strong>Estado del Usuario:</strong> ACTIVO</li>
+                                </ul>
+                                <p class="text-warning mt-2">
+                                    <strong>Nota:</strong> La persona podrá iniciar sesión con su nombre de usuario y contraseña (cédula)
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Scripts específicos para esta vista -->
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            console.log("=== FORMULARIO CREAR PERSONA CARGADO ===");
+
+            // Actualizar campos ocultos cuando cambian los selectores
+            $('select[name="PEPER_TIPO"]').change(function() {
+                $('#PEPER_TIPO_Hidden').val($(this).val());
+            });
+
+            $('select[name="PEESC_ID"]').change(function() {
+                $('#PEESC_ID_Hidden').val($(this).val());
+            });
+
+            $('input[name="PESEX_ID"]').change(function() {
+                $('#PESEX_ID_Hidden').val($(this).val());
+            });
+
+            // Sincronizar valores iniciales
+            $('#PEPER_TIPO_Hidden').val($('select[name="PEPER_TIPO"]').val());
+            $('#PEESC_ID_Hidden').val($('select[name="PEESC_ID"]').val());
+            $('#PESEX_ID_Hidden').val($('input[name="PESEX_ID"]:checked').val());
+
+            // Vista previa de imagen
+            $('#imagenPersona').change(function() {
+                if (this.files && this.files[0]) {
+                    var reader = new FileReader();
+                    reader.onload = function(e) {
+                        $('#previewImage').attr('src', e.target.result);
+                        $('#vistaPreviaImagen').show();
+                    }
+                    reader.readAsDataURL(this.files[0]);
+                    $('#nombreArchivo').text('📁 Archivo: ' + this.files[0].name);
+                    $('#infoImagen').show();
+                }
+            });
+
+            // Si ya hay una imagen en el modelo, mostrarla
+            var imagenActual = $('#PEPER_FOTO').val();
+            if (imagenActual) {
+                mostrarImagenActual(imagenActual);
+            }
+
+            // Botón limpiar formulario
+            $('#btnLimpiar').click(function () {
+                if (confirm('¿Está seguro de que desea limpiar el formulario?')) {
+                    location.reload();
+                }
+            });
+
+            // Validación del formulario
+            $('#formCrearPersona').submit(function (e) {
+                console.log('=== INICIANDO CREACIÓN DE PERSONA ===');
+
+                var isValid = true;
+
+                // Reset errores
+                $('.form-control').removeClass('is-invalid');
+                $('.invalid-feedback').remove();
+
+                // Validar tipo de persona
+                if (!$('select[name="PEPER_TIPO"]').val()) {
+                    $('select[name="PEPER_TIPO"]').addClass('is-invalid');
+                    isValid = false;
+                }
+
+                // Validar nombre
+                if (!$('input[name="PEPER_NOMBRE"]').val().trim()) {
+                    $('input[name="PEPER_NOMBRE"]').addClass('is-invalid');
+                    isValid = false;
+                }
+
+                // Validar apellido
+                if (!$('input[name="PEPER_APELLIDO"]').val().trim()) {
+                    $('input[name="PEPER_APELLIDO"]').addClass('is-invalid');
+                    isValid = false;
+                }
+
+                // Validar cédula
+                var cedula = $('input[name="PEPER_CEDULA"]').val().trim();
+                if (!cedula) {
+                    $('input[name="PEPER_CEDULA"]').addClass('is-invalid');
+                    isValid = false;
+                } else if (cedula.length < 6) {
+                    $('input[name="PEPER_CEDULA"]').addClass('is-invalid');
+                    isValid = false;
+                    console.log('Error: La cédula debe tener al menos 6 caracteres');
+                }
+
+                // Validar email
+                var email = $('input[name="PEPER_EMAIL"]').val().trim();
+                if (!email) {
+                    $('input[name="PEPER_EMAIL"]').addClass('is-invalid');
+                    isValid = false;
+                } else if (!isValidEmail(email)) {
+                    $('input[name="PEPER_EMAIL"]').addClass('is-invalid');
+                    isValid = false;
+                }
+
+                // Validar fecha de ingreso
+                if (!$('input[name="PEPEPER_FECH_INGR"]').val()) {
+                    $('input[name="PEPEPER_FECH_INGR"]').addClass('is-invalid');
+                    isValid = false;
+                }
+
+                // Validar sexo
+                if (!$('input[name="PESEX_ID"]:checked').length) {
+                    $('input[name="PESEX_ID"]').addClass('is-invalid');
+                    isValid = false;
+                }
+
+                if (!isValid) {
+                    e.preventDefault();
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Datos incompletos',
+                        text: 'Por favor complete todos los campos obligatorios correctamente',
+                        confirmButtonColor: '#2a64c5'
+                    });
+                } else {
+                    // Mostrar indicador de carga
+                    $('#btnGuardar').html('<i class="fas fa-spinner fa-spin me-1"></i>Creando...');
+                    $('#btnGuardar').prop('disabled', true);
+                    console.log('✅ Formulario válido, enviando...');
+                }
+            });
+
+            // Auto-hide alerts after 5 seconds
+            setTimeout(function () {
+                $('.alert').alert('close');
+            }, 5000);
+
+            // Enfocar primer campo editable
+            $('input[name="PEPER_NOMBRE"]').focus();
+        });
+
+        // Función para subir imagen
+        function subirImagen() {
+            var fileInput = document.getElementById('imagenPersona');
+            if (!fileInput.files[0]) {
+                mostrarMensaje('Por favor seleccione una imagen primero', 'warning');
+                return;
+            }
+
+            var formData = new FormData();
+            formData.append('imagenSubida', fileInput.files[0]);
+            formData.append('cedulaPersona', $('#PEPER_CEDULA').val());
+
+            $.ajax({
+                url: '@Url.Action("SubirImagen", "ControladorPersonal")',
+                type: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function(data) {
+                    if (data.success) {
+                        $('#PEPER_FOTO').val(data.fileName);
+                        mostrarMensaje('Imagen subida correctamente', 'success');
+                        $('#btnEliminarImagen').show();
+                        $('#nombreArchivo').text('📁 Archivo: ' + data.fileName);
+                        $('#infoImagen').show();
+                    } else {
+                        mostrarMensaje('Error: ' + data.message, 'danger');
+                    }
+                },
+                error: function() {
+                    mostrarMensaje('Error en la solicitud', 'danger');
+                }
+            });
+        }
+
+        // Función para eliminar imagen
+        function eliminarImagen() {
+            var nombreArchivo = $('#PEPER_FOTO').val();
+            if (!nombreArchivo) {
+                mostrarMensaje('No hay imagen para eliminar', 'warning');
+                return;
+            }
+
+            if (confirm('¿Está seguro de eliminar esta imagen?')) {
+                $.ajax({
+                    url: '@Url.Action("EliminarImagen", "ControladorPersonal")',
+                    type: 'POST',
+                    data: JSON.stringify({ nombreArchivo: nombreArchivo }),
+                    contentType: 'application/json',
+                    success: function(data) {
+                        if (data.success) {
+                            $('#PEPER_FOTO').val('');
+                            $('#vistaPreviaImagen').hide();
+                            $('#infoImagen').hide();
+                            $('#btnEliminarImagen').hide();
+                            $('#imagenPersona').val('');
+                            mostrarMensaje('Imagen eliminada correctamente', 'success');
+                        } else {
+                            mostrarMensaje('Error: ' + data.message, 'danger');
+                        }
+                    },
+                    error: function() {
+                        mostrarMensaje('Error en la solicitud', 'danger');
+                    }
+                });
+            }
+        }
+
+        // Función para mostrar imagen actual
+        function mostrarImagenActual(nombreArchivo) {
+            $.ajax({
+                url: '@Url.Action("GetUrlImagen", "ControladorPersonal")',
+                type: 'GET',
+                data: { nombre: nombreArchivo },
+                success: function(url) {
+                    if (url) {
+                        $('#previewImage').attr('src', url);
+                        $('#vistaPreviaImagen').show();
+                        $('#nombreArchivo').text('📁 Archivo: ' + nombreArchivo);
+                        $('#infoImagen').show();
+                        $('#btnEliminarImagen').show();
+                    }
+                }
+            });
+        }
+
+        // Función para mostrar mensajes
+        function mostrarMensaje(texto, tipo) {
+            $('#mensajeImagen').html(
+                '<div class="alert alert-' + tipo + ' alert-dismissible fade show" role="alert">' +
+                texto +
+                '<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>' +
+                '</div>'
+            );
+
+            setTimeout(function() {
+                $('#mensajeImagen').html('');
+            }, 5000);
+        }
+
+        // Función para validar email
+        function isValidEmail(email) {
+          
+            return re.test(email);
+        }
+
+        // Función para mostrar pestañas
+        function showTab(tabName) {
+            // Ocultar todas las pestañas
+            $('.tab-pane').removeClass('active');
+            // Mostrar la pestaña seleccionada
+            $('#' + tabName).addClass('active');
+
+            // Actualizar botones activos
+            $('.tab-button').removeClass('active');
+            // Activar el botón correspondiente
+            $(event.target).addClass('active');
+        }
+    </script>
+
+    <style>
+        /* Estilos para las pestañas */
+        .tab-container {
+            margin-top: 20px;
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+            overflow: hidden;
+        }
+
+        .tab-buttons {
+            display: flex;
+            background-color: #f8f9fa;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        .tab-button {
+            padding: 12px 20px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 0.95rem;
+            font-weight: 500;
+            color: #495057;
+            transition: all 0.3s;
+            border-bottom: 3px solid transparent;
+        }
+
+            .tab-button:hover {
+                background-color: #e9ecef;
+            }
+
+            .tab-button.active {
+                color: #2a64c5;
+                border-bottom: 3px solid #2a64c5;
+                background-color: #e7f3ff;
+            }
+
+        .tab-content {
+            background-color: white;
+        }
+
+        .tab-pane {
+            display: none;
+        }
+
+            .tab-pane.active {
+                display: block;
+            }
+
+        /* Contenedor principal con imagen de fondo */
+        .main-background {
+            background-image: url('/Content/Images/university-background.jpg');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            min-height: 100vh;
+            position: relative;
+        }
+
+        /* Overlay más oscuro para mejor legibilidad */
+        .background-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 0;
+        }
+
+        /* Contenedor del dashboard */
+        .dashboard-container {
+            position: relative;
+            z-index: 1;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        /* Estilos para las tarjetas */
+        .card {
+            border-radius: 10px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            border: none;
+            margin-bottom: 20px;
+        }
+
+        .card-header {
+            border: none;
+            font-weight: 600;
+        }
+
+        /* Botones */
+        .btn-success {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            border: none;
+        }
+
+            .btn-success:hover {
+                background: linear-gradient(135deg, #218838 0%, #1e9e8a 100%);
+            }
+
+        /* Formulario */
+        .form-control {
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            padding: 10px 15px;
+        }
+
+            .form-control:focus {
+                border-color: #2a64c5;
+                box-shadow: 0 0 0 3px rgba(42, 100, 197, 0.2);
+            }
+
+            .form-control.is-invalid {
+                border-color: #dc3545;
+            }
+
+            .form-control.bg-light {
+                background-color: #f8f9fa !important;
+            }
+
+        /* Radio buttons */
+        .radio-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-top: 5px;
+        }
+
+        .form-check-input {
+            margin-top: 0.2rem;
+        }
+
+        .form-check-label {
+            margin-left: 0.3rem;
+        }
+
+        /* Input groups */
+        .input-group-text {
+            background-color: #f8f9fa;
+            border: 2px solid #e2e8f0;
+        }
+
+        /* Accordion */
+        .accordion-button {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+            .accordion-button:not(.collapsed) {
+                color: #2a64c5;
+                background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+            }
+
+        /* Labels con íconos */
+        .form-label i {
+            color: #2a64c5;
+            width: 20px;
+        }
+
+        /* Responsive */
+        @@media (max-width: 768px) {
+            .main-background {
+                background-attachment: scroll;
+            }
+
+            .btn {
+                width: 100%;
+                margin-bottom: 10px;
+            }
+
+            .card-header h3 {
+                font-size: 1.2rem;
+            }
+
+            .radio-group {
+                flex-direction: column;
+                gap: 8px;
+            }
+
+            .tab-buttons {
+                flex-direction: column;
+            }
+
+            .tab-button {
+                width: 100%;
+                text-align: left;
+            }
+        }
+    </style>
+}

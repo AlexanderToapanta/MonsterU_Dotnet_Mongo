@@ -1,0 +1,183 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Mapping Space="C-S" xmlns="http://schemas.microsoft.com/ado/2009/11/mapping/cs">
+  <EntityContainerMapping StorageEntityContainer="monster_universityModelStoreContainer" CdmEntityContainer="monster_universityEntities">
+    <EntitySetMapping Name="FEPAGO_PAGO">
+      <EntityTypeMapping TypeName="monster_universityModel.FEPAGO_PAGO">
+        <MappingFragment StoreEntitySet="FEPAGO_PAGO">
+          <ScalarProperty Name="FEPAGO_ID" ColumnName="FEPAGO_ID" />
+          <ScalarProperty Name="MECARR_ID" ColumnName="MECARR_ID" />
+          <ScalarProperty Name="MEEST_ID" ColumnName="MEEST_ID" />
+          <ScalarProperty Name="FEPAGO_MONTO" ColumnName="FEPAGO_MONTO" />
+          <ScalarProperty Name="FEPAGO_FECHA" ColumnName="FEPAGO_FECHA" />
+          <ScalarProperty Name="FEPAGO_REFE" ColumnName="FEPAGO_REFE" />
+          <ScalarProperty Name="FEPAGO_ESTADO" ColumnName="FEPAGO_ESTADO" />
+        </MappingFragment>
+      </EntityTypeMapping>
+    </EntitySetMapping>
+    <EntitySetMapping Name="MEASIG_ASIGNA">
+      <EntityTypeMapping TypeName="monster_universityModel.MEASIG_ASIGNA">
+        <MappingFragment StoreEntitySet="MEASIG_ASIGNA">
+          <ScalarProperty Name="MEASIG_ID" ColumnName="MEASIG_ID" />
+          <ScalarProperty Name="MEASIG_NOMBRE" ColumnName="MEASIG_NOMBRE" />
+          <ScalarProperty Name="MEASIG_NRC" ColumnName="MEASIG_NRC" />
+          <ScalarProperty Name="MEASIG_CREDITOS" ColumnName="MEASIG_CREDITOS" />
+          <ScalarProperty Name="MEASIG_DESCRIPCION" ColumnName="MEASIG_DESCRIPCION" />
+        </MappingFragment>
+      </EntityTypeMapping>
+    </EntitySetMapping>
+    <EntitySetMapping Name="MECARR_CARRERA">
+      <EntityTypeMapping TypeName="monster_universityModel.MECARR_CARRERA">
+        <MappingFragment StoreEntitySet="MECARR_CARRERA">
+          <ScalarProperty Name="MECARR_ID" ColumnName="MECARR_ID" />
+          <ScalarProperty Name="MECARR_NOMBRE" ColumnName="MECARR_NOMBRE" />
+          <ScalarProperty Name="MECARR_MAX_CRED" ColumnName="MECARR_MAX_CRED" />
+          <ScalarProperty Name="MECARR_MIN_CRED" ColumnName="MECARR_MIN_CRED" />
+        </MappingFragment>
+      </EntityTypeMapping>
+    </EntitySetMapping>
+    <EntitySetMapping Name="MEEST_ESTUD">
+      <EntityTypeMapping TypeName="monster_universityModel.MEEST_ESTUD">
+        <MappingFragment StoreEntitySet="MEEST_ESTUD">
+          <ScalarProperty Name="MECARR_ID" ColumnName="MECARR_ID" />
+          <ScalarProperty Name="MEEST_ID" ColumnName="MEEST_ID" />
+          <ScalarProperty Name="XEUSU_ID" ColumnName="XEUSU_ID" />
+          <ScalarProperty Name="MEEST_NOMBRE" ColumnName="MEEST_NOMBRE" />
+          <ScalarProperty Name="MEEST_APELLIDO" ColumnName="MEEST_APELLIDO" />
+          <ScalarProperty Name="MEEST_CEDULA" ColumnName="MEEST_CEDULA" />
+          <ScalarProperty Name="MEEST_EMAIL" ColumnName="MEEST_EMAIL" />
+          <ScalarProperty Name="MEEST_FECHANA" ColumnName="MEEST_FECHANA" />
+          <ScalarProperty Name="MEEST_PROMEDIO" ColumnName="MEEST_PROMEDIO" />
+        </MappingFragment>
+      </EntityTypeMapping>
+    </EntitySetMapping>
+    <EntitySetMapping Name="MEGRP_GRUPO">
+      <EntityTypeMapping TypeName="monster_universityModel.MEGRP_GRUPO">
+        <MappingFragment StoreEntitySet="MEGRP_GRUPO">
+          <ScalarProperty Name="MEGRP_ID" ColumnName="MEGRP_ID" />
+          <ScalarProperty Name="MEPERI_ID" ColumnName="MEPERI_ID" />
+          <ScalarProperty Name="PEPER_ID" ColumnName="PEPER_ID" />
+          <ScalarProperty Name="MEASIG_ID" ColumnName="MEASIG_ID" />
+          <ScalarProperty Name="MEGRP_CODIGO" ColumnName="MEGRP_CODIGO" />
+          <ScalarProperty Name="MEGRP_AULA" ColumnName="MEGRP_AULA" />
+          <ScalarProperty Name="MEGRP_CUPO_MAX" ColumnName="MEGRP_CUPO_MAX" />
+          <ScalarProperty Name="MEGRP_CUPO_ACT" ColumnName="MEGRP_CUPO_ACT" />
+        </MappingFragment>
+      </EntityTypeMapping>
+    </EntitySetMapping>
+    <EntitySetMapping Name="MEHOR_HORARIO">
+      <EntityTypeMapping TypeName="monster_universityModel.MEHOR_HORARIO">
+        <MappingFragment StoreEntitySet="MEHOR_HORARIO">
+          <ScalarProperty Name="MEGRP_ID" ColumnName="MEGRP_ID" />
+          <ScalarProperty Name="MEHOR_ID" ColumnName="MEHOR_ID" />
+          <ScalarProperty Name="MEHOR_DIA" ColumnName="MEHOR_DIA" />
+          <ScalarProperty Name="MEHOR_FECHA_I" ColumnName="MEHOR_FECHA_I" />
+          <ScalarProperty Name="MEHOR_FECHA_F" ColumnName="MEHOR_FECHA_F" />
+        </MappingFragment>
+      </EntityTypeMapping>
+    </EntitySetMapping>
+    <EntitySetMapping Name="MEPERI_PERIOD">
+      <EntityTypeMapping TypeName="monster_universityModel.MEPERI_PERIOD">
+        <MappingFragment StoreEntitySet="MEPERI_PERIOD">
+          <ScalarProperty Name="MEPERI_ID" ColumnName="MEPERI_ID" />
+          <ScalarProperty Name="MEPERI_NOMBRE" ColumnName="MEPERI_NOMBRE" />
+          <ScalarProperty Name="MEPERI_FECHAINI" ColumnName="MEPERI_FECHAINI" />
+          <ScalarProperty Name="MEPERI_FECHAFIN" ColumnName="MEPERI_FECHAFIN" />
+          <ScalarProperty Name="MEPERI_ACTIVO" ColumnName="MEPERI_ACTIVO" />
+        </MappingFragment>
+      </EntityTypeMapping>
+    </EntitySetMapping>
+    <EntitySetMapping Name="PEESC_ESTCIV">
+      <EntityTypeMapping TypeName="monster_universityModel.PEESC_ESTCIV">
+        <MappingFragment StoreEntitySet="PEESC_ESTCIV">
+          <ScalarProperty Name="PEESC_ID" ColumnName="PEESC_ID" />
+          <ScalarProperty Name="PEESC_DESCRI" ColumnName="PEESC_DESCRI" />
+        </MappingFragment>
+      </EntityTypeMapping>
+    </EntitySetMapping>
+    <EntitySetMapping Name="PEPER_PERSON">
+      <EntityTypeMapping TypeName="monster_universityModel.PEPER_PERSON">
+        <MappingFragment StoreEntitySet="PEPER_PERSON">
+          <ScalarProperty Name="PEPER_ID" ColumnName="PEPER_ID" />
+          <ScalarProperty Name="PEESC_ID" ColumnName="PEESC_ID" />
+          <ScalarProperty Name="XEUSU_ID" ColumnName="XEUSU_ID" />
+          <ScalarProperty Name="PESEX_ID" ColumnName="PESEX_ID" />
+          <ScalarProperty Name="PEPER_NOMBRE" ColumnName="PEPER_NOMBRE" />
+          <ScalarProperty Name="PEPER_APELLIDO" ColumnName="PEPER_APELLIDO" />
+          <ScalarProperty Name="PEPER_EMAIL" ColumnName="PEPER_EMAIL" />
+          <ScalarProperty Name="PEPER_CEDULA" ColumnName="PEPER_CEDULA" />
+          <ScalarProperty Name="PEPER_CELULAR" ColumnName="PEPER_CELULAR" />
+          <ScalarProperty Name="PEPER_TIPO" ColumnName="PEPER_TIPO" />
+          <ScalarProperty Name="PEPEPER_FECH_INGR" ColumnName="PEPEPER_FECH_INGR" />
+        </MappingFragment>
+      </EntityTypeMapping>
+    </EntitySetMapping>
+    <EntitySetMapping Name="PESEX_SEXO">
+      <EntityTypeMapping TypeName="monster_universityModel.PESEX_SEXO">
+        <MappingFragment StoreEntitySet="PESEX_SEXO">
+          <ScalarProperty Name="PESEX_ID" ColumnName="PESEX_ID" />
+          <ScalarProperty Name="PESEX_DESCRI" ColumnName="PESEX_DESCRI" />
+        </MappingFragment>
+      </EntityTypeMapping>
+    </EntitySetMapping>
+    <EntitySetMapping Name="XEAUD_AUDLOG">
+      <EntityTypeMapping TypeName="monster_universityModel.XEAUD_AUDLOG">
+        <MappingFragment StoreEntitySet="XEAUD_AUDLOG">
+          <ScalarProperty Name="IDAUDITORIA" ColumnName="IDAUDITORIA" />
+          <ScalarProperty Name="XEUSU_ID" ColumnName="XEUSU_ID" />
+          <ScalarProperty Name="ACCION" ColumnName="ACCION" />
+          <ScalarProperty Name="TABLAAFEC" ColumnName="TABLAAFEC" />
+          <ScalarProperty Name="FILAID" ColumnName="FILAID" />
+          <ScalarProperty Name="FECHAHORA" ColumnName="FECHAHORA" />
+          <ScalarProperty Name="DETALLE" ColumnName="DETALLE" />
+        </MappingFragment>
+      </EntityTypeMapping>
+    </EntitySetMapping>
+    <EntitySetMapping Name="XEROL_ROL">
+      <EntityTypeMapping TypeName="monster_universityModel.XEROL_ROL">
+        <MappingFragment StoreEntitySet="XEROL_ROL">
+          <ScalarProperty Name="XEROL_ID" ColumnName="XEROL_ID" />
+          <ScalarProperty Name="XEROL_NOMBRE" ColumnName="XEROL_NOMBRE" />
+          <ScalarProperty Name="XEROL_DESCRI" ColumnName="XEROL_DESCRI" />
+        </MappingFragment>
+      </EntityTypeMapping>
+    </EntitySetMapping>
+    <EntitySetMapping Name="XEUSU_USUAR">
+      <EntityTypeMapping TypeName="monster_universityModel.XEUSU_USUAR">
+        <MappingFragment StoreEntitySet="XEUSU_USUAR">
+          <ScalarProperty Name="XEUSU_ID" ColumnName="XEUSU_ID" />
+          <ScalarProperty Name="PEPER_ID" ColumnName="PEPER_ID" />
+          <ScalarProperty Name="MECARR_ID" ColumnName="MECARR_ID" />
+          <ScalarProperty Name="MEEST_ID" ColumnName="MEEST_ID" />
+          <ScalarProperty Name="XEUSU_NOMBRE" ColumnName="XEUSU_NOMBRE" />
+          <ScalarProperty Name="XEUSU_CONTRA" ColumnName="XEUSU_CONTRA" />
+          <ScalarProperty Name="XEUSU_ESTADO" ColumnName="XEUSU_ESTADO" />
+        </MappingFragment>
+      </EntityTypeMapping>
+    </EntitySetMapping>
+    <AssociationSetMapping Name="MR_MEASIG_MEASIG" TypeName="monster_universityModel.MR_MEASIG_MEASIG" StoreEntitySet="MR_MEASIG_MEASIG">
+      <EndProperty Name="MEASIG_ASIGNA">
+        <ScalarProperty Name="MEASIG_ID" ColumnName="MEA_MEASIG_ID" />
+      </EndProperty>
+      <EndProperty Name="MEASIG_ASIGNA1">
+        <ScalarProperty Name="MEASIG_ID" ColumnName="MEASIG_ID" />
+      </EndProperty>
+    </AssociationSetMapping>
+    <AssociationSetMapping Name="MR_MEEST_MEGRP" TypeName="monster_universityModel.MR_MEEST_MEGRP" StoreEntitySet="MR_MEEST_MEGRP">
+      <EndProperty Name="MEEST_ESTUD">
+        <ScalarProperty Name="MECARR_ID" ColumnName="MECARR_ID" />
+        <ScalarProperty Name="MEEST_ID" ColumnName="MEEST_ID" />
+      </EndProperty>
+      <EndProperty Name="MEGRP_GRUPO">
+        <ScalarProperty Name="MEGRP_ID" ColumnName="MEGRP_ID" />
+      </EndProperty>
+    </AssociationSetMapping>
+    <AssociationSetMapping Name="XR_XEUSU_XEROL" TypeName="monster_universityModel.XR_XEUSU_XEROL" StoreEntitySet="XR_XEUSU_XEROL">
+      <EndProperty Name="XEROL_ROL">
+        <ScalarProperty Name="XEROL_ID" ColumnName="XEROL_ID" />
+      </EndProperty>
+      <EndProperty Name="XEUSU_USUAR">
+        <ScalarProperty Name="XEUSU_ID" ColumnName="XEUSU_ID" />
+      </EndProperty>
+    </AssociationSetMapping>
+  </EntityContainerMapping>
+</Mapping>

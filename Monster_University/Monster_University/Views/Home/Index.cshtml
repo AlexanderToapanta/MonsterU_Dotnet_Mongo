@@ -1,0 +1,182 @@
+﻿@{
+    ViewBag.Title = "Index";
+    var usuario = ViewBag.UsuarioLogueado;
+}
+
+<div class="main-background">
+    <div class="background-overlay"></div>
+
+    <div class="dashboard-container">
+
+        <!-- TARJETA DE BIENVENIDA -->
+        <div class="card mb-4 shadow-lg bg-white" style="border-radius: 10px;">
+            <div class="card-header text-white"
+                 style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); font-weight: 600; border-radius: 10px 10px 0 0;">
+                Bienvenido al Sistema
+            </div>
+
+            <div class="card-body">
+                <h2 style="color:#2c3e50;">
+                    Hola, @(ViewBag.Usuario ?? "Usuario")
+                </h2>
+
+                <p style="color:#7f8c8d;">Bienvenido al Sistema de Gestión de Matrículas Monster</p>
+
+                <div class="user-info mt-3 p-3"
+                     style="background:#f8f9fa; border-radius:8px; border-left:4px solid #667eea;">
+                    <h4 style="color:#2c3e50;">Información de tu cuenta:</h4>
+
+                    <table class="table table-borderless mt-3">
+                        <tbody>
+                            <tr>
+                                <th scope="row">Usuario:</th>
+                                <td><strong>@ViewBag.Usuario</strong></td>
+                            </tr>
+
+                            <tr>
+                                <th scope="row">Estado:</th>
+                                <td>
+                                    <strong style="color:@((ViewBag.Estado == "ACTIVO") ? "green" : "red")">
+                                        @ViewBag.Estado
+                                    </strong>
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <th scope="row">ID Usuario:</th>
+                                <td><strong>@ViewBag.UsuarioID</strong></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+            </div>
+        </div>
+
+
+        <!-- ACCESOS RÁPIDOS -->
+        <div class="card mb-4 shadow-lg bg-white" style="border-radius: 10px;">
+            <div class="card-header text-white"
+                 style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); font-weight: 600; border-radius: 10px 10px 0 0;">
+                Accesos Rápidos
+            </div>
+
+            <div class="card-body text-center">
+                <a class="quick-action-btn"
+                   href="@Url.Action("cambiarcontrasena", "ControladorUsuario")">
+                    <i class="bi bi-key"></i> Cambiar Contraseña
+                </a>
+            </div>
+        </div>
+
+
+        <!-- INFORMACIÓN DEL SISTEMA -->
+        <div class="card shadow-lg bg-white" style="border-radius: 10px;">
+            <div class="card-header text-white"
+                 style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); font-weight: 600; border-radius: 10px 10px 0 0;">
+                Información del Sistema
+            </div>
+
+            <div class="card-body">
+                <div class="accordion" id="accordionInfo">
+
+                    <!-- TAB 1 -->
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="headingOne">
+                            <button class="accordion-button collapsed" type="button"
+                                    data-bs-toggle="collapse" data-bs-target="#collapseOne">
+                                Acerca del Sistema
+                            </button>
+                        </h2>
+
+                        <div id="collapseOne" class="accordion-collapse collapse">
+                            <div class="accordion-body">
+                                <p>
+                                    <strong>Sistema de Gestión de Matrículas Monster</strong><br />
+                                    Versión: 1.0<br />
+                                    Desarrollado para gestionar matrículas, estudiantes, docentes y asignaturas.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- TAB 2 -->
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="headingTwo">
+                            <button class="accordion-button collapsed" type="button"
+                                    data-bs-toggle="collapse" data-bs-target="#collapseTwo">
+                                Últimas Actividades
+                            </button>
+                        </h2>
+
+                        <div id="collapseTwo" class="accordion-collapse collapse">
+                            <div class="accordion-body">
+                                <p>No hay actividades recientes.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+
+        <!-- FOOTER -->
+        <div class="text-center mt-4 p-3"
+             style="background: rgba(255,255,255,0.9); border-radius: 10px;">
+            <p style="color:#2c3e50; font-weight:600;">
+                Sistema de Matrículas Monster - © 2025
+            </p>
+        </div>
+
+    </div>
+
+</div>
+
+
+<style>
+    .main-background {
+        position: relative;
+        min-height: 100vh;
+        background-image: url('https://www.bangor.ac.uk/sites/default/files/styles/16x9_1100w/public/2020-05/CB%202018%20May%20%2837%29.jpg?h=41ef3158&itok=zGs3cG5Q');
+        background-size: cover;
+        background-position: center;
+        background-attachment: fixed;
+    }
+
+    .background-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.4);
+        z-index: 0;
+    }
+
+    .dashboard-container {
+        position: relative;
+        z-index: 1;
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 40px 20px;
+    }
+
+    .quick-action-btn {
+        padding: 12px 24px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 8px;
+        font-weight: 600;
+        text-decoration: none;
+        transition: 0.3s;
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+    }
+
+        .quick-action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+            color: white;
+            text-decoration: none;
+        }
+</style>

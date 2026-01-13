@@ -1,0 +1,363 @@
+﻿<%@ Master Language="C#" AutoEventWireup="true" 
+    CodeBehind="monsteruniversity.master.cs" 
+    Inherits="Monster_University.monsteruniversity" %>
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head runat="server">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title><asp:ContentPlaceHolder ID="TitleContent" runat="server">Monster University</asp:ContentPlaceHolder></title>
+    
+    <!-- Bootstrap 5 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+    
+    <!-- CSS personalizado -->
+    <link href="~/Content/monster.css" rel="stylesheet" />
+    
+    <!-- Placeholder para CSS adicional -->
+    <asp:ContentPlaceHolder ID="HeadContent" runat="server">
+    </asp:ContentPlaceHolder>
+    
+    <style>
+        .monster-layout {
+            display: grid;
+            grid-template-rows: auto 1fr auto;
+            min-height: 100vh;
+        }
+        
+        .monster-header {
+            background: linear-gradient(135deg, #2a64c5 0%, #1e429f 100%);
+            color: white;
+            padding: 0.8rem 1.5rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+        
+        .monster-main {
+            background-color: #f8f9fa;
+            padding: 1.5rem;
+            position: relative;
+            overflow: auto;
+        }
+        
+        .monster-footer {
+            background-color: #1e293b;
+            color: white;
+            padding: 1rem;
+            text-align: center;
+            border-top: 3px solid #2a64c5;
+        }
+        
+        .monster-logo {
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: white;
+            text-decoration: none;
+        }
+        
+        .monster-logo:hover {
+            color: #cbd5e1;
+        }
+        
+        .monster-nav {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .monster-nav-link {
+            color: white !important;
+            font-weight: 500;
+            padding: 0.5rem 1rem !important;
+            border-radius: 5px;
+            transition: all 0.3s ease;
+        }
+        
+        .monster-nav-link:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+            transform: translateY(-2px);
+        }
+        
+        .monster-user-info {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: white;
+            font-weight: 500;
+        }
+        
+        .monster-content {
+            background-color: white;
+            border-radius: 10px;
+            padding: 2rem;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            min-height: calc(100vh - 200px);
+        }
+        
+        .user-menu-dropdown {
+            display: flex;
+            align-items: center;
+            position: relative;
+        }
+        
+        .user-menu-btn {
+            background: transparent;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.3s ease;
+        }
+        
+        .user-menu-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.5);
+        }
+        
+        .user-dropdown-menu {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+            min-width: 200px;
+            z-index: 1001;
+            display: none;
+            margin-top: 5px;
+        }
+        
+        .user-dropdown-menu.show {
+            display: block;
+        }
+        
+        .user-dropdown-item {
+            padding: 0.75rem 1rem;
+            color: #334155;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            transition: all 0.2s ease;
+            border-bottom: 1px solid #f1f5f9;
+        }
+        
+        .user-dropdown-item:last-child {
+            border-bottom: none;
+        }
+        
+        .user-dropdown-item:hover {
+            background-color: #f8fafc;
+            color: #2a64c5;
+        }
+        
+        @media (max-width: 768px) {
+            .monster-main {
+                padding: 1rem;
+            }
+            
+            .monster-content {
+                padding: 1rem;
+            }
+            
+            .monster-nav {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+            
+            .user-dropdown-menu {
+                position: fixed;
+                top: auto;
+                right: 1rem;
+                left: 1rem;
+                bottom: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <form id="form1" runat="server">
+        <asp:ScriptManager ID="ScriptManager1" runat="server" EnablePartialRendering="true">
+        </asp:ScriptManager>
+        
+        <div class="monster-layout">
+            <!-- ============ HEADER ============ -->
+            <header class="monster-header">
+                <div class="container-fluid">
+                    <div class="d-flex justify-content-between align-items-center">
+                        
+                        <a href="~/index.aspx" class="monster-logo">
+                            <i class="fas fa-university me-2"></i>MONSTER UNIVERSITY
+                        </a>
+                        
+                  
+                        <nav class="monster-nav">
+                            <asp:Menu ID="MonsterMenu" runat="server" 
+                                Orientation="Horizontal"
+                                CssClass="navbar"
+                                StaticDisplayLevels="1"
+                                IncludeStyleBlock="false">
+                                
+                                <Items>
+                                    <asp:MenuItem Text="<i class='fas fa-home'></i> Inicio" Value="Home" NavigateUrl="~/index.aspx"></asp:MenuItem>
+                                    <asp:MenuItem Text="<i class='fas fa-users'></i> Personal" Value="Personal">
+                                       
+                                    </asp:MenuItem>
+                                    <asp:MenuItem Text="<i class='fas fa-chart-line'></i> Académico" Value="Academico">
+                                       
+                                    </asp:MenuItem>
+                                    <asp:MenuItem Text="<i class='fas fa-shield-alt'></i> Seguridad" Value="Seguridad">
+                                        
+                                    </asp:MenuItem>
+                                </Items>
+                                
+                                <StaticMenuItemStyle CssClass="nav-link monster-nav-link" />
+                                <DynamicMenuItemStyle CssClass="dropdown-item" />
+                                <DynamicMenuStyle CssClass="dropdown-menu" />
+                            </asp:Menu>
+                            
+                           
+                            <div class="user-menu-dropdown" id="divUserMenu" runat="server" visible="false">
+                                <button type="button" class="user-menu-btn" id="btnUserMenu">
+                                    <i class="fas fa-user-circle"></i>
+                                    <asp:Label ID="lblUserName" runat="server"></asp:Label>
+                                    <i class="fas fa-chevron-down ms-1"></i>
+                                </button>
+                                
+                                <div class="user-dropdown-menu" id="userDropdown">
+                                    <div class="user-dropdown-header p-3 bg-light border-bottom">
+                                        <div class="fw-bold"><asp:Label ID="lblUserFullName" runat="server"></asp:Label></div>
+                                        <small class="text-muted"><asp:Label ID="lblUserRole" runat="server"></asp:Label></small>
+                                    </div>
+                                    
+                                    <asp:HyperLink ID="lnkCambiarContrasena" runat="server" 
+                                        NavigateUrl="~/CambiarContrasena.aspx"
+                                        CssClass="user-dropdown-item">
+                                        <i class="fas fa-key"></i> Cambiar Contraseña
+                                    </asp:HyperLink>
+                                    
+                                    <asp:HyperLink ID="lnkMiPerfil" runat="server" 
+                                        NavigateUrl="~/MiPerfil.aspx"
+                                        CssClass="user-dropdown-item">
+                                        <i class="fas fa-user-edit"></i> Mi Perfil
+                                    </asp:HyperLink>
+                                    
+                                    <div class="dropdown-divider"></div>
+                                    
+                                    <asp:Button ID="btnLogout" runat="server" 
+                                        Text="Cerrar Sesión" 
+                                        CssClass="user-dropdown-item border-0 w-100 text-start bg-transparent"
+                                        OnClick="btnLogout_Click">
+                                    </asp:Button>
+                                </div>
+                            </div>
+                            
+                            <asp:HyperLink ID="lnkLogin" runat="server" 
+                                NavigateUrl="~/Login.aspx"
+                                CssClass="btn btn-light btn-sm"
+                                Visible="false">
+                                <i class="fas fa-sign-in-alt"></i> Ingresar
+                            </asp:HyperLink>
+                        </nav>
+                    </div>
+                </div>
+            </header>
+
+            <!-- ============ CONTENIDO PRINCIPAL ============ -->
+            <main class="monster-main">
+                <div class="container-fluid">
+                    <div class="monster-content">
+                        <asp:ContentPlaceHolder ID="MainContent" runat="server">
+                            <!-- Contenido de cada página -->
+                        </asp:ContentPlaceHolder>
+                    </div>
+                </div>
+            </main>
+
+            <!-- ============ FOOTER ============ -->
+            <footer class="monster-footer">
+                <div class="container">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6><i class="fas fa-university"></i> Monster University</h6>
+                            <p class="small mb-0">Sistema de Gestión Académica Integral</p>
+                        </div>
+                        <div class="col-md-6 text-md-end">
+                            <asp:ContentPlaceHolder ID="FooterContent" runat="server">
+                                <p class="small mb-0">
+                                    &copy; <%: DateTime.Now.Year %> - Todos los derechos reservados
+                                    <br />
+                                    <span class="text-muted">Versión 1.0.0</span>
+                                </p>
+                            </asp:ContentPlaceHolder>
+                        </div>
+                    </div>
+                </div>
+            </footer>
+        </div>
+    </form>
+    
+    <!-- Bootstrap JS Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    
+    <!-- Scripts personalizados -->
+    <script src="~/Scripts/monster.js"></script>
+    
+    <!-- Placeholder para scripts adicionales -->
+    <asp:ContentPlaceHolder ID="ScriptsContent" runat="server">
+    </asp:ContentPlaceHolder>
+    
+    <script>
+        $(document).ready(function() {
+         
+            $('.dropdown-toggle').dropdown();
+            
+           
+            $('[data-bs-toggle="tooltip"]').tooltip();
+            
+           
+            $('#btnUserMenu').click(function(e) {
+                e.stopPropagation();
+                $('#userDropdown').toggleClass('show');
+            });
+            
+           
+            $(document).click(function(e) {
+                if (!$(e.target).closest('.user-menu-dropdown').length) {
+                    $('#userDropdown').removeClass('show');
+                }
+                
+               
+                if (!$(e.target).closest('.dropdown').length) {
+                    $('.dropdown-menu').removeClass('show');
+                }
+            });
+            
+            
+            $('.user-dropdown-menu').click(function(e) {
+                e.stopPropagation();
+            });
+            
+           
+            $('#<%= btnLogout.ClientID %>').click(function (e) {
+                if (!confirm('¿Está seguro que desea cerrar sesión?')) {
+                    e.preventDefault();
+                    return false;
+                }
+            });
+        });
+    </script>
+</body>
+</html>

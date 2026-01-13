@@ -1,0 +1,54 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Web.Mvc;
+
+namespace Monster_University.Controllers
+{
+    public class ControladorCarreraController : Controller
+    {
+        // GET: ControladorCarrera/Lista
+        public ActionResult Lista()
+        {
+            try
+            {
+                // Por defecto devolvemos lista vacía; reemplace con CapaDatos cuando esté disponible.
+                var lista = new List<dynamic>();
+                ViewBag.Carreras = lista;
+                return View();
+            }
+            catch (Exception ex)
+            {
+                ViewBag.Error = ex.Message;
+                ViewBag.Carreras = new List<dynamic>();
+                return View();
+            }
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult Crear(FormCollection form)
+        {
+            // TODO: implementar persistencia usando CapaDatos
+            TempData["SuccessMessage"] = "Carrera creada (simulado).";
+            return RedirectToAction("Lista");
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult Editar(FormCollection form)
+        {
+            // TODO: implementar persistencia
+            TempData["SuccessMessage"] = "Carrera editada (simulado).";
+            return RedirectToAction("Lista");
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult EliminarMultiple(string ids)
+        {
+            // TODO: implementar eliminación múltiple
+            TempData["SuccessMessage"] = "Registros eliminados (simulado).";
+            return RedirectToAction("Lista");
+        }
+    }
+}

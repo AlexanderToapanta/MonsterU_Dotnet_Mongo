@@ -1,0 +1,106 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web.Mvc;
+using CapaDatos;
+using CapaModelo;
+
+namespace Monster_University.Controllers
+{
+    public class ControladorCarreraController : Controller
+    {
+        // GET: ControladorCarrera/Lista
+        public ActionResult Lista()
+        {
+            try
+            {
+                var lista = CD_Carrera.Instancia.ObtenerCarreras();
+                ViewBag.Carreras = lista ?? new List<Carrera>();
+                // Generate next ID for the create form
+                ViewBag.NewCarreraId = CD_Carrera.Instancia.GenerarNuevoId();
+                return View();
+            }
+            catch (Exception ex)
+            {
+                ViewBag.Error = ex.Message;
+                ViewBag.Carreras = new List<Carrera>();
+                ViewBag.NewCarreraId = CD_Carrera.Instancia.GenerarNuevoId();
+                return View();
+            }
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult Crear(FormCollection form)
+        {
+            try
+            {
+                var idFromForm = (form["MECARR_ID"] ?? string.Empty).ToString();
+                var idToUse = string.IsNullOrWhiteSpace(idFromForm) ? CD_Carrera.Instancia.GenerarNuevoId() : idFromForm;
+
+                var c = new Carrera
+                {
+                    MECARR_ID = idToUse,
+                    MECARR_NOMBRE = (form["MECARR_NOMBRE"] ?? string.Empty).ToString(),
+                    MECARR_MAXCRED = int.TryParse(form["MECARR_MAXCRED"], out var max) ? max :0,
+                    MECARR_MINCRED = int.TryParse(form["MECARR_MINCRED"], out var min) ? min :0
+                };
+
+                bool ok = CD_Carrera.Instancia.RegistrarCarrera(c);
+                TempData["SuccessMessage"] = ok ? "Carrera registrada correctamente." : "No se pudo registrar la carrera.";
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = "Error: " + ex.Message;
+            }
+            return RedirectToAction("Lista");
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult Editar(FormCollection form)
+        {
+            try
+            {
+                var c = new Carrera
+                {
+                    MECARR_ID = (form["MECARR_ID"] ?? string.Empty).ToString(),
+                    MECARR_NOMBRE = (form["MECARR_NOMBRE"] ?? string.Empty).ToString(),
+                    MECARR_MAXCRED = int.TryParse(form["MECARR_MAXCRED"], out var max) ? max :0,
+                    MECARR_MINCRED = int.TryParse(form["MECARR_MINCRED"], out var min) ? min :0
+                };
+
+                bool ok = CD_Carrera.Instancia.ModificarCarrera(c);
+                TempData["SuccessMessage"] = ok ? "Carrera actualizada correctamente." : "No se pudo actualizar la carrera.";
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = "Error: " + ex.Message;
+            }
+            return RedirectToAction("Lista");
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult EliminarMultiple(string ids)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(ids))
+                {
+                    TempData["ErrorMessage"] = "No se enviaron IDs.";
+                    return RedirectToAction("Lista");
+                }
+
+                var idList = ids.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries).Select(s => s.Trim()).ToList();
+                bool ok = CD_Carrera.Instancia.EliminarMultiple(idList);
+                TempData["SuccessMessage"] = ok ? "Registros eliminados correctamente." : "No se pudieron eliminar los registros.";
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = "Error: " + ex.Message;
+            }
+            return RedirectToAction("Lista");
+        }
+    }
+}

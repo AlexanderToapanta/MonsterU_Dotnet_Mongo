@@ -1,0 +1,101 @@
+﻿@{
+    ViewBag.Title = "cambiarcontrasena";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="password-change-container">
+
+    <div class="card shadow p-4" style="max-width: 600px; width:100%; margin:auto;">
+
+        <h3 class="text-center mb-3">Cambiar Contraseña</h3>
+
+        <!-- Mensajes -->
+        @if (ViewBag.Error != null)
+        {
+            <div class="alert alert-danger">@ViewBag.Error</div>
+        }
+
+        @if (TempData["SuccessMessage"] != null)
+        {
+            <div class="alert alert-success">@TempData["SuccessMessage"]</div>
+        }
+
+        <!-- Información del usuario -->
+        <div class="user-card mb-3 p-3" style="background:#e3f2fd; border-radius:5px;">
+            <div><strong>Usuario:</strong> @Session["Usuario"]</div>
+            <div>
+                <strong>Estado:</strong>
+                <span style="color:green;">ACTIVO</span>
+            </div>
+        </div>
+
+        <!-- FORMULARIO -->
+        @using (Html.BeginForm("CambiarContrasena", "ControladorUsuario", FormMethod.Post))
+        {
+            @Html.AntiForgeryToken()
+
+            <div class="mb-3">
+                <label for="claveActual" class="form-label fw-bold">Contraseña Actual *</label>
+                <input type="password" id="claveActual" name="claveActual" required
+                       class="form-control" placeholder="Ingrese su contraseña actual" />
+            </div>
+
+            <div class="mb-3">
+                <label for="nuevaClave" class="form-label fw-bold">Nueva Contraseña *</label>
+                <input type="password" id="nuevaClave" name="nuevaClave" required
+                       class="form-control" placeholder="Ingrese la nueva contraseña" />
+            </div>
+
+            <div class="mb-3">
+                <label for="confirmarClave" class="form-label fw-bold">Confirmar Contraseña *</label>
+                <input type="password" id="confirmarClave" name="confirmarClave" required
+                       class="form-control" placeholder="Confirme la nueva contraseña" />
+            </div>
+
+            <!-- Reglas -->
+            <div class="password-rules p-3 mb-3" style="background:#fff3cd; border-radius:5px;">
+                <h5>Requisitos de la contraseña:</h5>
+                <ul>
+                    <li>Mínimo 6 caracteres</li>
+                    <li>Usar letras mayúsculas, minúsculas y números</li>
+                    <li>No usar contraseñas obvias o repetitivas</li>
+                </ul>
+            </div>
+
+            <!-- Botones -->
+            <div class="d-flex justify-content-center gap-3">
+
+                <button type="submit" class="btn btn-success">
+                    <i class="bi bi-check"></i> Cambiar Contraseña
+                </button>
+
+                <a href="@Url.Action("Index", "Home")" class="btn btn-secondary">
+                    <i class="bi bi-x"></i> Cancelar
+                </a>
+
+                <button type="reset" class="btn btn-info">
+                    <i class="bi bi-arrow-repeat"></i> Limpiar
+                </button>
+
+            </div>
+        }
+
+    </div>
+</div>
+
+<style>
+    .password-change-container {
+        padding: 40px 20px;
+        display: flex;
+        justify-content: center;
+        min-height: 70vh;
+    }
+
+    .user-card {
+        border-left: 4px solid #2196F3;
+    }
+
+    .password-rules {
+        border-left: 4px solid #ffc107;
+    }
+</style>

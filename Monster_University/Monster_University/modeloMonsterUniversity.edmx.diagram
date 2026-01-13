@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="3.0" xmlns:edmx="http://schemas.microsoft.com/ado/2009/11/edmx">
+ <!-- EF Designer content (DO NOT EDIT MANUALLY BELOW HERE) -->
+  <edmx:Designer xmlns="http://schemas.microsoft.com/ado/2009/11/edmx">
+    <!-- Diagram content (shape and connector positions) -->
+    <edmx:Diagrams>
+      <Diagram DiagramId="58137753ae3443c98b4f8ca8d23f70e2" Name="Diagram1">
+        <EntityTypeShape EntityType="monster_universityModel.FEPAGO_PAGO" Width="1.5" PointX="5.25" PointY="5.375" IsExpanded="true" />
+        <EntityTypeShape EntityType="monster_universityModel.MEASIG_ASIGNA" Width="1.5" PointX="10.5" PointY="1" IsExpanded="true" />
+        <EntityTypeShape EntityType="monster_universityModel.MECARR_CARRERA" Width="1.5" PointX="0.75" PointY="5.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="monster_universityModel.MEEST_ESTUD" Width="1.5" PointX="3" PointY="4.875" IsExpanded="true" />
+        <EntityTypeShape EntityType="monster_universityModel.MEGRP_GRUPO" Width="1.5" PointX="12.75" PointY="5" IsExpanded="true" />
+        <EntityTypeShape EntityType="monster_universityModel.MEHOR_HORARIO" Width="1.5" PointX="15" PointY="5.625" IsExpanded="true" />
+        <EntityTypeShape EntityType="monster_universityModel.MEPERI_PERIOD" Width="1.5" PointX="10.5" PointY="14.25" IsExpanded="true" />
+        <EntityTypeShape EntityType="monster_universityModel.PEESC_ESTCIV" Width="1.5" PointX="8.25" PointY="1.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="monster_universityModel.PEPER_PERSON" Width="1.5" PointX="10.5" PointY="4.625" IsExpanded="true" />
+        <EntityTypeShape EntityType="monster_universityModel.PESEX_SEXO" Width="1.5" PointX="8.25" PointY="10.125" IsExpanded="true" />
+        <EntityTypeShape EntityType="monster_universityModel.XEAUD_AUDLOG" Width="1.5" PointX="10.5" PointY="10.25" IsExpanded="true" />
+        <EntityTypeShape EntityType="monster_universityModel.XEROL_ROL" Width="1.5" PointX="6" PointY="2.5" IsExpanded="true" />
+        <EntityTypeShape EntityType="monster_universityModel.XEUSU_USUAR" Width="1.5" PointX="8.25" PointY="5" IsExpanded="true" />
+        <AssociationConnector Association="monster_universityModel.FK_FEPAGO_P_FR_MEEST__MEEST_ES" ManuallyRouted="false" />
+        <AssociationConnector Association="monster_universityModel.FK_MEGRP_GR_MR_MEASIG_MEASIG_A" ManuallyRouted="false" />
+        <AssociationConnector Association="monster_universityModel.FK_MEEST_ES_MR_MECARR_MECARR_C" ManuallyRouted="false" />
+        <AssociationConnector Association="monster_universityModel.FK_MEEST_ES_XR_XEUSU__XEUSU_US" ManuallyRouted="false" />
+        <AssociationConnector Association="monster_universityModel.FK_XEUSU_US_XR_XEUSU__MEEST_ES" ManuallyRouted="false" />
+        <AssociationConnector Association="monster_universityModel.FK_MEGRP_GR_MR_MEPERI_MEPERI_P" ManuallyRouted="false" />
+        <AssociationConnector Association="monster_universityModel.FK_MEGRP_GR_MR_PEPER__PEPER_PE" ManuallyRouted="false" />
+        <AssociationConnector Association="monster_universityModel.FK_MEHOR_HO_MR_MEGRP__MEGRP_GR" ManuallyRouted="false" />
+        <AssociationConnector Association="monster_universityModel.FK_PEPER_PE_RE_PEESC__PEESC_ES" ManuallyRouted="false" />
+        <AssociationConnector Association="monster_universityModel.FK_PEPER_PE_PR_PESEX__PESEX_SE" ManuallyRouted="false" />
+        <AssociationConnector Association="monster_universityModel.FK_PEPER_PE_XR_XEUSU__XEUSU_US" ManuallyRouted="false" />
+        <AssociationConnector Association="monster_universityModel.FK_XEUSU_US_XR_XEUSU__PEPER_PE" ManuallyRouted="false" />
+        <AssociationConnector Association="monster_universityModel.FK_XEAUD_AU_XR_XEUSU__XEUSU_US" ManuallyRouted="false" />
+        <AssociationConnector Association="monster_universityModel.MR_MEASIG_MEASIG" ManuallyRouted="false" />
+        <AssociationConnector Association="monster_universityModel.MR_MEEST_MEGRP" ManuallyRouted="false" />
+        <AssociationConnector Association="monster_universityModel.XR_XEUSU_XEROL" ManuallyRouted="false" />
+      </Diagram>
+    </edmx:Diagrams>
+  </edmx:Designer>
+</edmx:Edmx>

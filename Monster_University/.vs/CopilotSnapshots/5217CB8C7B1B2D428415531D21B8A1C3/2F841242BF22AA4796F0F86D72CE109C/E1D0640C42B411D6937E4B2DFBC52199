@@ -1,0 +1,61 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Web.Mvc;
+
+namespace Monster_University.Controllers
+{
+    public class ControladorCarreraController : Controller
+    {
+        // GET: ControladorCarrera/Lista
+        public ActionResult Lista()
+        {
+            try
+            {
+                // Intentamos obtener la lista desde la capa de datos si existe; si no, devolvemos lista vacía
+                List<dynamic> lista = null;
+                // Si tiene una capa de datos, reemplace la línea anterior por la llamada correspondiente, por ejemplo:
+                // lista = CapaDatos.CD_Carrera.Instancia.ObtenerCarreras();
+
+                ViewBag.Carreras = lista ?? new List<dynamic>();
+                return View();
+            }
+            catch (Exception ex)
+            {
+                ViewBag.Error = ex.Message;
+                ViewBag.Carreras = new List<dynamic>();
+                return View();
+            }
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult Crear(FormCollection form)
+        {
+            // Implementar lógica para crear carrera usando la capa de datos
+            // Ejemplo (simulado):
+            // var nueva = new Carrera { MECARR_ID = form["MECARR_ID"], MECARR_NOMBRE = form["MECARR_NOMBRE"], ... };
+            // CapaDatos.CD_Carrera.Instancia.RegistrarCarrera(nueva);
+
+            TempData["SuccessMessage"] = "Carrera creada (simulado).";
+            return RedirectToAction("Lista");
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult Editar(FormCollection form)
+        {
+            // Implementar lógica para editar carrera usando la capa de datos
+            TempData["SuccessMessage"] = "Carrera editada (simulado).";
+            return RedirectToAction("Lista");
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult EliminarMultiple(string ids)
+        {
+            // Implementar lógica para eliminar múltiples registros por IDs
+            TempData["SuccessMessage"] = "Registros eliminados (simulado).";
+            return RedirectToAction("Lista");
+        }
+    }
+}

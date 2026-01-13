@@ -1,0 +1,412 @@
+﻿@{
+    Layout = null;
+
+    // Obtener datos directamente de la sesión
+    var usuario = Session["Usuario"] as CapaModelo.Usuario;
+    var opciones = Session["OpcionesUsuario"] as List<CapaModelo.Opcion>;
+
+    // Funciones auxiliares locales
+    bool TienePermiso(string codigoOpcion)
+    {
+        return opciones?.Exists(o => o.XEOPC_ID == codigoOpcion) ?? false;
+    }
+
+    bool TienePermisoEnGrupo(params string[] codigos)
+    {
+        if (opciones == null) return false;
+
+        foreach (var codigo in codigos)
+        {
+            if (opciones.Exists(o => o.XEOPC_ID == codigo))
+                return true;
+        }
+        return false;
+    }
+
+    bool TienePermisoPrefijo(string prefijo)
+    {
+        return opciones?.Exists(o => o.XEOPC_ID != null && o.XEOPC_ID.StartsWith(prefijo)) ?? false;
+    }
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@ViewBag.Title - Monster University</title>
+
+    <!-- Bootstrap 5 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+    <!-- Estilos personalizados -->
+    <style>
+        .layout-container {
+            display: grid;
+            grid-template-rows: 65px auto 60px;
+            min-height: 100vh;
+            width: 100%;
+        }
+
+        .layout-north {
+            grid-row: 1;
+            background-color: #f8f9fa;
+            border-bottom: 1px solid #dee2e6;
+            padding: 0.5rem 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: relative;
+            z-index: 10;
+        }
+
+        .layout-center {
+            grid-row: 2;
+            padding: 1rem;
+            overflow: auto;
+            background-image: url('https://www.bangor.ac.uk/sites/default/files/styles/16x9_1100w/public/2020-05/CB%202018%20May%20%2837%29.jpg?h=41ef3158&itok=zGs3cG5Q');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            background-repeat: no-repeat;
+            position: relative;
+        }
+
+            .layout-center::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0, 0, 0, 0.4);
+                z-index: 0;
+            }
+
+        .layout-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .layout-south {
+            grid-row: 3;
+            background-color: rgba(233,236,239,0.9);
+            border-top: 1px solid #dee2e6;
+            padding: 0.5rem 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            z-index: 10;
+        }
+
+        .app-header {
+            font-size: 1.6rem;
+            font-weight: bold;
+            color: #6C7BFF;
+        }
+
+        .menu-btn {
+            margin-left: 5px;
+            margin-right: 5px;
+        }
+
+        .user-menu {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .dropdown-menu {
+            min-width: 200px;
+        }
+
+        .opcion-inactiva {
+            color: #6c757d !important;
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+
+            .opcion-inactiva:hover {
+                background-color: #f8f9fa !important;
+            }
+    </style>
+
+    @RenderSection("styles", required: false)
+</head>
+<body>
+
+    <div class="layout-container">
+
+        <!-- ==================================== HEADER ====================================== -->
+        <div class="layout-north">
+
+            <!-- TÍTULO -->
+            <div class="app-header">MONSTER UNIVERSITY</div>
+
+            <!-- MENÚS DINÁMICOS SEGÚN ROL Y OPCIONES -->
+            <div class="user-menu">
+
+                <!-- HOME - Siempre visible si está logueado -->
+                @if (usuario != null)
+                {
+                    <a href="@Url.Action("Index", "Home")" class="btn btn-primary menu-btn">
+                        <i class="fas fa-home"></i> Home
+                    </a>
+                }
+
+                <!-- ACADÉMICO - Solo si tiene AC1, AC2 o ACA -->
+                @if (usuario != null && TienePermisoEnGrupo("AC1", "AC2", "ACA"))
+                {
+                    <div class="dropdown">
+                        <button class="btn btn-secondary dropdown-toggle menu-btn" type="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-graduation-cap"></i> Académico
+                        </button>
+                        <ul class="dropdown-menu">
+
+                            <!-- AC1 - Administrar Carreras -->
+                            @if (TienePermiso("AC1"))
+                            {
+                                <li>
+                                    <a href="@Url.Action("Lista", "ControladorCarrera")" class="dropdown-item">
+                                        <i class="fas fa-book"></i> Administrar Carreras
+                                    </a>
+                                </li>
+                            }
+
+                            <!-- AC2 - Reporte de Carreras -->
+                            @if (TienePermiso("AC2"))
+                            {
+                                <li>
+                                    <a href="@Url.Action("Reporte", "ControladorCarrera")" class="dropdown-item">
+                                        <i class="fas fa-chart-bar"></i> Reporte de Carreras
+                                    </a>
+                                </li>
+                            }
+
+                           
+
+                            <!-- Si no tiene opciones específicas -->
+                            @if (!TienePermisoEnGrupo("AC1", "AC2", "ACA"))
+                            {
+                                <li><a class="dropdown-item opcion-inactiva" href="#"><i class="fas fa-lock"></i> Sin permisos académicos</a></li>
+                            }
+                        </ul>
+                    </div>
+                }
+
+                <!-- PERSONAL - Solo si tiene PER -->
+                @if (usuario != null && TienePermiso("PER"))
+                {
+                    <div class="dropdown">
+                        <button class="btn btn-secondary dropdown-toggle menu-btn" type="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-users"></i> Personal
+                        </button>
+                        <ul class="dropdown-menu">
+                            <li>
+                                <a href="@Url.Action("crearpersonal", "ControladorPersonal")" class="dropdown-item">
+                                    <i class="fas fa-user-plus"></i> Crear Personal
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                }
+
+                <!-- FINANZAS - Solo si tiene FIN -->
+                @if (usuario != null && TienePermiso("FIN"))
+                {
+                    <div class="dropdown">
+                        <button class="btn btn-secondary dropdown-toggle menu-btn" type="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-money-bill"></i> Finanzas
+                        </button>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="#"><i class="fas fa-file-invoice-dollar"></i> Reportes</a></li>
+                            <li><a class="dropdown-item" href="#"><i class="fas fa-chart-line"></i> Estadísticas</a></li>
+                        </ul>
+                    </div>
+                }
+
+
+
+                <!-- SEGURIDAD - Solo si tiene SE1, SE2, SE3 o SEG -->
+                @if (usuario != null && TienePermisoEnGrupo("SE1", "SE2", "SE3", "SEG"))
+                {
+                    <div class="dropdown">
+                        <button class="btn btn-secondary dropdown-toggle menu-btn" type="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-shield-alt"></i> Seguridad
+                        </button>
+                        <ul class="dropdown-menu">
+
+                            <!-- SE1 - Administrar Roles -->
+                            @if (TienePermiso("SE1"))
+                            {
+                                <li>
+                                    <a href="@Url.Action("GestionarRol", "ControladorRol")" class="dropdown-item">
+                                        <i class="fas fa-user-tag"></i> Administrar Roles
+                                    </a>
+                                </li>
+                            }
+
+                            <!-- SE2 - Asignar Roles -->
+                            @if (TienePermiso("SE2"))
+                            {
+                                <li>
+                                    <a href="@Url.Action("AsignarRol", "ControladorRol")" class="dropdown-item">
+                                        <i class="fas fa-link"></i> Asignar Roles
+                                    </a>
+                                </li>
+                            }
+
+                            <!-- SE3 - Asignar Opciones a Roles -->
+                            @if (TienePermiso("SE3"))
+                            {
+                                <li>
+                                    <a href="@Url.Action("AsignarOpRol", "ControladorOpRoles")" class="dropdown-item">
+                                        <i class="fas fa-cogs"></i> Asignar Opciones a Roles
+                                    </a>
+                                </li>
+                            }
+
+
+
+                            <!-- Si no tiene opciones específicas -->
+                            @if (!TienePermisoEnGrupo("SE1", "SE2", "SE3", "SEG"))
+                            {
+                                <li><a class="dropdown-item opcion-inactiva" href="#"><i class="fas fa-lock"></i> Sin permisos de seguridad</a></li>
+                            }
+                        </ul>
+                    </div>
+                }
+
+                <!-- USUARIO LOGUEADO -->
+                @if (usuario != null)
+                {
+                    <div class="dropdown">
+                        <button class="btn btn-outline-primary dropdown-toggle menu-btn"
+                                data-bs-toggle="dropdown">
+                            <i class="fas fa-user"></i> @usuario.XEUSU_NOMBRE
+                        </button>
+                        <ul class="dropdown-menu">
+                            <li>
+                                <a href="@Url.Action("cambiarcontrasena", "ControladorUsuario")" class="dropdown-item">
+                                    <i class="fas fa-key"></i> Cambiar Contraseña
+                                </a>
+                            </li>
+
+                           
+
+                            <!-- Información del rol -->
+                            @if (!string.IsNullOrEmpty(usuario.XEROL_ID))
+                            {
+                                <li><a class="dropdown-item disabled text-muted"><i class="fas fa-user-tag"></i> Rol: @usuario.XEROL_ID</a></li>
+                            }
+
+                            <li><hr class="dropdown-divider" /></li>
+
+                            <li>
+                                @using (Html.BeginForm("Logout", "Login", FormMethod.Post, new { id = "logoutForm" }))
+                                {
+                                    @Html.AntiForgeryToken()
+                                    <a href="javascript:document.getElementById('logoutForm').submit();"
+                                       class="dropdown-item text-danger">
+                                        <i class="fas fa-sign-out-alt"></i> Cerrar sesión
+                                    </a>
+                                }
+                            </li>
+                        </ul>
+                    </div>
+                }
+                else
+                {
+                    <!-- LOGIN SI NO ESTÁ LOGUEADO -->
+                    <a href="@Url.Action("Login", "Login")" class="btn btn-primary menu-btn">
+                        <i class="fas fa-sign-in-alt"></i> Iniciar Sesión
+                    </a>
+                }
+            </div>
+        </div>
+
+        <!-- ==================================== CONTENIDO CENTRAL ====================================== -->
+        <div class="layout-center">
+            <div class="layout-content">
+                @RenderBody()
+            </div>
+        </div>
+
+        <!-- ==================================== FOOTER ====================================== -->
+        <div class="layout-south">
+            @if (IsSectionDefined("footer"))
+            {
+                @RenderSection("footer")
+            }
+            else
+            {
+                <div class="text-muted small">
+                    &copy; @DateTime.Now.Year - Monster University - Sistema de Gestión Académica
+                </div>
+                <div class="text-muted small">
+                    @if (usuario != null)
+                    {
+                        <span>Usuario: @usuario.XEUSU_NOMBRE</span>
+                        if (!string.IsNullOrEmpty(usuario.XEROL_ID))
+                        {
+                            <span> | Rol: @usuario.XEROL_ID</span>
+                        }
+                        <span> | Opciones activas: @(opciones?.Count ?? 0)</span>
+                        <span> | </span>
+                        
+                    }
+                    else
+                    {
+                        <span>Sesión no iniciada</span>
+                    }
+                </div>
+            }
+        </div>
+
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/js/all.min.js"></script>
+
+    <!-- Script para control de sesión -->
+    <script>
+        // Control de inactividad de sesión (30 minutos)
+        var sessionTimeout = 30 * 60 * 1000; // 30 minutos en milisegundos
+        var timeoutTimer;
+
+        function resetTimer() {
+            clearTimeout(timeoutTimer);
+            timeoutTimer = setTimeout(function() {
+                alert('Su sesión ha expirado por inactividad');
+                window.location.href = '@Url.Action("Login", "Login")';
+            }, sessionTimeout);
+        }
+
+        // Reiniciar timer con actividad del usuario
+        $(document).on('mousemove keypress click', resetTimer);
+
+        // Iniciar timer al cargar
+        $(document).ready(function() {
+            resetTimer();
+
+            // Mostrar tooltips
+            $('[data-bs-toggle="tooltip"]').tooltip();
+
+            // Control de permisos en tiempo real
+            $('.opcion-inactiva').click(function(e) {
+                e.preventDefault();
+                alert('No tiene permisos para acceder a esta opción');
+                return false;
+            });
+        });
+    </script>
+
+    @RenderSection("scripts", required: false)
+
+</body>
+</html>
