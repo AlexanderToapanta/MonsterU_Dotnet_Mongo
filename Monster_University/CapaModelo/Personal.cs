@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace CapaModelo
 {
-    public class Persona
+    public class Personal
     {
         public string id { get; set; }
         public string codigo { get; set; }

@@ -9,11 +9,11 @@ namespace CapaDatos
     public class CD_Persona
     {
         public static CD_Persona _instancia = null;
-        private IMongoCollection<Persona> _personasCollection;
+        private IMongoCollection<Personal> _personasCollection;
 
         private CD_Persona()
         {
-            _personasCollection = Conexion.GetCollection<Persona>("personas");
+            _personasCollection = Conexion.GetCollection<Personal>("personas");
         }
 
         public static CD_Persona Instancia
@@ -28,11 +28,11 @@ namespace CapaDatos
             }
         }
 
-        public List<Persona> ObtenerPersonas()
+        public List<Personal> ObtenerPersonas()
         {
             try
             {
-                var filter = Builders<Persona>.Filter.Empty;
+                var filter = Builders<Personal>.Filter.Empty;
                 var personas = _personasCollection.Find(filter).ToList();
                 return personas;
             }
@@ -43,11 +43,11 @@ namespace CapaDatos
             }
         }
 
-        public Persona ObtenerDetallePersona(string id)
+        public Personal ObtenerDetallePersona(string id)
         {
             try
             {
-                var filter = Builders<Persona>.Filter.Eq(p => p.id, id);
+                var filter = Builders<Personal>.Filter.Eq(p => p.id, id);
                 var persona = _personasCollection.Find(filter).FirstOrDefault();
                 return persona;
             }
@@ -58,11 +58,11 @@ namespace CapaDatos
             }
         }
 
-        public Persona ObtenerPersonaPorCodigo(string codigo)
+        public Personal ObtenerPersonaPorCodigo(string codigo)
         {
             try
             {
-                var filter = Builders<Persona>.Filter.Eq(p => p.codigo, codigo);
+                var filter = Builders<Personal>.Filter.Eq(p => p.codigo, codigo);
                 var persona = _personasCollection.Find(filter).FirstOrDefault();
                 return persona;
             }
@@ -73,11 +73,11 @@ namespace CapaDatos
             }
         }
 
-        public Persona ObtenerPersonaPorDocumento(string documento)
+        public Personal ObtenerPersonaPorDocumento(string documento)
         {
             try
             {
-                var filter = Builders<Persona>.Filter.Eq(p => p.documento, documento);
+                var filter = Builders<Personal>.Filter.Eq(p => p.documento, documento);
                 var persona = _personasCollection.Find(filter).FirstOrDefault();
                 return persona;
             }
@@ -88,11 +88,11 @@ namespace CapaDatos
             }
         }
 
-        public Persona ObtenerPersonaPorUsername(string username)
+        public Personal ObtenerPersonaPorUsername(string username)
         {
             try
             {
-                var filter = Builders<Persona>.Filter.Eq(p => p.username, username);
+                var filter = Builders<Personal>.Filter.Eq(p => p.username, username);
                 var persona = _personasCollection.Find(filter).FirstOrDefault();
                 return persona;
             }
@@ -103,11 +103,11 @@ namespace CapaDatos
             }
         }
 
-        public Persona ObtenerPersonaPorEmail(string email)
+        public Personal ObtenerPersonaPorEmail(string email)
         {
             try
             {
-                var filter = Builders<Persona>.Filter.Eq(p => p.email, email);
+                var filter = Builders<Personal>.Filter.Eq(p => p.email, email);
                 var persona = _personasCollection.Find(filter).FirstOrDefault();
                 return persona;
             }
@@ -118,7 +118,7 @@ namespace CapaDatos
             }
         }
 
-        public bool RegistrarPersona(Persona oPersona)
+        public bool RegistrarPersona(Personal oPersona)
         {
             try
             {
@@ -148,12 +148,12 @@ namespace CapaDatos
             }
         }
 
-        public bool ModificarPersona(Persona oPersona)
+        public bool ModificarPersona(Personal oPersona)
         {
             try
             {
-                var filter = Builders<Persona>.Filter.Eq(p => p.id, oPersona.id);
-                var update = Builders<Persona>.Update
+                var filter = Builders<Personal>.Filter.Eq(p => p.id, oPersona.id);
+                var update = Builders<Personal>.Update
                     .Set(p => p.codigo, oPersona.codigo)
                     .Set(p => p.peperTipo, oPersona.peperTipo)
                     .Set(p => p.documento, oPersona.documento)
@@ -184,7 +184,7 @@ namespace CapaDatos
         {
             try
             {
-                var filter = Builders<Persona>.Filter.Eq(p => p.id, id);
+                var filter = Builders<Personal>.Filter.Eq(p => p.id, id);
                 var result = _personasCollection.DeleteOne(filter);
                 return result.DeletedCount > 0;
             }
@@ -195,43 +195,43 @@ namespace CapaDatos
             }
         }
 
-        public List<Persona> BuscarPersona(string criterio, string valor)
+        public List<Personal> BuscarPersona(string criterio, string valor)
         {
             try
             {
-                FilterDefinition<Persona> filter;
+                FilterDefinition<Personal> filter;
 
                 switch (criterio.ToUpper())
                 {
                     case "CEDULA":
-                        filter = Builders<Persona>.Filter.Regex(p => p.documento, new MongoDB.Bson.BsonRegularExpression(valor, "i"));
+                        filter = Builders<Personal>.Filter.Regex(p => p.documento, new MongoDB.Bson.BsonRegularExpression(valor, "i"));
                         break;
                     case "NOMBRE":
-                        filter = Builders<Persona>.Filter.Or(
-                            Builders<Persona>.Filter.Regex(p => p.nombres, new MongoDB.Bson.BsonRegularExpression(valor, "i")),
-                            Builders<Persona>.Filter.Regex(p => p.apellidos, new MongoDB.Bson.BsonRegularExpression(valor, "i"))
+                        filter = Builders<Personal>.Filter.Or(
+                            Builders<Personal>.Filter.Regex(p => p.nombres, new MongoDB.Bson.BsonRegularExpression(valor, "i")),
+                            Builders<Personal>.Filter.Regex(p => p.apellidos, new MongoDB.Bson.BsonRegularExpression(valor, "i"))
                         );
                         break;
                     case "EMAIL":
-                        filter = Builders<Persona>.Filter.Regex(p => p.email, new MongoDB.Bson.BsonRegularExpression(valor, "i"));
+                        filter = Builders<Personal>.Filter.Regex(p => p.email, new MongoDB.Bson.BsonRegularExpression(valor, "i"));
                         break;
                     case "TIPO":
-                        filter = Builders<Persona>.Filter.Eq(p => p.peperTipo, valor);
+                        filter = Builders<Personal>.Filter.Eq(p => p.peperTipo, valor);
                         break;
                     case "SEXO":
-                        filter = Builders<Persona>.Filter.Eq(p => p.sexo, valor);
+                        filter = Builders<Personal>.Filter.Eq(p => p.sexo, valor);
                         break;
                     case "ESTADO CIVIL":
-                        filter = Builders<Persona>.Filter.Eq(p => p.estado_civil, valor);
+                        filter = Builders<Personal>.Filter.Eq(p => p.estado_civil, valor);
                         break;
                     case "ESTADO":
-                        filter = Builders<Persona>.Filter.Eq(p => p.estado, valor);
+                        filter = Builders<Personal>.Filter.Eq(p => p.estado, valor);
                         break;
                     case "CODIGO":
-                        filter = Builders<Persona>.Filter.Eq(p => p.codigo, valor);
+                        filter = Builders<Personal>.Filter.Eq(p => p.codigo, valor);
                         break;
                     default:
-                        filter = Builders<Persona>.Filter.Regex(p => p.documento, new MongoDB.Bson.BsonRegularExpression(valor, "i"));
+                        filter = Builders<Personal>.Filter.Regex(p => p.documento, new MongoDB.Bson.BsonRegularExpression(valor, "i"));
                         break;
                 }
 
@@ -249,17 +249,17 @@ namespace CapaDatos
         {
             try
             {
-                FilterDefinition<Persona> filter;
+                FilterDefinition<Personal> filter;
 
                 if (string.IsNullOrEmpty(idExcluir))
                 {
-                    filter = Builders<Persona>.Filter.Eq(p => p.documento, documento);
+                    filter = Builders<Personal>.Filter.Eq(p => p.documento, documento);
                 }
                 else
                 {
-                    filter = Builders<Persona>.Filter.And(
-                        Builders<Persona>.Filter.Eq(p => p.documento, documento),
-                        Builders<Persona>.Filter.Ne(p => p.id, idExcluir)
+                    filter = Builders<Personal>.Filter.And(
+                        Builders<Personal>.Filter.Eq(p => p.documento, documento),
+                        Builders<Personal>.Filter.Ne(p => p.id, idExcluir)
                     );
                 }
 
@@ -277,17 +277,17 @@ namespace CapaDatos
         {
             try
             {
-                FilterDefinition<Persona> filter;
+                FilterDefinition<Personal> filter;
 
                 if (string.IsNullOrEmpty(idExcluir))
                 {
-                    filter = Builders<Persona>.Filter.Eq(p => p.email, email);
+                    filter = Builders<Personal>.Filter.Eq(p => p.email, email);
                 }
                 else
                 {
-                    filter = Builders<Persona>.Filter.And(
-                        Builders<Persona>.Filter.Eq(p => p.email, email),
-                        Builders<Persona>.Filter.Ne(p => p.id, idExcluir)
+                    filter = Builders<Personal>.Filter.And(
+                        Builders<Personal>.Filter.Eq(p => p.email, email),
+                        Builders<Personal>.Filter.Ne(p => p.id, idExcluir)
                     );
                 }
 
@@ -305,17 +305,17 @@ namespace CapaDatos
         {
             try
             {
-                FilterDefinition<Persona> filter;
+                FilterDefinition<Personal> filter;
 
                 if (string.IsNullOrEmpty(idExcluir))
                 {
-                    filter = Builders<Persona>.Filter.Eq(p => p.username, username);
+                    filter = Builders<Personal>.Filter.Eq(p => p.username, username);
                 }
                 else
                 {
-                    filter = Builders<Persona>.Filter.And(
-                        Builders<Persona>.Filter.Eq(p => p.username, username),
-                        Builders<Persona>.Filter.Ne(p => p.id, idExcluir)
+                    filter = Builders<Personal>.Filter.And(
+                        Builders<Personal>.Filter.Eq(p => p.username, username),
+                        Builders<Personal>.Filter.Ne(p => p.id, idExcluir)
                     );
                 }
 
@@ -333,17 +333,17 @@ namespace CapaDatos
         {
             try
             {
-                FilterDefinition<Persona> filter;
+                FilterDefinition<Personal> filter;
 
                 if (string.IsNullOrEmpty(idExcluir))
                 {
-                    filter = Builders<Persona>.Filter.Eq(p => p.codigo, codigo);
+                    filter = Builders<Personal>.Filter.Eq(p => p.codigo, codigo);
                 }
                 else
                 {
-                    filter = Builders<Persona>.Filter.And(
-                        Builders<Persona>.Filter.Eq(p => p.codigo, codigo),
-                        Builders<Persona>.Filter.Ne(p => p.id, idExcluir)
+                    filter = Builders<Personal>.Filter.And(
+                        Builders<Personal>.Filter.Eq(p => p.codigo, codigo),
+                        Builders<Personal>.Filter.Ne(p => p.id, idExcluir)
                     );
                 }
 
@@ -361,7 +361,7 @@ namespace CapaDatos
         {
             try
             {
-                var tipos = _personasCollection.Distinct<string>("peperTipo", FilterDefinition<Persona>.Empty).ToList();
+                var tipos = _personasCollection.Distinct<string>("peperTipo", FilterDefinition<Personal>.Empty).ToList();
                 return tipos;
             }
             catch (Exception ex)
@@ -375,7 +375,7 @@ namespace CapaDatos
         {
             try
             {
-                var estados = _personasCollection.Distinct<string>("estado", FilterDefinition<Persona>.Empty).ToList();
+                var estados = _personasCollection.Distinct<string>("estado", FilterDefinition<Personal>.Empty).ToList();
                 return estados;
             }
             catch (Exception ex)
@@ -389,7 +389,7 @@ namespace CapaDatos
         {
             try
             {
-                var sexos = _personasCollection.Distinct<string>("sexo", FilterDefinition<Persona>.Empty).ToList();
+                var sexos = _personasCollection.Distinct<string>("sexo", FilterDefinition<Personal>.Empty).ToList();
                 return sexos;
             }
             catch (Exception ex)
@@ -403,7 +403,7 @@ namespace CapaDatos
         {
             try
             {
-                var estadosCiviles = _personasCollection.Distinct<string>("estado_civil", FilterDefinition<Persona>.Empty).ToList();
+                var estadosCiviles = _personasCollection.Distinct<string>("estado_civil", FilterDefinition<Personal>.Empty).ToList();
                 return estadosCiviles;
             }
             catch (Exception ex)
@@ -413,11 +413,11 @@ namespace CapaDatos
             }
         }
 
-        public List<Persona> ObtenerPersonasPorEstado(string estado)
+        public List<Personal> ObtenerPersonasPorEstado(string estado)
         {
             try
             {
-                var filter = Builders<Persona>.Filter.Eq(p => p.estado, estado);
+                var filter = Builders<Personal>.Filter.Eq(p => p.estado, estado);
                 var personas = _personasCollection.Find(filter).ToList();
                 return personas;
             }
@@ -428,11 +428,11 @@ namespace CapaDatos
             }
         }
 
-        public List<Persona> ObtenerPersonasPorTipo(string tipo)
+        public List<Personal> ObtenerPersonasPorTipo(string tipo)
         {
             try
             {
-                var filter = Builders<Persona>.Filter.Eq(p => p.peperTipo, tipo);
+                var filter = Builders<Personal>.Filter.Eq(p => p.peperTipo, tipo);
                 var personas = _personasCollection.Find(filter).ToList();
                 return personas;
             }
