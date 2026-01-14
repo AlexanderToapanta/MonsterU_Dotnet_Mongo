@@ -2,13 +2,13 @@
     Layout = null;
 
     // Obtener datos directamente de la sesión
-    var usuario = Session["Usuario"] as CapaModelo.Usuario;
-    var opciones = Session["OpcionesUsuario"] as List<CapaModelo.Opcion>;
+    var usuario = Session["Usuario"] as CapaModelo.Personal;
+    var opciones = Session["OpcionesUsuario"] as List<CapaModelo.Configuracion>;
 
     // Funciones auxiliares locales
     bool TienePermiso(string codigoOpcion)
     {
-        return opciones?.Exists(o => o.XEOPC_ID == codigoOpcion) ?? false;
+        return opciones?.Exists(o => o.Id == codigoOpcion) ?? false;
     }
 
     bool TienePermisoEnGrupo(params string[] codigos)
@@ -17,7 +17,7 @@
 
         foreach (var codigo in codigos)
         {
-            if (opciones.Exists(o => o.XEOPC_ID == codigo))
+            if (opciones.Exists(o => o.Id == codigo))
                 return true;
         }
         return false;
@@ -25,7 +25,7 @@
 
     bool TienePermisoPrefijo(string prefijo)
     {
-        return opciones?.Exists(o => o.XEOPC_ID != null && o.XEOPC_ID.StartsWith(prefijo)) ?? false;
+        return opciones?.Exists(o => o.Id != null && o.Id.StartsWith(prefijo)) ?? false;
     }
 }
 
@@ -286,7 +286,7 @@
                     <div class="dropdown">
                         <button class="btn btn-outline-primary dropdown-toggle menu-btn"
                                 data-bs-toggle="dropdown">
-                            <i class="fas fa-user"></i> @usuario.XEUSU_NOMBRE
+                            <i class="fas fa-user"></i> @usuario.username
                         </button>
                         <ul class="dropdown-menu">
                             <li>
@@ -298,9 +298,9 @@
                            
 
                             <!-- Información del rol -->
-                            @if (!string.IsNullOrEmpty(usuario.XEROL_ID))
+                            @if (!string.IsNullOrEmpty(usuario.codigo))
                             {
-                                <li><a class="dropdown-item disabled text-muted"><i class="fas fa-user-tag"></i> Rol: @usuario.XEROL_ID</a></li>
+                                <li><a class="dropdown-item disabled text-muted"><i class="fas fa-user-tag"></i> Rol: @usuario.codigo</a></li>
                             }
 
                             <li><hr class="dropdown-divider" /></li>
@@ -349,10 +349,10 @@
                 <div class="text-muted small">
                     @if (usuario != null)
                     {
-                        <span>Usuario: @usuario.XEUSU_NOMBRE</span>
-                        if (!string.IsNullOrEmpty(usuario.XEROL_ID))
+                        <span>Usuario: @usuario.username</span>
+                        if (!string.IsNullOrEmpty(usuario.codigo))
                         {
-                            <span> | Rol: @usuario.XEROL_ID</span>
+                            <span> | Rol: @usuario.codigo</span>
                         }
                         <span> | Opciones activas: @(opciones?.Count ?? 0)</span>
                         <span> | </span>

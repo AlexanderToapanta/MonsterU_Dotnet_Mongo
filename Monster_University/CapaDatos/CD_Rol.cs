@@ -35,12 +35,12 @@ namespace CapaDatos
             {
                 var filter = Builders<Rol>.Filter.Empty;
                 var roles = _rolesCollection.Find(filter).ToList();
-                return roles;
+                return roles ?? new List<Rol>();
             }
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine("Error en ObtenerRoles: " + ex.Message);
-                return null;
+                return new List<Rol>();
             }
         }
 
@@ -130,8 +130,8 @@ namespace CapaDatos
             try
             {
                 // Verificar si hay usuarios con este rol
-                var personasCollection = Conexion.GetCollection<Persona>("personas");
-                var filterPersonas = Builders<Persona>.Filter.Eq("rol.codigo", codigo);
+                var personasCollection = Conexion.GetCollection<Personal>("personas");
+                var filterPersonas = Builders<Personal>.Filter.Eq("rol.codigo", codigo);
 
                 var countUsuarios = personasCollection.CountDocuments(filterPersonas);
 
@@ -184,12 +184,12 @@ namespace CapaDatos
                 }
 
                 var roles = _rolesCollection.Find(filter).ToList();
-                return roles;
+                return roles ?? new List<Rol>();
             }
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine("Error en BuscarRol: " + ex.Message);
-                return null;
+                return new List<Rol>();
             }
         }
 
@@ -343,12 +343,12 @@ namespace CapaDatos
             try
             {
                 var estados = _rolesCollection.Distinct<string>("estado", FilterDefinition<Rol>.Empty).ToList();
-                return estados;
+                return estados ?? new List<string>();
             }
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine("Error en ObtenerEstadosRol: " + ex.Message);
-                return null;
+                return new List<string>();
             }
         }
 
@@ -358,12 +358,12 @@ namespace CapaDatos
             {
                 var filter = Builders<Rol>.Filter.Eq(r => r.estado, estado);
                 var roles = _rolesCollection.Find(filter).ToList();
-                return roles;
+                return roles ?? new List<Rol>();
             }
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine("Error en ObtenerRolesPorEstado: " + ex.Message);
-                return null;
+                return new List<Rol>();
             }
         }
 
@@ -373,12 +373,12 @@ namespace CapaDatos
             {
                 var filter = Builders<Rol>.Filter.AnyEq(r => r.opciones_permitidas, codigoOpcion);
                 var roles = _rolesCollection.Find(filter).ToList();
-                return roles;
+                return roles ?? new List<Rol>();
             }
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine("Error en ObtenerRolesConOpcion: " + ex.Message);
-                return null;
+                return new List<Rol>();
             }
         }
 
@@ -388,12 +388,12 @@ namespace CapaDatos
             {
                 var filter = Builders<Rol>.Filter.Eq(r => r.estado, "ACTIVO");
                 var roles = _rolesCollection.Find(filter).ToList();
-                return roles;
+                return roles ?? new List<Rol>();
             }
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine("Error en ObtenerRolesActivos: " + ex.Message);
-                return null;
+                return new List<Rol>();
             }
         }
     }

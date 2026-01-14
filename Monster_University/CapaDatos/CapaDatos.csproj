@@ -147,12 +147,9 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CD_Carrera.cs" />
-    <Compile Include="CD_Opcion.cs" />
-    <Compile Include="CD_OpcionRoles.cs" />
+    <Compile Include="CD_Configuracion.cs" />
     <Compile Include="CD_Personal.cs" />
     <Compile Include="CD_Rol.cs" />
-    <Compile Include="CD_Sexo.cs" />
     <Compile Include="Conexion.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

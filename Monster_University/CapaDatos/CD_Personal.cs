@@ -6,23 +6,23 @@ using System.Linq;
 
 namespace CapaDatos
 {
-    public class CD_Persona
+    public class CD_Personal
     {
-        public static CD_Persona _instancia = null;
+        public static CD_Personal _instancia = null;
         private IMongoCollection<Personal> _personasCollection;
 
-        private CD_Persona()
+        private CD_Personal()
         {
             _personasCollection = Conexion.GetCollection<Personal>("personas");
         }
 
-        public static CD_Persona Instancia
+        public static CD_Personal Instancia
         {
             get
             {
                 if (_instancia == null)
                 {
-                    _instancia = new CD_Persona();
+                    _instancia = new CD_Personal();
                 }
                 return _instancia;
             }
@@ -443,4 +443,5 @@ namespace CapaDatos
             }
         }
     }
+
 }
