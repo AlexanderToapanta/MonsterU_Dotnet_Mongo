@@ -3,6 +3,10 @@
   "WorkspaceRootPath": "C:\\Users\\Usuario\\Documents\\MonsterUniversityDotnet\\MonsterUDotnet\\Monster_University\\",
   "Documents": [
     {
+      "AbsoluteMoniker": "D:0:0:{0ACDA5ED-A0F5-43E2-9DA5-E0EE34936451}|Monster_University\\Monster_University.csproj|C:\\Users\\Usuario\\Documents\\MonsterUniversityDotnet\\MonsterUDotnet\\Monster_University\\monster_university\\views\\controladorrol\\gestionarrol.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{0ACDA5ED-A0F5-43E2-9DA5-E0EE34936451}|Monster_University\\Monster_University.csproj|solutionrelative:monster_university\\views\\controladorrol\\gestionarrol.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
       "AbsoluteMoniker": "D:0:0:{0ACDA5ED-A0F5-43E2-9DA5-E0EE34936451}|Monster_University\\Monster_University.csproj|c:\\users\\usuario\\documents\\monsteruniversitydotnet\\monsterudotnet\\monster_university\\monster_university\\views\\login\\login.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
       "RelativeMoniker": "D:0:0:{0ACDA5ED-A0F5-43E2-9DA5-E0EE34936451}|Monster_University\\Monster_University.csproj|solutionrelative:monster_university\\views\\login\\login.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
     },
@@ -43,10 +47,6 @@
       "RelativeMoniker": "D:0:0:{0ACDA5ED-A0F5-43E2-9DA5-E0EE34936451}|Monster_University\\Monster_University.csproj|solutionrelative:monster_university\\controllers\\controladorpersonalcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{0ACDA5ED-A0F5-43E2-9DA5-E0EE34936451}|Monster_University\\Monster_University.csproj|C:\\Users\\Usuario\\Documents\\MonsterUniversityDotnet\\MonsterUDotnet\\Monster_University\\monster_university\\views\\controladorrol\\gestionarrol.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
-      "RelativeMoniker": "D:0:0:{0ACDA5ED-A0F5-43E2-9DA5-E0EE34936451}|Monster_University\\Monster_University.csproj|solutionrelative:monster_university\\views\\controladorrol\\gestionarrol.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
-    },
-    {
       "AbsoluteMoniker": "D:0:0:{0ACDA5ED-A0F5-43E2-9DA5-E0EE34936451}|Monster_University\\Monster_University.csproj|C:\\Users\\Usuario\\Documents\\MonsterUniversityDotnet\\MonsterUDotnet\\Monster_University\\monster_university\\views\\home\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
       "RelativeMoniker": "D:0:0:{0ACDA5ED-A0F5-43E2-9DA5-E0EE34936451}|Monster_University\\Monster_University.csproj|solutionrelative:monster_university\\views\\home\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
     },
@@ -78,7 +78,7 @@
       "DocumentGroups": [
         {
           "DockedHeight": 305,
-          "SelectedChildIndex": 17,
+          "SelectedChildIndex": 6,
           "Children": [
             {
               "$type": "Bookmark",
@@ -86,7 +86,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 6,
+              "DocumentIndex": 7,
               "Title": "AsignarOpRol.cshtml",
               "DocumentMoniker": "C:\\Users\\Usuario\\Documents\\MonsterUniversityDotnet\\MonsterUDotnet\\Monster_University\\Monster_University\\Views\\ControladorOpRoles\\AsignarOpRol.cshtml",
               "RelativeDocumentMoniker": "Monster_University\\Views\\ControladorOpRoles\\AsignarOpRol.cshtml",
@@ -98,7 +98,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 7,
+              "DocumentIndex": 8,
               "Title": "AsignarRol.cshtml",
               "DocumentMoniker": "C:\\Users\\Usuario\\Documents\\MonsterUniversityDotnet\\MonsterUDotnet\\Monster_University\\Monster_University\\Views\\ControladorRol\\AsignarRol.cshtml",
               "RelativeDocumentMoniker": "Monster_University\\Views\\ControladorRol\\AsignarRol.cshtml",
@@ -122,7 +122,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 2,
+              "DocumentIndex": 3,
               "Title": "_Layout.cshtml",
               "DocumentMoniker": "C:\\Users\\Usuario\\Documents\\MonsterUniversityDotnet\\MonsterUDotnet\\Monster_University\\Monster_University\\Views\\Shared\\_Layout.cshtml",
               "RelativeDocumentMoniker": "Monster_University\\Views\\Shared\\_Layout.cshtml",
@@ -134,7 +134,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 1,
+              "DocumentIndex": 2,
               "Title": "LoginController.cs",
               "DocumentMoniker": "C:\\Users\\Usuario\\Documents\\MonsterUniversityDotnet\\MonsterUDotnet\\Monster_University\\Monster_University\\Controllers\\LoginController.cs",
               "RelativeDocumentMoniker": "Monster_University\\Controllers\\LoginController.cs",
@@ -146,15 +146,16 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 10,
+              "DocumentIndex": 0,
               "Title": "GestionarRol.cshtml",
               "DocumentMoniker": "C:\\Users\\Usuario\\Documents\\MonsterUniversityDotnet\\MonsterUDotnet\\Monster_University\\Monster_University\\Views\\ControladorRol\\GestionarRol.cshtml",
               "RelativeDocumentMoniker": "Monster_University\\Views\\ControladorRol\\GestionarRol.cshtml",
               "ToolTip": "C:\\Users\\Usuario\\Documents\\MonsterUniversityDotnet\\MonsterUDotnet\\Monster_University\\Monster_University\\Views\\ControladorRol\\GestionarRol.cshtml",
               "RelativeToolTip": "Monster_University\\Views\\ControladorRol\\GestionarRol.cshtml",
-              "ViewState": "AgIAAFMBAAAAAAAAAAAcwGcBAAABAAAAAAAAAA==",
+              "ViewState": "AgIAAE0BAAAAAAAAAAAowGcBAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
-              "WhenOpened": "2025-12-17T15:21:04.599Z"
+              "WhenOpened": "2025-12-17T15:21:04.599Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
@@ -170,7 +171,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 4,
+              "DocumentIndex": 5,
               "Title": "ControladorRolController.cs",
               "DocumentMoniker": "C:\\Users\\Usuario\\Documents\\MonsterUniversityDotnet\\MonsterUDotnet\\Monster_University\\Monster_University\\Controllers\\ControladorRolController.cs",
               "RelativeDocumentMoniker": "Monster_University\\Controllers\\ControladorRolController.cs",
@@ -182,7 +183,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 3,
+              "DocumentIndex": 4,
               "Title": "CD_Rol.cs",
               "DocumentMoniker": "C:\\Users\\Usuario\\Documents\\MonsterUniversityDotnet\\MonsterUDotnet\\Monster_University\\CapaDatos\\CD_Rol.cs",
               "RelativeDocumentMoniker": "CapaDatos\\CD_Rol.cs",
@@ -218,7 +219,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 9,
+              "DocumentIndex": 10,
               "Title": "ControladorPersonalController.cs",
               "DocumentMoniker": "C:\\Users\\Usuario\\Documents\\MonsterUniversityDotnet\\MonsterUDotnet\\Monster_University\\Monster_University\\Controllers\\ControladorPersonalController.cs",
               "RelativeDocumentMoniker": "Monster_University\\Controllers\\ControladorPersonalController.cs",
@@ -242,7 +243,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 5,
+              "DocumentIndex": 6,
               "Title": "crearpersonal.cshtml",
               "DocumentMoniker": "C:\\Users\\Usuario\\Documents\\MonsterUniversityDotnet\\MonsterUDotnet\\Monster_University\\Monster_University\\Views\\ControladorPersonal\\crearpersonal.cshtml",
               "RelativeDocumentMoniker": "Monster_University\\Views\\ControladorPersonal\\crearpersonal.cshtml",
@@ -266,7 +267,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 8,
+              "DocumentIndex": 9,
               "Title": "CD_Usuario.cs",
               "DocumentMoniker": "C:\\Users\\Usuario\\Documents\\MonsterUniversityDotnet\\MonsterUDotnet\\Monster_University\\CapaDatos\\CD_Usuario.cs",
               "RelativeDocumentMoniker": "CapaDatos\\CD_Usuario.cs",
@@ -278,7 +279,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 0,
+              "DocumentIndex": 1,
               "Title": "Login.cshtml",
               "DocumentMoniker": "C:\\Users\\Usuario\\Documents\\MonsterUniversityDotnet\\MonsterUDotnet\\Monster_University\\Monster_University\\Views\\Login\\Login.cshtml",
               "RelativeDocumentMoniker": "Monster_University\\Views\\Login\\Login.cshtml",

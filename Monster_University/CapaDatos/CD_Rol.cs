@@ -1,20 +1,20 @@
 ﻿using CapaModelo;
+using MongoDB.Driver;
+using MongoDB.Bson;
 using System;
 using System.Collections.Generic;
-using System.Data;
-using System.Data.SqlClient;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace CapaDatos
 {
     public class CD_Rol
     {
         public static CD_Rol _instancia = null;
+        private IMongoCollection<Rol> _rolesCollection;
 
         private CD_Rol()
         {
+            _rolesCollection = Conexion.GetCollection<Rol>("roles");
         }
 
         public static CD_Rol Instancia
@@ -31,372 +31,370 @@ namespace CapaDatos
 
         public List<Rol> ObtenerRoles()
         {
-            List<Rol> rptListaRoles = new List<Rol>();
-            using (SqlConnection oConexion = new SqlConnection(Conexion.CN))
+            try
             {
-                string query = @"SELECT XEROL_ID, XEROL_NOMBRE, XEROL_DESCRI 
-                                   FROM XEROL_ROL 
-                                   ORDER BY XEROL_ID";
-
-                SqlCommand cmd = new SqlCommand(query, oConexion);
-
-                try
-                {
-                    oConexion.Open();
-                    SqlDataReader dr = cmd.ExecuteReader();
-
-                    while (dr.Read())
-                    {
-                        rptListaRoles.Add(new Rol()
-                        {
-                            XEROL_ID = dr["XEROL_ID"]?.ToString(),
-                            XEROL_NOMBRE = dr["XEROL_NOMBRE"]?.ToString(),
-                            XEROL_DESCRI = dr["XEROL_DESCRI"]?.ToString()
-                        });
-                    }
-                    dr.Close();
-                    return rptListaRoles;
-                }
-                catch (Exception ex)
-                {
-                    rptListaRoles = null;
-                    System.Diagnostics.Debug.WriteLine("Error en ObtenerRoles: " + ex.Message);
-                    return rptListaRoles;
-                }
+                var filter = Builders<Rol>.Filter.Empty;
+                var roles = _rolesCollection.Find(filter).ToList();
+                return roles;
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine("Error en ObtenerRoles: " + ex.Message);
+                return null;
             }
         }
 
-        public Rol ObtenerDetalleRol(string XEROL_ID)
+        public Rol ObtenerDetalleRol(string codigo)
         {
-            Rol rptRol = new Rol();
-            using (SqlConnection oConexion = new SqlConnection(Conexion.CN))
+            try
             {
-                string query = @"SELECT XEROL_ID, XEROL_NOMBRE, XEROL_DESCRI
-                                   FROM XEROL_ROL 
-                                   WHERE XEROL_ID = @XEROL_ID";
+                var filter = Builders<Rol>.Filter.Eq(r => r.codigo, codigo);
+                var rol = _rolesCollection.Find(filter).FirstOrDefault();
+                return rol;
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine("Error en ObtenerDetalleRol: " + ex.Message);
+                return null;
+            }
+        }
 
-                SqlCommand cmd = new SqlCommand(query, oConexion);
-                cmd.Parameters.AddWithValue("@XEROL_ID", XEROL_ID);
-
-                try
-                {
-                    oConexion.Open();
-                    SqlDataReader dr = cmd.ExecuteReader();
-
-                    if (dr.Read())
-                    {
-                        rptRol = new Rol()
-                        {
-                            XEROL_ID = dr["XEROL_ID"]?.ToString(),
-                            XEROL_NOMBRE = dr["XEROL_NOMBRE"]?.ToString(),
-                            XEROL_DESCRI = dr["XEROL_DESCRI"]?.ToString()
-                        };
-                    }
-                    else
-                    {
-                        rptRol = null;
-                    }
-                    dr.Close();
-                    return rptRol;
-                }
-                catch (Exception ex)
-                {
-                    rptRol = null;
-                    System.Diagnostics.Debug.WriteLine("Error en ObtenerDetalleRol: " + ex.Message);
-                    return rptRol;
-                }
+        public Rol ObtenerRolPorNombre(string nombre)
+        {
+            try
+            {
+                var filter = Builders<Rol>.Filter.Eq(r => r.nombre, nombre);
+                var rol = _rolesCollection.Find(filter).FirstOrDefault();
+                return rol;
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine("Error en ObtenerRolPorNombre: " + ex.Message);
+                return null;
             }
         }
 
         public bool RegistrarRol(Rol oRol)
         {
-            bool respuesta = false;
-            using (SqlConnection oConexion = new SqlConnection(Conexion.CN))
+            try
             {
-                try
+                // Asignar valores por defecto si no existen
+                if (string.IsNullOrEmpty(oRol.codigo))
                 {
-                    string query = @"INSERT INTO XEROL_ROL 
-                                         (XEROL_ID, XEROL_NOMBRE, XEROL_DESCRI) 
-                                         VALUES 
-                                         (@XEROL_ID, @XEROL_NOMBRE, @XEROL_DESCRI)";
-
-                    SqlCommand cmd = new SqlCommand(query, oConexion);
-                    cmd.CommandType = CommandType.Text;
-
-                    cmd.Parameters.AddWithValue("@XEROL_ID", oRol.XEROL_ID);
-                    cmd.Parameters.AddWithValue("@XEROL_NOMBRE", oRol.XEROL_NOMBRE);
-                    cmd.Parameters.AddWithValue("@XEROL_DESCRI",
-                        string.IsNullOrEmpty(oRol.XEROL_DESCRI) ? (object)DBNull.Value : oRol.XEROL_DESCRI);
-
-                    oConexion.Open();
-                    int rowsAffected = cmd.ExecuteNonQuery();
-                    respuesta = rowsAffected > 0;
+                    oRol.codigo = ObjectId.GenerateNewId().ToString();
                 }
-                catch (Exception ex)
+
+                if (string.IsNullOrEmpty(oRol.estado))
                 {
-                    respuesta = false;
-                    System.Diagnostics.Debug.WriteLine("Error en RegistrarRol: " + ex.Message);
+                    oRol.estado = "ACTIVO";
                 }
+
+                if (oRol.opciones_permitidas == null)
+                {
+                    oRol.opciones_permitidas = new List<string>();
+                }
+
+                _rolesCollection.InsertOne(oRol);
+                return true;
             }
-            return respuesta;
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine("Error en RegistrarRol: " + ex.Message);
+                return false;
+            }
         }
 
         public bool ModificarRol(Rol oRol)
         {
-            bool respuesta = false;
-            using (SqlConnection oConexion = new SqlConnection(Conexion.CN))
+            try
             {
-                try
-                {
-                    string query = @"UPDATE XEROL_ROL SET 
-                                         XEROL_NOMBRE = @XEROL_NOMBRE,
-                                         XEROL_DESCRI = @XEROL_DESCRI
-                                         WHERE XEROL_ID = @XEROL_ID";
+                var filter = Builders<Rol>.Filter.Eq(r => r.codigo, oRol.codigo);
+                var update = Builders<Rol>.Update
+                    .Set(r => r.nombre, oRol.nombre)
+                    .Set(r => r.descripcion, oRol.descripcion)
+                    .Set(r => r.opciones_permitidas, oRol.opciones_permitidas)
+                    .Set(r => r.estado, oRol.estado);
 
-                    SqlCommand cmd = new SqlCommand(query, oConexion);
-
-                    cmd.Parameters.AddWithValue("@XEROL_ID", oRol.XEROL_ID);
-                    cmd.Parameters.AddWithValue("@XEROL_NOMBRE", oRol.XEROL_NOMBRE);
-                    cmd.Parameters.AddWithValue("@XEROL_DESCRI",
-                        string.IsNullOrEmpty(oRol.XEROL_DESCRI) ? (object)DBNull.Value : oRol.XEROL_DESCRI);
-
-                    oConexion.Open();
-                    int rowsAffected = cmd.ExecuteNonQuery();
-                    respuesta = rowsAffected > 0;
-                }
-                catch (Exception ex)
-                {
-                    respuesta = false;
-                    System.Diagnostics.Debug.WriteLine("Error en ModificarRol: " + ex.Message);
-                }
+                var result = _rolesCollection.UpdateOne(filter, update);
+                return result.ModifiedCount > 0;
             }
-            return respuesta;
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine("Error en ModificarRol: " + ex.Message);
+                return false;
+            }
         }
 
-        public bool EliminarRol(string XEROL_ID)
+        public bool EliminarRol(string codigo)
         {
-            bool respuesta = false;
-            using (SqlConnection oConexion = new SqlConnection(Conexion.CN))
+            try
             {
-                try
+                // Verificar si hay usuarios con este rol
+                var personasCollection = Conexion.GetCollection<Persona>("personas");
+                var filterPersonas = Builders<Persona>.Filter.Eq("rol.codigo", codigo);
+
+                var countUsuarios = personasCollection.CountDocuments(filterPersonas);
+
+                if (countUsuarios > 0)
                 {
-                    // Verificar si hay usuarios con este rol
-                    string queryVerificar = @"SELECT COUNT(*) FROM XEUSU_USUAR 
-                                               WHERE XEROL_ID = @XEROL_ID";
-
-                    string queryEliminar = @"DELETE FROM XEROL_ROL 
-                                               WHERE XEROL_ID = @XEROL_ID";
-
-                    oConexion.Open();
-
-                    SqlCommand cmdVerificar = new SqlCommand(queryVerificar, oConexion);
-                    cmdVerificar.Parameters.AddWithValue("@XEROL_ID", XEROL_ID);
-                    int usuariosRelacionados = Convert.ToInt32(cmdVerificar.ExecuteScalar());
-
-                    if (usuariosRelacionados > 0)
-                    {
-                        respuesta = false;
-                        System.Diagnostics.Debug.WriteLine("No se puede eliminar rol con usuarios asignados.");
-                    }
-                    else
-                    {
-                        SqlCommand cmdEliminar = new SqlCommand(queryEliminar, oConexion);
-                        cmdEliminar.Parameters.AddWithValue("@XEROL_ID", XEROL_ID);
-
-                        int rowsAffected = cmdEliminar.ExecuteNonQuery();
-                        respuesta = rowsAffected > 0;
-                    }
+                    System.Diagnostics.Debug.WriteLine("No se puede eliminar rol con usuarios asignados.");
+                    return false;
                 }
-                catch (Exception ex)
-                {
-                    respuesta = false;
-                    System.Diagnostics.Debug.WriteLine("Error en EliminarRol: " + ex.Message);
-                }
+
+                // Eliminar el rol
+                var filter = Builders<Rol>.Filter.Eq(r => r.codigo, codigo);
+                var result = _rolesCollection.DeleteOne(filter);
+                return result.DeletedCount > 0;
             }
-            return respuesta;
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine("Error en EliminarRol: " + ex.Message);
+                return false;
+            }
         }
 
         public List<Rol> BuscarRol(string criterio, string valor)
         {
-            List<Rol> rptListaRoles = new List<Rol>();
-            using (SqlConnection oConexion = new SqlConnection(Conexion.CN))
+            try
             {
-                try
+                FilterDefinition<Rol> filter;
+
+                switch (criterio.ToUpper())
                 {
-                    string query = @"SELECT XEROL_ID, XEROL_NOMBRE, XEROL_DESCRI
-                                       FROM XEROL_ROL 
-                                       WHERE ";
-
-                    switch (criterio.ToUpper())
-                    {
-                        case "ID":
-                            query += "XEROL_ID LIKE @VALOR";
-                            break;
-                        case "NOMBRE":
-                            query += "XEROL_NOMBRE LIKE @VALOR";
-                            break;
-                        case "DESCRIPCION":
-                            query += "XEROL_DESCRI LIKE @VALOR";
-                            break;
-                        default:
-                            query += "XEROL_NOMBRE LIKE @VALOR";
-                            break;
-                    }
-
-                    query += " ORDER BY XEROL_ID";
-
-                    SqlCommand cmd = new SqlCommand(query, oConexion);
-                    cmd.Parameters.AddWithValue("@VALOR", "%" + valor + "%");
-
-                    oConexion.Open();
-                    SqlDataReader dr = cmd.ExecuteReader();
-
-                    while (dr.Read())
-                    {
-                        rptListaRoles.Add(new Rol()
-                        {
-                            XEROL_ID = dr["XEROL_ID"]?.ToString(),
-                            XEROL_NOMBRE = dr["XEROL_NOMBRE"]?.ToString(),
-                            XEROL_DESCRI = dr["XEROL_DESCRI"]?.ToString()
-                        });
-                    }
-                    dr.Close();
+                    case "ID":
+                    case "CODIGO":
+                        filter = Builders<Rol>.Filter.Regex(r => r.codigo,
+                            new BsonRegularExpression(valor, "i"));
+                        break;
+                    case "NOMBRE":
+                        filter = Builders<Rol>.Filter.Regex(r => r.nombre,
+                            new BsonRegularExpression(valor, "i"));
+                        break;
+                    case "DESCRIPCION":
+                        filter = Builders<Rol>.Filter.Regex(r => r.descripcion,
+                            new BsonRegularExpression(valor, "i"));
+                        break;
+                    case "ESTADO":
+                        filter = Builders<Rol>.Filter.Eq(r => r.estado, valor);
+                        break;
+                    default:
+                        filter = Builders<Rol>.Filter.Regex(r => r.nombre,
+                            new BsonRegularExpression(valor, "i"));
+                        break;
                 }
-                catch (Exception ex)
-                {
-                    rptListaRoles = null;
-                    System.Diagnostics.Debug.WriteLine("Error en BuscarRol: " + ex.Message);
-                }
+
+                var roles = _rolesCollection.Find(filter).ToList();
+                return roles;
             }
-            return rptListaRoles;
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine("Error en BuscarRol: " + ex.Message);
+                return null;
+            }
         }
 
-        public bool ValidarNombreRolUnico(string XEROL_NOMBRE, string XEROL_ID_EXCLUIR = null)
+        public bool ValidarNombreRolUnico(string nombre, string codigoExcluir = null)
         {
-            bool esUnico = true;
-            using (SqlConnection oConexion = new SqlConnection(Conexion.CN))
+            try
             {
-                try
-                {
-                    string query;
-                    SqlCommand cmd;
+                FilterDefinition<Rol> filter;
 
-                    if (string.IsNullOrEmpty(XEROL_ID_EXCLUIR))
-                    {
-                        query = @"SELECT COUNT(*) FROM XEROL_ROL 
-                                   WHERE XEROL_NOMBRE = @XEROL_NOMBRE";
-                        cmd = new SqlCommand(query, oConexion);
-                        cmd.Parameters.AddWithValue("@XEROL_NOMBRE", XEROL_NOMBRE);
-                    }
-                    else
-                    {
-                        query = @"SELECT COUNT(*) FROM XEROL_ROL 
-                                   WHERE XEROL_NOMBRE = @XEROL_NOMBRE 
-                                   AND XEROL_ID != @XEROL_ID";
-                        cmd = new SqlCommand(query, oConexion);
-                        cmd.Parameters.AddWithValue("@XEROL_NOMBRE", XEROL_NOMBRE);
-                        cmd.Parameters.AddWithValue("@XEROL_ID", XEROL_ID_EXCLUIR);
-                    }
-
-                    oConexion.Open();
-                    int count = Convert.ToInt32(cmd.ExecuteScalar());
-                    esUnico = count == 0;
-                }
-                catch (Exception ex)
+                if (string.IsNullOrEmpty(codigoExcluir))
                 {
-                    esUnico = false;
-                    System.Diagnostics.Debug.WriteLine("Error en ValidarNombreRolUnico: " + ex.Message);
+                    filter = Builders<Rol>.Filter.Eq(r => r.nombre, nombre);
                 }
+                else
+                {
+                    filter = Builders<Rol>.Filter.And(
+                        Builders<Rol>.Filter.Eq(r => r.nombre, nombre),
+                        Builders<Rol>.Filter.Ne(r => r.codigo, codigoExcluir)
+                    );
+                }
+
+                var count = _rolesCollection.CountDocuments(filter);
+                return count == 0;
             }
-            return esUnico;
-        }
-        // Agrega estos métodos a tu clase CD_Rol existente
-
-        public bool RolExiste(string XEROL_ID)
-        {
-            bool existe = false;
-
-            using (SqlConnection oConexion = new SqlConnection(Conexion.CN))
+            catch (Exception ex)
             {
-                try
-                {
-                    string query = @"SELECT COUNT(*) FROM XEROL_ROL WHERE XEROL_ID = @XEROL_ID";
-
-                    SqlCommand cmd = new SqlCommand(query, oConexion);
-                    cmd.Parameters.AddWithValue("@XEROL_ID", XEROL_ID?.Trim() ?? "");
-
-                    oConexion.Open();
-                    int count = Convert.ToInt32(cmd.ExecuteScalar());
-                    existe = count > 0;
-
-                    // PARA DEBUG
-                    System.Diagnostics.Debug.WriteLine($"CD_Rol.RolExiste('{XEROL_ID}'): {existe} (count: {count})");
-                }
-                catch (Exception ex)
-                {
-                    existe = false;
-                    System.Diagnostics.Debug.WriteLine($"ERROR CD_Rol.RolExiste: {ex.Message}");
-                }
+                System.Diagnostics.Debug.WriteLine("Error en ValidarNombreRolUnico: " + ex.Message);
+                return false;
             }
-
-            return existe;
         }
 
-        public List<Opcion> ObtenerOpcionesPorRol(string XEROL_ID)
+        public bool RolExiste(string codigo)
         {
-            List<Opcion> listaOpciones = new List<Opcion>();
-
-            using (SqlConnection oConexion = new SqlConnection(Conexion.CN))
+            try
             {
-                try
-                {
-                    // PARA DEBUG
-                    System.Diagnostics.Debug.WriteLine($"=== CD_Rol.ObtenerOpcionesPorRol ===");
-                    System.Diagnostics.Debug.WriteLine($"Consultando opciones para rol: '{XEROL_ID}'");
+                var filter = Builders<Rol>.Filter.Eq(r => r.codigo, codigo);
+                var count = _rolesCollection.CountDocuments(filter);
+                var existe = count > 0;
 
-                    // Consulta que obtiene las opciones asignadas a un rol
-                    string query = @"
-                SELECT DISTINCT o.XEOPC_ID, o.XEOPC_NOMBRE
-                FROM xr_xerol_xeopc r_op
-                INNER JOIN xeopc_opcion o ON r_op.XEOPC_ID = o.XEOPC_ID
-                WHERE r_op.XEROL_ID = @XEROL_ID 
-                AND (r_op.XROP_FECHA_RETIRO IS NULL 
-                     OR r_op.XROP_FECHA_RETIRO > GETDATE())
-                ORDER BY o.XEOPC_ID";
-
-                    SqlCommand cmd = new SqlCommand(query, oConexion);
-                    cmd.Parameters.AddWithValue("@XEROL_ID", XEROL_ID?.Trim() ?? "");
-
-                    oConexion.Open();
-                    SqlDataReader dr = cmd.ExecuteReader();
-
-                    int count = 0;
-                    while (dr.Read())
-                    {
-                        count++;
-                        string opcId = dr["XEOPC_ID"]?.ToString();
-                        string opcNombre = dr["XEOPC_NOMBRE"]?.ToString();
-
-                        listaOpciones.Add(new Opcion()
-                        {
-                            XEOPC_ID = opcId,
-                            XEOPC_NOMBRE = opcNombre
-                        });
-                        System.Diagnostics.Debug.WriteLine($"  Opción {count}: '{opcId}' - '{opcNombre}'");
-                    }
-                    dr.Close();
-
-                    System.Diagnostics.Debug.WriteLine($"Total opciones encontradas para rol '{XEROL_ID}': {count}");
-                }
-                catch (Exception ex)
-                {
-                    listaOpciones = new List<Opcion>();
-                    System.Diagnostics.Debug.WriteLine($"ERROR CD_Rol.ObtenerOpcionesPorRol: {ex.Message}");
-                    System.Diagnostics.Debug.WriteLine($"Stack Trace: {ex.StackTrace}");
-                }
+                System.Diagnostics.Debug.WriteLine($"CD_Rol.RolExiste('{codigo}'): {existe} (count: {count})");
+                return existe;
             }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"ERROR CD_Rol.RolExiste: {ex.Message}");
+                return false;
+            }
+        }
 
-            return listaOpciones;
+        public bool AgregarOpcionARol(string codigoRol, string codigoOpcion)
+        {
+            try
+            {
+                var filter = Builders<Rol>.Filter.Eq(r => r.codigo, codigoRol);
+                var update = Builders<Rol>.Update.AddToSet(r => r.opciones_permitidas, codigoOpcion);
+
+                var result = _rolesCollection.UpdateOne(filter, update);
+                return result.ModifiedCount > 0;
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine("Error en AgregarOpcionARol: " + ex.Message);
+                return false;
+            }
+        }
+
+        public bool RemoverOpcionDeRol(string codigoRol, string codigoOpcion)
+        {
+            try
+            {
+                var filter = Builders<Rol>.Filter.Eq(r => r.codigo, codigoRol);
+                var update = Builders<Rol>.Update.Pull(r => r.opciones_permitidas, codigoOpcion);
+
+                var result = _rolesCollection.UpdateOne(filter, update);
+                return result.ModifiedCount > 0;
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine("Error en RemoverOpcionDeRol: " + ex.Message);
+                return false;
+            }
+        }
+
+        public bool TieneOpcion(string codigoRol, string codigoOpcion)
+        {
+            try
+            {
+                var filter = Builders<Rol>.Filter.And(
+                    Builders<Rol>.Filter.Eq(r => r.codigo, codigoRol),
+                    Builders<Rol>.Filter.AnyEq(r => r.opciones_permitidas, codigoOpcion)
+                );
+
+                var count = _rolesCollection.CountDocuments(filter);
+                return count > 0;
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine("Error en TieneOpcion: " + ex.Message);
+                return false;
+            }
+        }
+
+        public List<string> ObtenerOpcionesPorRol(string codigoRol)
+        {
+            try
+            {
+                System.Diagnostics.Debug.WriteLine($"=== CD_Rol.ObtenerOpcionesPorRol ===");
+                System.Diagnostics.Debug.WriteLine($"Consultando opciones para rol: '{codigoRol}'");
+
+                var filter = Builders<Rol>.Filter.Eq(r => r.codigo, codigoRol);
+
+                // Proyección para obtener solo las opciones
+                var rol = _rolesCollection.Find(filter)
+                    .Project<BsonDocument>(Builders<Rol>.Projection
+                        .Include(r => r.opciones_permitidas))
+                    .FirstOrDefault();
+
+                if (rol != null && rol.Contains("opciones_permitidas"))
+                {
+                    var opcionesBson = rol["opciones_permitidas"].AsBsonArray;
+                    var opciones = new List<string>();
+
+                    foreach (var opcion in opcionesBson)
+                    {
+                        opciones.Add(opcion.AsString);
+                    }
+
+                    System.Diagnostics.Debug.WriteLine($"Total opciones encontradas para rol '{codigoRol}': {opciones.Count}");
+
+                    foreach (var opcion in opciones)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"  Opción: '{opcion}'");
+                    }
+
+                    return opciones;
+                }
+
+                System.Diagnostics.Debug.WriteLine($"No se encontraron opciones para rol '{codigoRol}'");
+                return new List<string>();
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"ERROR CD_Rol.ObtenerOpcionesPorRol: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"Stack Trace: {ex.StackTrace}");
+                return new List<string>();
+            }
+        }
+
+        public List<string> ObtenerEstadosRol()
+        {
+            try
+            {
+                var estados = _rolesCollection.Distinct<string>("estado", FilterDefinition<Rol>.Empty).ToList();
+                return estados;
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine("Error en ObtenerEstadosRol: " + ex.Message);
+                return null;
+            }
+        }
+
+        public List<Rol> ObtenerRolesPorEstado(string estado)
+        {
+            try
+            {
+                var filter = Builders<Rol>.Filter.Eq(r => r.estado, estado);
+                var roles = _rolesCollection.Find(filter).ToList();
+                return roles;
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine("Error en ObtenerRolesPorEstado: " + ex.Message);
+                return null;
+            }
+        }
+
+        public List<Rol> ObtenerRolesConOpcion(string codigoOpcion)
+        {
+            try
+            {
+                var filter = Builders<Rol>.Filter.AnyEq(r => r.opciones_permitidas, codigoOpcion);
+                var roles = _rolesCollection.Find(filter).ToList();
+                return roles;
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine("Error en ObtenerRolesConOpcion: " + ex.Message);
+                return null;
+            }
+        }
+
+        public List<Rol> ObtenerRolesActivos()
+        {
+            try
+            {
+                var filter = Builders<Rol>.Filter.Eq(r => r.estado, "ACTIVO");
+                var roles = _rolesCollection.Find(filter).ToList();
+                return roles;
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine("Error en ObtenerRolesActivos: " + ex.Message);
+                return null;
+            }
         }
     }
 }

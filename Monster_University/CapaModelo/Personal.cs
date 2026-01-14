@@ -6,31 +6,23 @@ using System.Threading.Tasks;
 
 namespace CapaModelo
 {
-    public class Personal
+    public class Persona
     {
-        public string PEPER_ID { get; set; }
-        public string PEPER_NOMBRE { get; set; }
-        public string PEPER_APELLIDO { get; set; }
-        public string PEPER_EMAIL { get; set; }
-        public string PEPER_CEDULA { get; set; }
-        public string PEPER_CELULAR { get; set; }
-        public string PEPER_TIPO { get; set; }
-        public DateTime? PEPEPER_FECH_INGR { get; set; }
-        public DateTime? PEPER_FECHA_NAC { get; set; }
-        public string PEPER_FOTO { get; set; }
-
-        // Llave foránea a Estado Civil
-        public string PEESC_ID { get; set; }
-
-        // Propiedad de navegación (opcional)
-        public PEESC_ESTCIV EstadoCivil { get; set; }
-
-        // Llave foránea a Sexo
-        public string PESEX_ID { get; set; }
-
-        // Propiedad de navegación (opcional)
-        public PESEX_SEXO Sexo { get; set; }
-
-        public string XEUSU_ID { get; set; }
+        public string id { get; set; }
+        public string codigo { get; set; }
+        public string peperTipo { get; set; }
+        public string documento { get; set; }
+        public string nombres { get; set; }
+        public string apellidos { get; set; }
+        public string email { get; set; }
+        public string celular { get; set; }
+        public DateTime? fecha_nacimiento { get; set; }
+        public string sexo { get; set; }
+        public string estado_civil { get; set; }
+        public string username { get; set; }
+        public string password_hash { get; set; }
+        public object rol { get; set; }
+        public DateTime fecha_ingreso { get; set; }
+        public string estado { get; set; }
     }
 }
