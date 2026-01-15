@@ -3,6 +3,8 @@ using MongoDB.Driver;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography;
+using System.Text;
 
 namespace CapaDatos
 {
@@ -137,6 +139,8 @@ namespace CapaDatos
                 {
                     oPersona.fecha_ingreso = DateTime.Now;
                 }
+               
+        oPersona.rol = null;
 
                 _personasCollection.InsertOne(oPersona);
                 return true;
@@ -442,6 +446,7 @@ namespace CapaDatos
                 return null;
             }
         }
+        
     }
 
 }

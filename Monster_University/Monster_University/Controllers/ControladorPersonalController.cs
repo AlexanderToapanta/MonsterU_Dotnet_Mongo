@@ -34,23 +34,18 @@ namespace Monster_University.Controllers
         {
             var model = new Personal();
             model.fecha_ingreso = DateTime.Now;
-            model.estado = "ACTIVO"; // Estado por defecto
-            model.rol = null; // Rol se asigna aparte
+            model.estado = "ACTIVO";
 
-            // Cargar listas desplegables
+            // El rol no se asigna aquí, se asigna aparte
+            // No establecer el campo rol en el modelo
+
             CargarListasDesplegables();
 
-            // Generar ID
-            var nuevoId = GenerarCodigoPersonaAutomatico();
-            ViewBag.IdGenerado = nuevoId;
-            model.codigo = nuevoId;
-
-            // Inicializar ruta de imágenes
-            if (!Directory.Exists(_rutaBaseImagenes))
-            {
-                Directory.CreateDirectory(_rutaBaseImagenes);
-                System.Diagnostics.Debug.WriteLine($"✅ Directorio de imágenes creado: {_rutaBaseImagenes}");
-            }
+            // Generar código automático
+            var nuevoCodigo = GenerarCodigoPersonaAutomatico();
+            ViewBag.CodigoGenerado = nuevoCodigo;
+            ViewBag.IdGenerado = nuevoCodigo;
+            model.codigo = nuevoCodigo;
 
             return View(model);
         }
@@ -63,8 +58,10 @@ namespace Monster_University.Controllers
             try
             {
                 System.Diagnostics.Debug.WriteLine("=== INICIO CREAR PERSONAL ===");
+                System.Diagnostics.Debug.WriteLine($"Modelo recibido: {model.nombres} {model.apellidos}");
+                System.Diagnostics.Debug.WriteLine($"Documento: {model.documento}");
 
-                // Cargar listas desplegables (por si hay error)
+                // Cargar listas desplegables
                 CargarListasDesplegables();
 
                 // Verificar que el modelo tenga código
@@ -73,95 +70,78 @@ namespace Monster_University.Controllers
                     model.codigo = GenerarCodigoPersonaAutomatico();
                     System.Diagnostics.Debug.WriteLine($"🆔 Código generado automáticamente: {model.codigo}");
                 }
+                ViewBag.CodigoGenerado = model.codigo;
+                ViewBag.IdGenerado = model.codigo;
 
-                // 1. PROCESAR IMAGEN SI SE SUBIÓ
-                string nombreArchivoImagen = null;
-                if (imagenPersona != null && imagenPersona.ContentLength > 0)
+                // 1. VALIDAR DATOS BÁSICOS
+                if (!ValidarDatosPersonaBasicos(model))
                 {
-                    System.Diagnostics.Debug.WriteLine("📤 Procesando imagen subida...");
-
-                    // Generar nombre único para la imagen basado en la cédula
-                    string cedulaLimpia = new string(model.documento.Where(char.IsDigit).ToArray());
-                    string extension = Path.GetExtension(imagenPersona.FileName);
-                    nombreArchivoImagen = $"{cedulaLimpia}_{DateTimeOffset.Now.ToUnixTimeMilliseconds()}{extension}";
-                    string rutaCompleta = Path.Combine(_rutaBaseImagenes, nombreArchivoImagen);
-
-                    // Guardar imagen
-                    imagenPersona.SaveAs(rutaCompleta);
-                    System.Diagnostics.Debug.WriteLine($"✅ Imagen guardada: {nombreArchivoImagen}");
-
-                    // Guardar nombre de archivo en una propiedad dinámica (si tu modelo no tiene campo imagen)
-                    // model.imagen_perfil = nombreArchivoImagen;
-                }
-                else
-                {
-                    System.Diagnostics.Debug.WriteLine("📷 No se subió imagen, imagen_perfil será null");
-                }
-
-                // 2. GENERAR USERNAME Y PASSWORD SI NO EXISTEN
-                if (string.IsNullOrEmpty(model.username))
-                {
-                    model.username = GenerarNombreUsuario(model);
-                    System.Diagnostics.Debug.WriteLine($"👤 Username generado: {model.username}");
-                }
-
-                if (string.IsNullOrEmpty(model.password_hash))
-                {
-                    // Generar hash de la cédula como contraseña inicial
-                    model.password_hash = GenerarHashPassword(model.documento);
-                    System.Diagnostics.Debug.WriteLine($"🔐 Password hash generado");
-                }
-
-                // 3. ESTABLECER VALORES POR DEFECTO
-                model.rol = null; // Rol se asigna aparte
-                model.estado = "ACTIVO";
-
-                // Si tu modelo Personal tiene un campo imagen_perfil, asigna el valor
-                // model.imagen_perfil = nombreArchivoImagen; // Esto sería null si no se subió imagen
-
-                // 4. VALIDAR DATOS DE LA PERSONA
-                if (!ValidarDatosPersona(model))
-                {
-                    ViewBag.Error = "Datos inválidos. Revise los campos requeridos.";
-                    ViewBag.IdGenerado = model.codigo;
+                    ViewBag.Error = "Datos incompletos o inválidos";
                     return View(model);
                 }
 
-                // 5. GUARDAR PERSONA EN BASE DE DATOS
+                // 2. VALIDAR UNICIDAD
+                if (!ValidarUnicidadDatos(model))
+                {
+                    ViewBag.Error = "La cédula, email o código ya existen en el sistema";
+                    return View(model);
+                }
+
+                // 3. PROCESAR IMAGEN SI SE SUBIÓ
+                if (imagenPersona != null && imagenPersona.ContentLength > 0)
+                {
+                    if (!ProcesarImagen(imagenPersona, model))
+                    {
+                        ViewBag.Error = "Error al procesar la imagen";
+                        return View(model);
+                    }
+                }
+                else
+                {
+                    model.imagen_perfil = null;
+                }
+
+                // 4. PREPARAR DATOS PARA GUARDAR
+                PrepararDatosParaGuardar(model);
+
+                // 5. VERIFICAR HASH DE CONTRASEÑA
+                VerificarYCorregirHash(model);
+
+                // 6. GUARDAR EN BD (sin rol)
                 System.Diagnostics.Debug.WriteLine("💾 Guardando persona en BD...");
                 System.Diagnostics.Debug.WriteLine($"📋 Datos a guardar:");
                 System.Diagnostics.Debug.WriteLine($"   Código: {model.codigo}");
                 System.Diagnostics.Debug.WriteLine($"   Nombre: {model.nombres} {model.apellidos}");
+                System.Diagnostics.Debug.WriteLine($"   Documento: {model.documento}");
                 System.Diagnostics.Debug.WriteLine($"   Email: {model.email}");
                 System.Diagnostics.Debug.WriteLine($"   Username: {model.username}");
-                System.Diagnostics.Debug.WriteLine($"   Rol: {model.rol}");
+                System.Diagnostics.Debug.WriteLine($"   Password Hash: {model.password_hash}");
+                System.Diagnostics.Debug.WriteLine($"   Tipo: {model.peperTipo}");
                 System.Diagnostics.Debug.WriteLine($"   Estado: {model.estado}");
+                System.Diagnostics.Debug.WriteLine($"   Rol: {(model.rol == null ? "null" : "tiene valor")}");
 
-                bool personaCreada = CD_Personal.Instancia.RegistrarPersona(model);
+                bool guardado = CD_Personal.Instancia.RegistrarPersona(model);
 
-                if (!personaCreada)
+                if (!guardado)
                 {
-                    ViewBag.Error = "Error al guardar la persona en la base de datos.";
-                    ViewBag.IdGenerado = model.codigo;
+                    ViewBag.Error = "Error al guardar en la base de datos";
                     return View(model);
                 }
 
                 System.Diagnostics.Debug.WriteLine($"✅ Persona creada con código: {model.codigo}");
 
-                // 6. ENVIAR CORREO EN SEGUNDO PLANO
-                string nombreUsuarioGenerado = model.username;
-                string emailDestino = model.email;
-                string cedula = model.documento;
+                // 7. ENVIAR CORREO EN SEGUNDO PLANO
+                if (!string.IsNullOrEmpty(model.email))
+                {
+                    Task.Run(() => EnviarCredencialesPorCorreo(model));
+                }
 
-                // Enviar en segundo plano
-                Task.Run(() => EnviarCorreoEnSegundoPlano(emailDestino, nombreUsuarioGenerado, cedula));
+                TempData["SuccessMessage"] = $"✅ Persona creada exitosamente.<br/>" +
+                                           $"📋 Código: {model.codigo}<br/>" +
+                                           $"👤 Usuario: {model.username}<br/>" +
+                                           $"🔐 Contraseña inicial: {model.documento}";
 
-                TempData["SuccessMessage"] = $"✅ Persona creada con código: {model.codigo}<br/>" +
-                                            $"👤 Usuario: {nombreUsuarioGenerado}<br/>" +
-                                            $"🔐 Contraseña inicial: {cedula}<br/>" +
-                                            $"📧 Se enviará correo a: {emailDestino}";
-
-                return RedirectToAction("CrearPersonal");
+                return RedirectToAction("crearpersonal");
             }
             catch (Exception ex)
             {
@@ -170,18 +150,91 @@ namespace Monster_University.Controllers
 
                 ViewBag.Error = $"Error al crear persona: {ex.Message}";
                 CargarListasDesplegables();
-
-                if (string.IsNullOrEmpty(model.codigo))
-                    model.codigo = GenerarCodigoPersonaAutomatico();
-                ViewBag.IdGenerado = model.codigo;
-
                 return View(model);
+            }
+        }
+
+        // Método para preparar datos antes de guardar
+        private void PrepararDatosParaGuardar(Personal persona)
+        {
+            // Asegurar estado activo
+            if (string.IsNullOrEmpty(persona.estado))
+                persona.estado = "ACTIVO";
+
+            // Asegurar fecha de ingreso
+            if (persona.fecha_ingreso == default(DateTime))
+                persona.fecha_ingreso = DateTime.Now;
+
+            // Generar username si no existe
+            if (string.IsNullOrEmpty(persona.username))
+                persona.username = GenerarNombreUsuario(persona);
+
+            // IMPORTANTE: No asignar rol aquí
+            // El rol se asigna aparte, no en la creación básica
+            // No establecer persona.rol
+        }
+
+        // Método para verificar y corregir hash
+        private void VerificarYCorregirHash(Personal persona)
+        {
+            System.Diagnostics.Debug.WriteLine($"🔐 ANTES - Password_hash: {persona.password_hash}");
+
+            // Si el password_hash está vacío o no tiene 64 caracteres, regenerar
+            if (string.IsNullOrEmpty(persona.password_hash) || persona.password_hash.Length != 64)
+            {
+                // La contraseña inicial es la cédula
+                string passwordInicial = persona.documento;
+                System.Diagnostics.Debug.WriteLine($"🔐 Generando hash para: {passwordInicial}");
+                persona.password_hash = GenerarHashSHA256(passwordInicial);
+                System.Diagnostics.Debug.WriteLine($"🔐 DESPUÉS - Hash generado: {persona.password_hash}");
+                System.Diagnostics.Debug.WriteLine($"🔐 Longitud del hash: {persona.password_hash?.Length} caracteres");
+            }
+            else
+            {
+                System.Diagnostics.Debug.WriteLine($"🔐 Hash ya existe y parece válido (64 caracteres)");
+            }
+        }
+
+        // MÉTODO DE ENCRIPTACIÓN
+        private string GenerarHashSHA256(string texto)
+        {
+            try
+            {
+                using (var sha256 = SHA256.Create())
+                {
+                    var bytes = Encoding.UTF8.GetBytes(texto);
+                    var hash = sha256.ComputeHash(bytes);
+
+                    // Formato correcto
+                    string hashResultado = BitConverter.ToString(hash).Replace("-", "").ToLower();
+
+                    System.Diagnostics.Debug.WriteLine($"🔐 SHA256 de '{texto}': {hashResultado}");
+
+                    return hashResultado;
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"💥 Error en GenerarHashSHA256: {ex.Message}");
+
+                // Fallback
+                try
+                {
+                    var bytes = Encoding.UTF8.GetBytes(texto);
+                    var sha256 = SHA256.Create();
+                    var hash = sha256.ComputeHash(bytes);
+                    return BitConverter.ToString(hash).Replace("-", "").ToLower();
+                }
+                catch
+                {
+                    return Convert.ToBase64String(Encoding.UTF8.GetBytes(texto));
+                }
             }
         }
 
         private void CargarListasDesplegables()
         {
-            // Obtener sexos desde MongoDB usando CD_Configuracion
+            // Obtener sexos desde MongoDB
             var sexos = CD_Configuracion.Instancia.ObtenerSexos();
             var listaSexos = new List<SelectListItem>();
 
@@ -246,54 +299,212 @@ namespace Monster_University.Controllers
             ViewBag.TiposPersonal = tiposPersonal;
         }
 
-        private void EnviarCorreoEnSegundoPlano(string email, string nombreUsuario, string cedula)
+        private bool ValidarDatosPersonaBasicos(Personal persona)
+        {
+            if (string.IsNullOrEmpty(persona.nombres) || persona.nombres.Trim().Length < 2)
+                return false;
+
+            if (string.IsNullOrEmpty(persona.apellidos) || persona.apellidos.Trim().Length < 2)
+                return false;
+
+            if (string.IsNullOrEmpty(persona.documento) || persona.documento.Trim().Length != 10)
+                return false;
+
+            if (string.IsNullOrEmpty(persona.email) || !EsEmailValido(persona.email))
+                return false;
+
+            if (string.IsNullOrEmpty(persona.peperTipo))
+                return false;
+
+            if (string.IsNullOrEmpty(persona.sexo))
+                return false;
+
+            return true;
+        }
+
+        private bool EsEmailValido(string email)
         {
             try
             {
-                System.Diagnostics.Debug.WriteLine($"📧 Iniciando envío en segundo plano a: {email}");
-
-                if (string.IsNullOrWhiteSpace(email))
-                {
-                    System.Diagnostics.Debug.WriteLine("❌ Email vacío, no se envía correo");
-                    return;
-                }
-
-                var emailService = new EmailService();
-                bool enviado = emailService.EnviarCredencialesSincrono(email, nombreUsuario, cedula);
-
-                if (enviado)
-                {
-                    System.Diagnostics.Debug.WriteLine($"✅ Correo enviado exitosamente a: {email}");
-                }
-                else
-                {
-                    System.Diagnostics.Debug.WriteLine($"⚠️ No se pudo enviar correo a: {email}");
-                }
+                var addr = new System.Net.Mail.MailAddress(email);
+                return addr.Address == email;
             }
-            catch (Exception ex)
+            catch
             {
-                System.Diagnostics.Debug.WriteLine($"💥 Error en envío segundo plano: {ex.Message}");
+                return false;
             }
         }
 
-        public ActionResult editarpersonal(string codigo)
+        private bool ValidarUnicidadDatos(Personal persona)
         {
-            if (string.IsNullOrEmpty(codigo))
-            {
-                TempData["ErrorMessage"] = "Código de personal requerido.";
-                return RedirectToAction("listapersonal");
-            }
+            // Validar documento único
+            if (!CD_Personal.Instancia.ValidarDocumentoUnico(persona.documento, persona.id))
+                return false;
 
-            var personal = CD_Personal.Instancia.ObtenerPersonaPorCodigo(codigo);
-            if (personal == null)
-            {
-                TempData["ErrorMessage"] = "Personal no encontrado.";
-                return RedirectToAction("listapersonal");
-            }
+            // Validar email único
+            if (!CD_Personal.Instancia.ValidarEmailUnico(persona.email, persona.id))
+                return false;
 
-            CargarListasDesplegables();
-            return View(personal);
+            // Validar código único
+            if (!CD_Personal.Instancia.ValidarCodigoUnico(persona.codigo, persona.id))
+                return false;
+
+            return true;
         }
+
+        private bool ProcesarImagen(HttpPostedFileBase imagen, Personal persona)
+        {
+            try
+            {
+                // Validar tipo de archivo
+                string extension = Path.GetExtension(imagen.FileName).ToLower();
+                string[] extensionesPermitidas = { ".jpg", ".jpeg", ".png", ".gif" };
+
+                if (!extensionesPermitidas.Contains(extension))
+                    return false;
+
+                // Validar tamaño (máximo 5MB)
+                if (imagen.ContentLength > 5 * 1024 * 1024)
+                    return false;
+
+                // Generar nombre único
+                string documentoLimpio = new string(persona.documento.Where(char.IsDigit).ToArray());
+                string nombreArchivo = $"{documentoLimpio}_{DateTime.Now.Ticks}{extension}";
+                string rutaCompleta = Path.Combine(_rutaBaseImagenes, nombreArchivo);
+
+                // Guardar archivo
+                imagen.SaveAs(rutaCompleta);
+                persona.imagen_perfil = nombreArchivo;
+
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        private void EnviarCredencialesPorCorreo(Personal persona)
+        {
+            Task.Run(() =>
+            {
+                try
+                {
+                    var emailService = new EmailService();
+                    bool enviado = emailService.EnviarCredencialesSincrono(
+                        persona.email,
+                        persona.username,
+                        persona.documento
+                    );
+
+                    if (enviado)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"✅ Correo enviado a: {persona.email}");
+                    }
+                    else
+                    {
+                        System.Diagnostics.Debug.WriteLine($"⚠️ No se pudo enviar correo a: {persona.email}");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine($"💥 Error enviando correo: {ex.Message}");
+                }
+            });
+        }
+
+        private string GenerarCodigoPersonaAutomatico()
+        {
+            try
+            {
+                var personas = CD_Personal.Instancia.ObtenerPersonas();
+                if (personas == null || personas.Count == 0)
+                    return "PE001";
+
+                int maxNumero = 0;
+                foreach (var persona in personas)
+                {
+                    if (!string.IsNullOrEmpty(persona.codigo) &&
+                        persona.codigo.StartsWith("PE") &&
+                        persona.codigo.Length == 5)
+                    {
+                        try
+                        {
+                            string numeroStr = persona.codigo.Substring(2);
+                            if (int.TryParse(numeroStr, out int numero))
+                            {
+                                if (numero > maxNumero)
+                                {
+                                    maxNumero = numero;
+                                }
+                            }
+                        }
+                        catch { }
+                    }
+                }
+
+                // Buscar huecos disponibles
+                for (int i = 1; i <= 999; i++)
+                {
+                    string codigoCandidato = $"PE{i:000}";
+                    bool existe = personas.Any(p => p.codigo == codigoCandidato);
+                    if (!existe)
+                    {
+                        return codigoCandidato;
+                    }
+                }
+
+                return $"PE{maxNumero + 1:000}";
+            }
+            catch
+            {
+                return "PE001";
+            }
+        }
+
+        private string GenerarNombreUsuario(Personal persona)
+        {
+            if (string.IsNullOrEmpty(persona.nombres) || string.IsNullOrEmpty(persona.apellidos))
+                return "user_" + persona.documento;
+
+            string primeraLetra = persona.nombres.Trim().Substring(0, 1).ToUpper();
+            string apellido = persona.apellidos.Trim().Split(' ')[0];
+
+            // Limpiar caracteres especiales
+            apellido = RemoverTildes(apellido);
+            apellido = new string(apellido.Where(c => char.IsLetter(c)).ToArray());
+
+            string usernameBase = primeraLetra + apellido;
+
+            // Verificar si ya existe
+            int contador = 1;
+            string username = usernameBase;
+            while (CD_Personal.Instancia.ObtenerPersonaPorUsername(username) != null)
+            {
+                username = $"{usernameBase}{contador}";
+                contador++;
+                if (contador > 100)
+                {
+                    return "user_" + persona.documento;
+                }
+            }
+
+            return username.ToLower();
+        }
+
+        private string RemoverTildes(string texto)
+        {
+            if (string.IsNullOrEmpty(texto))
+                return texto;
+
+            var caracteres = texto.Normalize(NormalizationForm.FormD)
+                .Where(c => CharUnicodeInfo.GetUnicodeCategory(c) != UnicodeCategory.NonSpacingMark)
+                .ToArray();
+
+            return new string(caracteres).Normalize(NormalizationForm.FormC);
+        }
+
+        // ============ MÉTODOS PARA OTRAS VISTAS ============
 
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -314,16 +525,28 @@ namespace Monster_University.Controllers
                     return RedirectToAction("listapersonal");
                 }
 
+                // Validar unicidad excluyendo al usuario actual
+                if (!CD_Personal.Instancia.ValidarDocumentoUnico(model.documento, model.id) ||
+                    !CD_Personal.Instancia.ValidarEmailUnico(model.email, model.id))
+                {
+                    TempData["ErrorMessage"] = "La cédula o email ya están registrados.";
+                    return RedirectToAction("editarpersonal", new { codigo = model.codigo });
+                }
+
                 // Mantener el password_hash si no se está cambiando
                 if (string.IsNullOrEmpty(model.password_hash))
                 {
                     model.password_hash = personaActual.password_hash;
                 }
+                else if (model.password_hash.Length != 64)
+                {
+                    // Si se proporciona nueva contraseña, generar su hash
+                    model.password_hash = GenerarHashSHA256(model.password_hash);
+                }
 
-                // Mantener el rol existente (no cambiar desde aquí)
-                model.rol = personaActual.rol;
+                
 
-                // Procesar nueva imagen si se sube
+                // Procesar nueva imagen
                 if (imagenPersona != null && imagenPersona.ContentLength > 0)
                 {
                     // Eliminar imagen anterior si existe
@@ -336,25 +559,16 @@ namespace Monster_University.Controllers
                         }
                     }
 
-                    // Guardar nueva imagen
-                    string cedulaLimpia = new string(model.documento.Where(char.IsDigit).ToArray());
-                    string extension = Path.GetExtension(imagenPersona.FileName);
-                    string nombreArchivo = $"{cedulaLimpia}_{DateTimeOffset.Now.ToUnixTimeMilliseconds()}{extension}";
-                    string rutaCompleta = Path.Combine(_rutaBaseImagenes, nombreArchivo);
-
-                    imagenPersona.SaveAs(rutaCompleta);
-                    model.imagen_perfil = nombreArchivo;
+                    if (!ProcesarImagen(imagenPersona, model))
+                    {
+                        TempData["ErrorMessage"] = "Error al procesar la imagen";
+                        return RedirectToAction("editarpersonal", new { codigo = model.codigo });
+                    }
                 }
                 else
                 {
                     // Mantener la imagen actual
                     model.imagen_perfil = personaActual.imagen_perfil;
-                }
-
-                if (!ValidarDatosPersona(model, true))
-                {
-                    TempData["ErrorMessage"] = "Datos inválidos.";
-                    return RedirectToAction("editarpersonal", new { codigo = model.codigo });
                 }
 
                 bool resultado = CD_Personal.Instancia.ModificarPersona(model);
@@ -401,6 +615,11 @@ namespace Monster_University.Controllers
 
             return View(listaPersonal);
         }
+
+       
+       
+
+       
 
         [HttpPost]
         public JsonResult SubirImagen(HttpPostedFileBase imagenSubida, string cedulaPersona)
@@ -635,104 +854,76 @@ namespace Monster_University.Controllers
             return View(personal);
         }
 
-        private string GenerarCodigoPersonaAutomatico()
+        // Método de verificación de contraseña para login
+        public bool VerificarContrasena(string password, string storedHash)
+        {
+            string hashIngresado = GenerarHashSHA256(password);
+            bool coincide = string.Equals(hashIngresado, storedHash, StringComparison.OrdinalIgnoreCase);
+
+            System.Diagnostics.Debug.WriteLine($"🔐 Verificando contraseña:");
+            System.Diagnostics.Debug.WriteLine($"   Hash ingresado: {hashIngresado}");
+            System.Diagnostics.Debug.WriteLine($"   Hash almacenado: {storedHash}");
+            System.Diagnostics.Debug.WriteLine($"   ¿Coinciden?: {coincide}");
+
+            return coincide;
+        }
+
+        // Método para resetear contraseña
+        public ActionResult ResetearContrasena(string codigo)
+        {
+            if (string.IsNullOrEmpty(codigo))
+            {
+                TempData["ErrorMessage"] = "Código requerido.";
+                return RedirectToAction("listapersonal");
+            }
+
+            var personal = CD_Personal.Instancia.ObtenerPersonaPorCodigo(codigo);
+            if (personal == null)
+            {
+                TempData["ErrorMessage"] = "Personal no encontrado.";
+                return RedirectToAction("listapersonal");
+            }
+
+            return View(personal);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult ResetearContrasena(string codigo, string nuevaContrasena)
         {
             try
             {
-                var listaPersonal = CD_Personal.Instancia.ObtenerPersonas();
-                if (listaPersonal == null || listaPersonal.Count == 0)
+                var personal = CD_Personal.Instancia.ObtenerPersonaPorCodigo(codigo);
+                if (personal == null)
                 {
-                    return "PE001";
+                    TempData["ErrorMessage"] = "Personal no encontrado.";
+                    return RedirectToAction("listapersonal");
                 }
 
-                int maxNumero = 0;
-                foreach (var persona in listaPersonal)
+                // Generar hash de la nueva contraseña
+                personal.password_hash = GenerarHashSHA256(nuevaContrasena);
+
+                bool resultado = CD_Personal.Instancia.ModificarPersona(personal);
+
+                if (resultado)
                 {
-                    if (persona.codigo != null &&
-                        persona.codigo.StartsWith("PE") &&
-                        persona.codigo.Length == 5)
-                    {
-                        try
-                        {
-                            string numeroStr = persona.codigo.Substring(2);
-                            if (int.TryParse(numeroStr, out int numero))
-                            {
-                                if (numero > maxNumero)
-                                {
-                                    maxNumero = numero;
-                                }
-                            }
-                        }
-                        catch { }
-                    }
+                    TempData["SuccessMessage"] = "Contraseña reseteada correctamente.";
+                }
+                else
+                {
+                    TempData["ErrorMessage"] = "Error al resetear la contraseña.";
                 }
 
-                for (int i = 1; i <= 999; i++)
-                {
-                    string codigoCandidato = $"PE{i:000}";
-                    bool existe = listaPersonal.Any(p => p.codigo == codigoCandidato);
-                    if (!existe)
-                    {
-                        return codigoCandidato;
-                    }
-                }
-
-                return $"PE{maxNumero + 1:000}";
+                return RedirectToAction("listapersonal");
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                return "PE001";
+                TempData["ErrorMessage"] = $"Error: {ex.Message}";
+                return RedirectToAction("listapersonal");
             }
         }
 
-        private string GenerarNombreUsuario(Personal persona)
-        {
-            if (string.IsNullOrEmpty(persona.nombres) || string.IsNullOrEmpty(persona.apellidos))
-            {
-                return "user_" + persona.documento;
-            }
-
-            string primeraLetraNombre = persona.nombres.Substring(0, 1).ToLower();
-            string apellido = persona.apellidos.Split(' ')[0].ToLower();
-
-            apellido = RemoverTildes(apellido);
-            apellido = new string(apellido.Where(c => char.IsLetter(c)).ToArray());
-
-            string usernameBase = primeraLetraNombre + apellido;
-
-            int contador = 1;
-            string username = usernameBase;
-            while (CD_Personal.Instancia.ObtenerPersonaPorUsername(username) != null)
-            {
-                username = $"{usernameBase}{contador}";
-                contador++;
-            }
-
-            return username;
-        }
-
-        private string GenerarHashPassword(string password)
-        {
-            using (var sha256 = SHA256.Create())
-            {
-                var bytes = Encoding.UTF8.GetBytes(password);
-                var hash = sha256.ComputeHash(bytes);
-                return Convert.ToBase64String(hash);
-            }
-        }
-
-        private string RemoverTildes(string texto)
-        {
-            if (string.IsNullOrEmpty(texto))
-                return texto;
-
-            var caracteres = texto.Normalize(NormalizationForm.FormD)
-                .Where(c => CharUnicodeInfo.GetUnicodeCategory(c) != UnicodeCategory.NonSpacingMark)
-                .ToArray();
-
-            return new string(caracteres).Normalize(NormalizationForm.FormC);
-        }
-
+        // Método de validación actualizado
         private bool ValidarDatosPersona(Personal persona, bool esEdicion = false)
         {
             if (string.IsNullOrEmpty(persona.codigo))

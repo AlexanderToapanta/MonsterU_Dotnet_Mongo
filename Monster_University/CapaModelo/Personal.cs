@@ -50,6 +50,7 @@ namespace CapaModelo
         public string imagen_perfil { get; set; }
 
         [BsonElement("rol")]
+        [BsonIgnoreIfNull]
         public object rol { get; set; }
 
         [BsonElement("fecha_ingreso")]
