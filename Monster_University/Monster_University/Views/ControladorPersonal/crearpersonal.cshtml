@@ -36,7 +36,7 @@
                     </div>
                 }
 
-                @using (Html.BeginForm("crearpersonal", "ControladorPersonal", FormMethod.Post, new { id = "formCrearPersona", @class = "needs-validation", @novalidate = "novalidate" }))
+                @using (Html.BeginForm("crearpersonal", "ControladorPersonal", FormMethod.Post, new { id = "formCrearPersona", @class = "needs-validation", @novalidate = "novalidate", enctype = "multipart/form-data" }))
                 {
                     @Html.AntiForgeryToken()
 
@@ -176,60 +176,114 @@
                             <!-- Pestaña Datos Personales -->
                             <div id="datosPersonales" class="tab-pane active">
                                 <div style="padding: 20px;">
-                                    <!-- Tipo de Persona -->
-                                    <div class="mb-3">
-                                        <label class="form-label fw-bold">
-                                            <i class="fas fa-user-tag me-1"></i>Tipo de Persona: <span class="text-danger">*</span>
-                                        </label>
-                                        <select name="peperTipo" class="form-control" required>
-                                            <option value="">Seleccione tipo</option>
-                                            <option value="Administrador del Sistema">Administrador del Sistema</option>
-                                            <option value="Docente">Docente</option>
-                                            <option value="Administrador de matriculas">Administrador de matrículas</option>
-                                            <option value="Secretaria Academica">Secretaría Académica</option>
-                                            <option value="Estudiante">Estudiante</option>
-                                            <option value="Personal Administrativo">Personal Administrativo</option>
-                                        </select>
-                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-8">
+                                            <!-- Tipo de Persona -->
+                                            <div class="mb-3">
+                                                <label class="form-label fw-bold">
+                                                    <i class="fas fa-user-tag me-1"></i>Tipo de Persona: <span class="text-danger">*</span>
+                                                </label>
+                                                <select name="peperTipo" class="form-control" required>
+                                                    <option value="">Seleccione tipo</option>
+                                                    <option value="Administrador del Sistema">Administrador del Sistema</option>
+                                                    <option value="Docente">Docente</option>
+                                                    <option value="Administrador de matriculas">Administrador de matrículas</option>
+                                                    <option value="Secretaria Academica">Secretaría Académica</option>
+                                                    <option value="Estudiante">Estudiante</option>
+                                                    <option value="Personal Administrativo">Personal Administrativo</option>
+                                                </select>
+                                            </div>
 
-                                    <!-- Sexo -->
-                                    <div class="mb-3">
-                                        <label class="form-label fw-bold">
-                                            <i class="fas fa-venus-mars me-1"></i>Sexo: <span class="text-danger">*</span>
-                                        </label>
-                                        <div class="radio-group mt-2">
-                                            @if (ViewBag.Sexos != null)
-                                            {
-                                                foreach (var sexo in ViewBag.Sexos)
-                                                {
-                                                    <div class="form-check form-check-inline">
-                                                        <input class="form-check-input" type="radio"
-                                                               name="sexo" id="sexo_@sexo.Value"
-                                                               value="@sexo.Value" required>
-                                                        <label class="form-check-label" for="sexo_@sexo.Value">
-                                                            @sexo.Text
-                                                        </label>
+                                            <!-- Sexo -->
+                                            <div class="mb-3">
+                                                <label class="form-label fw-bold">
+                                                    <i class="fas fa-venus-mars me-1"></i>Sexo: <span class="text-danger">*</span>
+                                                </label>
+                                                <div class="radio-group mt-2">
+                                                    @if (ViewBag.Sexos != null)
+                                                    {
+                                                        foreach (var sexo in ViewBag.Sexos)
+                                                        {
+                                                            <div class="form-check form-check-inline">
+                                                                <input class="form-check-input" type="radio"
+                                                                       name="sexo" id="sexo_@sexo.Value"
+                                                                       value="@sexo.Value" required>
+                                                                <label class="form-check-label" for="sexo_@sexo.Value">
+                                                                    @sexo.Text
+                                                                </label>
+                                                            </div>
+                                                        }
+                                                    }
+                                                </div>
+                                            </div>
+
+                                            <!-- Estado Civil -->
+                                            <div class="mb-3">
+                                                <label class="form-label fw-bold">
+                                                    <i class="fas fa-heart me-1"></i>Estado Civil:
+                                                </label>
+                                                <select name="estado_civil" class="form-control" id="estado_civil">
+                                                    <option value="">Seleccione estado civil (opcional)</option>
+                                                    @if (ViewBag.EstadosCiviles != null)
+                                                    {
+                                                        foreach (var estado in ViewBag.EstadosCiviles)
+                                                        {
+                                                            <option value="@estado.Value">@estado.Text</option>
+                                                        }
+                                                    }
+                                                </select>
+                                            </div>
+
+                                            <!-- Imagen de Perfil -->
+                                            <div class="mb-3">
+                                                <label class="form-label fw-bold">
+                                                    <i class="fas fa-camera me-1"></i>Imagen de Perfil (Opcional):
+                                                </label>
+                                                <div class="input-group">
+                                                    <input type="file" class="form-control" id="imagenPersona"
+                                                           name="imagenPersona" accept=".jpg,.jpeg,.png,.gif"
+                                                           onchange="previewImage(event)">
+                                                    <button class="btn btn-outline-danger" type="button"
+                                                            id="btnEliminarImagen" onclick="eliminarImagen()" style="display: none;">
+                                                        <i class="fas fa-trash"></i>
+                                                    </button>
+                                                </div>
+                                                <small class="text-muted">Formatos: JPG, JPEG, PNG, GIF (Máx. 5MB). Si no sube imagen, se guardará como null.</small>
+
+                                                <!-- Información del archivo seleccionado -->
+                                                <div id="fileNameContainer" class="mt-2" style="display: none;">
+                                                    <div class="alert alert-light d-flex justify-content-between align-items-center">
+                                                        <div>
+                                                            <i class="fas fa-file-image me-2"></i>
+                                                            <span id="fileNameText"></span>
+                                                            <span class="badge bg-info ms-2" id="fileSize"></span>
+                                                        </div>
+                                                        <button type="button" class="btn btn-sm btn-outline-secondary" onclick="eliminarImagen()">
+                                                            <i class="fas fa-times"></i>
+                                                        </button>
                                                     </div>
-                                                }
-                                            }
+                                                </div>
+                                            </div>
                                         </div>
-                                    </div>
 
-                                    <!-- Estado Civil -->
-                                    <div class="mb-3">
-                                        <label class="form-label fw-bold">
-                                            <i class="fas fa-heart me-1"></i>Estado Civil:
-                                        </label>
-                                        <select name="estado_civil" class="form-control" id="estado_civil">
-                                            <option value="">Seleccione estado civil (opcional)</option>
-                                            @if (ViewBag.EstadosCiviles != null)
-                                            {
-                                                foreach (var estado in ViewBag.EstadosCiviles)
-                                                {
-                                                    <option value="@estado.Value">@estado.Text</option>
-                                                }
-                                            }
-                                        </select>
+                                        <div class="col-md-4">
+                                            <!-- Previsualización de imagen -->
+                                            <div class="mb-3">
+                                                <label class="form-label fw-bold">
+                                                    <i class="fas fa-eye me-1"></i>Vista Previa:
+                                                </label>
+                                                <div class="image-preview-container" id="imagePreviewContainer">
+                                                    <div class="image-placeholder" id="imagePlaceholder">
+                                                        <i class="fas fa-user-circle fa-6x text-muted"></i>
+                                                        <p class="mt-2 text-muted text-center">Sin imagen</p>
+                                                    </div>
+                                                    <img id="imagePreview" class="img-thumbnail d-none"
+                                                         style="width: 250px; height: 250px; object-fit: cover; border-radius: 8px;"
+                                                         alt="Vista previa de la imagen">
+                                                </div>
+                                                <small class="text-muted">La imagen aparecerá aquí al seleccionarla</small>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -282,11 +336,12 @@
                         </div>
                     </div>
 
-                    <!-- Campos ocultos para usuario automático -->
+                    <!-- Campos ocultos -->
                     @Html.HiddenFor(m => m.username)
                     @Html.HiddenFor(m => m.password_hash)
                     @Html.HiddenFor(m => m.rol)
                     @Html.HiddenFor(m => m.estado, new { @Value = "ACTIVO" })
+                    <input type="hidden" id="nombreArchivoImagen" name="nombreArchivoImagen" value="" />
 
                     <!-- Botones de acción -->
                     <div class="text-center mt-4">
@@ -325,6 +380,7 @@
                                     <li>El nombre de usuario será: Primera letra del nombre + Apellido completo</li>
                                     <li>La contraseña inicial será la <strong>cédula</strong> de la persona</li>
                                     <li>El estado del usuario será <strong>ACTIVO</strong> por defecto</li>
+                                    <li>El rol se asignará posteriormente en un proceso separado</li>
                                 </ul>
                             </div>
                         </div>
@@ -355,13 +411,36 @@
                     <div class="accordion-item">
                         <h2 class="accordion-header" id="headingThree">
                             <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree">
-                                <i class="fas fa-database me-2"></i>Información del Sistema
+                                <i class="fas fa-camera me-2"></i>Imagen de Perfil
                             </button>
                         </h2>
                         <div id="collapseThree" class="accordion-collapse collapse" data-bs-parent="#accordionInfo">
                             <div class="accordion-body">
+                                <p><strong>Información sobre la imagen de perfil:</strong></p>
+                                <ul>
+                                    <li><strong>Opcional:</strong> No es obligatorio subir una imagen</li>
+                                    <li><strong>Formato:</strong> Se guardará como <code>null</code> si no se sube</li>
+                                    <li><strong>Dimensiones recomendadas:</strong> Cuadrada (1:1) para mejor visualización</li>
+                                    <li><strong>Formatos aceptados:</strong> JPG, JPEG, PNG, GIF</li>
+                                    <li><strong>Tamaño máximo:</strong> 5MB</li>
+                                    <li><strong>Renombrado:</strong> Se guarda como CÉDULA_TIMESTAMP.extensión</li>
+                                    <li><strong>Ubicación:</strong> Se almacena físicamente en el servidor y la ruta en MongoDB</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="headingFour">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFour">
+                                <i class="fas fa-database me-2"></i>Información del Sistema
+                            </button>
+                        </h2>
+                        <div id="collapseFour" class="accordion-collapse collapse" data-bs-parent="#accordionInfo">
+                            <div class="accordion-body">
                                 <p><strong>Base de datos:</strong> monster_university_neatbeans</p>
                                 <p><strong>Colección:</strong> personas</p>
+                                <p><strong>Campo imagen:</strong> imagen_perfil (puede ser null)</p>
                                 <p><strong>Servidor MongoDB:</strong> localhost:27017</p>
                                 <p><strong>Estado conexión:</strong> <span style="color: #28a745; font-weight: bold;">✓ Activa</span></p>
                             </div>
@@ -397,9 +476,28 @@
                 generarUsername();
             });
 
+            // Validar tamaño de imagen antes de enviar
+            $('#imagenPersona').on('change', function() {
+                var file = this.files[0];
+                if (file) {
+                    // Validar tamaño (5MB = 5 * 1024 * 1024 bytes)
+                    if (file.size > 5 * 1024 * 1024) {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Archivo demasiado grande',
+                            text: 'La imagen no debe superar los 5MB',
+                            confirmButtonColor: '#2a64c5'
+                        });
+                        $(this).val('');
+                        resetImagePreview();
+                        return false;
+                    }
+                }
+            });
+
             // Botón limpiar formulario
             $('#btnLimpiar').click(function () {
-                if (confirm('¿Está seguro de que desea limpiar el formulario?')) {
+                if (confirm('¿Está seguro de que desea limpiar el formulario? Se perderán todos los datos incluyendo la imagen.')) {
                     location.reload();
                 }
             });
@@ -507,7 +605,6 @@
             }
         }
 
-     
         // Función para mostrar pestañas
         function showTab(tabName) {
             // Ocultar todas las pestañas
@@ -519,6 +616,159 @@
             $('.tab-button').removeClass('active');
             // Activar el botón correspondiente
             $(event.target).addClass('active');
+        }
+
+        // Función para previsualizar imagen
+        function previewImage(event) {
+            var input = event.target;
+            var file = input.files[0];
+
+            if (file) {
+                var reader = new FileReader();
+
+                reader.onload = function(e) {
+                    // Mostrar imagen
+                    $('#imagePreview').attr('src', e.target.result).removeClass('d-none');
+                    $('#imagePlaceholder').addClass('d-none');
+
+                    // Mostrar información del archivo
+                    $('#fileNameContainer').show();
+                    $('#fileNameText').text(file.name);
+
+                    // Calcular tamaño
+                    var fileSize = (file.size / 1024).toFixed(2);
+                    $('#fileSize').text(fileSize + ' KB');
+
+                    // Mostrar botón eliminar
+                    $('#btnEliminarImagen').show();
+
+                    // Si hay documento, enviar imagen al servidor
+                    var documento = $('#documento').val().trim();
+                    if (documento && documento.length >= 6) {
+                        uploadImageToServer(file, documento);
+                    } else {
+                        console.log('⚠️ Documento no válido, imagen no se subirá al servidor aún');
+                    }
+                };
+
+                reader.readAsDataURL(file);
+            } else {
+                resetImagePreview();
+            }
+        }
+
+        // Función para subir imagen al servidor
+        function uploadImageToServer(file, cedula) {
+            var formData = new FormData();
+            formData.append('imagenSubida', file);
+            formData.append('cedulaPersona', cedula);
+
+            $.ajax({
+                url: '@Url.Action("SubirImagen", "ControladorPersonal")',
+                type: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function(response) {
+                    if (response.success) {
+                        console.log('✅ Imagen subida al servidor:', response.fileName);
+                        $('#nombreArchivoImagen').val(response.fileName);
+
+                        // Mostrar notificación suave
+                        Toastify({
+                            text: "✅ Imagen subida correctamente",
+                            duration: 3000,
+                            gravity: "top",
+                            position: "right",
+                            backgroundColor: "#28a745",
+                        }).showToast();
+                    } else {
+                        console.error('❌ Error al subir imagen:', response.message);
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error al subir imagen',
+                            text: response.message,
+                            confirmButtonColor: '#2a64c5'
+                        });
+                        resetImagePreview();
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error('❌ Error en la solicitud:', error);
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error de conexión',
+                        text: 'No se pudo subir la imagen al servidor',
+                        confirmButtonColor: '#2a64c5'
+                    });
+                    resetImagePreview();
+                }
+            });
+        }
+
+        // Función para eliminar imagen
+        function eliminarImagen() {
+            var nombreArchivo = $('#nombreArchivoImagen').val();
+            var hasFile = $('#imagenPersona').val() !== '';
+
+            if (nombreArchivo || hasFile) {
+                Swal.fire({
+                    title: '¿Eliminar imagen?',
+                    text: '¿Está seguro de que desea eliminar la imagen seleccionada?',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#d33',
+                    cancelButtonColor: '#3085d6',
+                    confirmButtonText: 'Sí, eliminar',
+                    cancelButtonText: 'Cancelar'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        if (nombreArchivo) {
+                            // Eliminar del servidor
+                            $.ajax({
+                                url: '@Url.Action("EliminarImagen", "ControladorPersonal")',
+                                type: 'POST',
+                                data: { nombreArchivo: nombreArchivo },
+                                success: function(response) {
+                                    if (response.success) {
+                                        console.log('✅ Imagen eliminada del servidor');
+                                    }
+                                }
+                            });
+                        }
+
+                        // Limpiar formulario
+                        resetImagePreview();
+
+                        Toastify({
+                            text: "🗑️ Imagen eliminada",
+                            duration: 3000,
+                            gravity: "top",
+                            position: "right",
+                            backgroundColor: "#6c757d",
+                        }).showToast();
+                    }
+                });
+            } else {
+                resetImagePreview();
+            }
+        }
+
+        // Función para resetear la previsualización
+        function resetImagePreview() {
+            $('#imagenPersona').val('');
+            $('#imagePreview').attr('src', '').addClass('d-none');
+            $('#imagePlaceholder').removeClass('d-none');
+            $('#fileNameContainer').hide();
+            $('#fileNameText').text('');
+            $('#nombreArchivoImagen').val('');
+            $('#btnEliminarImagen').hide();
+        }
+
+        // Función para validar email
+        function isValidEmail(email) {
+            var re = /^[^\s@@]+@@[^\s@@]+\.[^\s@@]+$/;
+            return re.test(email);
         }
     </script>
 
@@ -588,6 +838,33 @@
                 transform: translateY(0);
             }
         }
+
+        /* Estilos para la previsualización de imagen */
+        .image-preview-container {
+            width: 100%;
+            height: 250px;
+            border: 2px dashed #dee2e6;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            background-color: #f8f9fa;
+            transition: all 0.3s;
+        }
+
+            .image-preview-container:hover {
+                border-color: #2a64c5;
+            }
+
+        .image-placeholder {
+            text-align: center;
+            color: #6c757d;
+        }
+
+            .image-placeholder i {
+                margin-bottom: 10px;
+            }
 
         /* Contenedor principal con imagen de fondo */
         .main-background {
@@ -734,6 +1011,17 @@
             color: #004085;
         }
 
+        .alert-warning {
+            background-color: #fff3cd;
+            border-color: #ffeaa7;
+            color: #856404;
+        }
+
+        /* Badges */
+        .badge {
+            font-size: 0.75em;
+        }
+
         /* Responsive */
         @@media (max-width: 768px) {
             .main-background {
@@ -763,6 +1051,17 @@
                 text-align: left;
                 padding: 12px 15px;
             }
+
+            .image-preview-container {
+                width: 200px;
+                height: 200px;
+                margin: 0 auto;
+            }
+
+                .image-preview-container img {
+                    width: 200px;
+                    height: 200px;
+                }
         }
     </style>
 }

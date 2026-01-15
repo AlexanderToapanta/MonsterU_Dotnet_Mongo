@@ -46,6 +46,8 @@ namespace CapaModelo
 
         [BsonElement("password_hash")]
         public string password_hash { get; set; }
+        [BsonElement("imagen_perfil")]
+        public string imagen_perfil { get; set; }
 
         [BsonElement("rol")]
         public object rol { get; set; }
