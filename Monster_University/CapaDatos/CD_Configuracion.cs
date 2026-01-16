@@ -1,8 +1,9 @@
-﻿using System;
+﻿using CapaModelo;
+using MongoDB.Bson;
+using MongoDB.Driver;
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using MongoDB.Driver;
-using CapaModelo;
 
 namespace CapaDatos
 {
@@ -15,6 +16,9 @@ namespace CapaDatos
         {
             // Usamos la conexión existente de la clase Conexion
             _configuracionesCollection = Conexion.GetCollection<Configuracion>("configuraciones");
+
+            // Opcional: Crear índices al inicializar
+            CrearIndices();
         }
 
         public static CD_Configuracion Instancia
@@ -24,6 +28,28 @@ namespace CapaDatos
                 if (_instancia == null)
                     _instancia = new CD_Configuracion();
                 return _instancia;
+            }
+        }
+
+        /// <summary>
+        /// Crea índices para optimizar las consultas
+        /// </summary>
+        private void CrearIndices()
+        {
+            try
+            {
+                // Índice único para el campo Tipo
+                var tipoIndexKeys = Builders<Configuracion>.IndexKeys.Ascending(c => c.Tipo);
+                var tipoIndexOptions = new CreateIndexOptions { Unique = true };
+                var tipoIndexModel = new CreateIndexModel<Configuracion>(tipoIndexKeys, tipoIndexOptions);
+
+                _configuracionesCollection.Indexes.CreateOne(tipoIndexModel);
+
+                System.Diagnostics.Debug.WriteLine("✅ Índices creados para la colección configuraciones");
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"⚠️ Error al crear índices: {ex.Message}");
             }
         }
 
@@ -93,24 +119,35 @@ namespace CapaDatos
                 if (configuracion == null)
                     return false;
 
+                // Asegurarse que la lista de valores no sea null
+                configuracion.Valores = configuracion.Valores ?? new List<Configuracion.ValorConfiguracion>();
+
                 var filter = Builders<Configuracion>.Filter.Eq(c => c.Tipo, configuracion.Tipo);
                 var existing = _configuracionesCollection.Find(filter).FirstOrDefault();
 
                 if (existing != null)
                 {
-                    // Actualizar
+                    // Actualizar documento existente
                     var update = Builders<Configuracion>.Update
                         .Set(c => c.Valores, configuracion.Valores);
 
                     var result = _configuracionesCollection.UpdateOne(filter, update);
-                    return result.ModifiedCount > 0;
+
+                    System.Diagnostics.Debug.WriteLine($"✅ Configuración actualizada: {configuracion.Tipo}");
+                    return result.ModifiedCount > 0 || result.MatchedCount > 0;
                 }
                 else
                 {
-                    // Insertar nuevo
+                    // Insertar nuevo documento
                     _configuracionesCollection.InsertOne(configuracion);
+                    System.Diagnostics.Debug.WriteLine($"✅ Nueva configuración creada: {configuracion.Tipo}");
                     return true;
                 }
+            }
+            catch (MongoWriteException ex) 
+            {
+                System.Diagnostics.Debug.WriteLine($"💥 Error: Ya existe una configuración con el tipo '{configuracion.Tipo}'");
+                return false;
             }
             catch (Exception ex)
             {
@@ -128,6 +165,8 @@ namespace CapaDatos
             {
                 var filter = Builders<Configuracion>.Filter.Eq(c => c.Tipo, tipo);
                 var result = _configuracionesCollection.DeleteOne(filter);
+
+                System.Diagnostics.Debug.WriteLine($"✅ Configuración eliminada: {tipo} (afectados: {result.DeletedCount})");
                 return result.DeletedCount > 0;
             }
             catch (Exception ex)
@@ -140,24 +179,61 @@ namespace CapaDatos
         /// <summary>
         /// Obtiene solo los valores de una configuración específica como lista simple
         /// </summary>
-        public List<ValorConfiguracion> ObtenerValoresConfiguracion(string tipo)
+        public List<Configuracion.ValorConfiguracion> ObtenerValoresConfiguracion(string tipo)
         {
             try
             {
-                var configuracion = ObtenerConfiguracionPorTipo(tipo);
-                return configuracion?.Valores ?? new List<ValorConfiguracion>();
+                System.Diagnostics.Debug.WriteLine($"🔍 Buscando valores para tipo: {tipo}");
+
+                // Pipeline de agregación para obtener solo los valores
+                var pipeline = new[]
+                {
+            new BsonDocument("$match",
+                new BsonDocument("tipo", tipo)),
+            new BsonDocument("$project",
+                new BsonDocument
+                {
+                    { "valores", 1 },
+                    { "_id", 0 }
+                })
+        };
+
+                var result = _configuracionesCollection
+                    .Aggregate<BsonDocument>(pipeline)
+                    .FirstOrDefault();
+
+                if (result != null && result.Contains("valores"))
+                {
+                    var valores = result["valores"].AsBsonArray;
+                    var listaValores = new List<Configuracion.ValorConfiguracion>();
+
+                    foreach (var valor in valores)
+                    {
+                        listaValores.Add(new Configuracion.ValorConfiguracion
+                        {
+                            Codigo = valor["codigo"].AsString,
+                            Nombre = valor["nombre"].AsString
+                        });
+                    }
+
+                    System.Diagnostics.Debug.WriteLine($"✅ Valores encontrados para {tipo}: {listaValores.Count}");
+                    return listaValores;
+                }
+
+                System.Diagnostics.Debug.WriteLine($"⚠️ No se encontraron valores para: {tipo}");
+                return new List<Configuracion.ValorConfiguracion>();
             }
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine($"💥 Error al obtener valores de configuración: {ex.Message}");
-                return new List<ValorConfiguracion>();
+                return new List<Configuracion.ValorConfiguracion>();
             }
         }
 
         /// <summary>
         /// Método específico para obtener sexos (para compatibilidad)
         /// </summary>
-        public List<ValorConfiguracion> ObtenerSexos()
+        public List<Configuracion.ValorConfiguracion> ObtenerSexos()
         {
             return ObtenerValoresConfiguracion("sexo");
         }
@@ -165,7 +241,7 @@ namespace CapaDatos
         /// <summary>
         /// Método específico para obtener estados civiles (para compatibilidad)
         /// </summary>
-        public List<ValorConfiguracion> ObtenerEstadosCiviles()
+        public List<Configuracion.ValorConfiguracion> ObtenerEstadosCiviles()
         {
             return ObtenerValoresConfiguracion("estado_civil");
         }
@@ -184,6 +260,87 @@ namespace CapaDatos
             catch
             {
                 return codigo;
+            }
+        }
+
+        /// <summary>
+        /// Agrega un nuevo valor a una configuración existente
+        /// </summary>
+        public bool AgregarValorConfiguracion(string tipo, Configuracion.ValorConfiguracion nuevoValor)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(tipo) || nuevoValor == null)
+                    return false;
+
+                var filter = Builders<Configuracion>.Filter.Eq(c => c.Tipo, tipo);
+                var update = Builders<Configuracion>.Update
+                    .Push(c => c.Valores, nuevoValor);
+
+                var result = _configuracionesCollection.UpdateOne(filter, update);
+
+                if (result.ModifiedCount > 0)
+                {
+                    System.Diagnostics.Debug.WriteLine($"✅ Valor agregado a {tipo}: {nuevoValor.Codigo} - {nuevoValor.Nombre}");
+                    return true;
+                }
+                else
+                {
+                    System.Diagnostics.Debug.WriteLine($"⚠️ No se pudo agregar el valor a {tipo}");
+                    return false;
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"💥 Error al agregar valor a configuración: {ex.Message}");
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// Inicializa configuraciones básicas si no existen
+        /// </summary>
+        public void InicializarConfiguracionesBasicas()
+        {
+            try
+            {
+                var configuracionesBasicas = new List<Configuracion>
+                {
+                    new Configuracion
+                    {
+                        Tipo = "sexo",
+                        Valores = new List<Configuracion.ValorConfiguracion>
+                        {
+                            new Configuracion.ValorConfiguracion { Codigo = "M", Nombre = "Masculino" },
+                            new Configuracion.ValorConfiguracion { Codigo = "F", Nombre = "Femenino" }
+                        }
+                    },
+                    new Configuracion
+                    {
+                        Tipo = "estado_civil",
+                        Valores = new List<Configuracion.ValorConfiguracion>
+                        {
+                            new Configuracion.ValorConfiguracion { Codigo = "S", Nombre = "Soltero/a" },
+                            new Configuracion.ValorConfiguracion { Codigo = "C", Nombre = "Casado/a" },
+                            new Configuracion.ValorConfiguracion { Codigo = "D", Nombre = "Divorciado/a" },
+                            new Configuracion.ValorConfiguracion { Codigo = "V", Nombre = "Viudo/a" }
+                        }
+                    }
+                };
+
+                foreach (var config in configuracionesBasicas)
+                {
+                    if (ObtenerConfiguracionPorTipo(config.Tipo) == null)
+                    {
+                        GuardarConfiguracion(config);
+                    }
+                }
+
+                System.Diagnostics.Debug.WriteLine("✅ Configuraciones básicas inicializadas");
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"💥 Error al inicializar configuraciones: {ex.Message}");
             }
         }
     }

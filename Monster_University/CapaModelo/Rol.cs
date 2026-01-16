@@ -1,14 +1,32 @@
 ﻿using System;
 using System.Collections.Generic;
+using MongoDB.Bson;
+using MongoDB.Bson.Serialization.Attributes;
 
 namespace CapaModelo
 {
+    [BsonIgnoreExtraElements]
     public class Rol
     {
-        public string codigo { get; set; }
-        public string nombre { get; set; }
-        public string descripcion { get; set; }
-        public List<string> opciones_permitidas { get; set; }
-        public string estado { get; set; }
+        [BsonId]
+        [BsonRepresentation(BsonType.ObjectId)]
+        public string Id { get; set; }
+
+        [BsonElement("codigo")]
+        public string Codigo { get; set; }
+
+        [BsonElement("nombre")]
+        public string Nombre { get; set; }
+
+        [BsonElement("descripcion")]
+        public string Descripcion { get; set; }
+
+        [BsonElement("opciones_permitidas")]
+        public List<string> OpcionesPermitidas { get; set; } = new List<string>();
+
+        [BsonElement("estado")]
+        public string Estado { get; set; } = "activo";
+
+       
     }
 }

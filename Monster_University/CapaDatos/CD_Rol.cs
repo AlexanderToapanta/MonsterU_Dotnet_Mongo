@@ -48,7 +48,7 @@ namespace CapaDatos
         {
             try
             {
-                var filter = Builders<Rol>.Filter.Eq(r => r.codigo, codigo);
+                var filter = Builders<Rol>.Filter.Eq(r => r.Codigo, codigo);
                 var rol = _rolesCollection.Find(filter).FirstOrDefault();
                 return rol;
             }
@@ -63,7 +63,7 @@ namespace CapaDatos
         {
             try
             {
-                var filter = Builders<Rol>.Filter.Eq(r => r.nombre, nombre);
+                var filter = Builders<Rol>.Filter.Eq(r => r.Nombre, nombre);
                 var rol = _rolesCollection.Find(filter).FirstOrDefault();
                 return rol;
             }
@@ -79,19 +79,19 @@ namespace CapaDatos
             try
             {
                 // Asignar valores por defecto si no existen
-                if (string.IsNullOrEmpty(oRol.codigo))
+                if (string.IsNullOrEmpty(oRol.Codigo))
                 {
-                    oRol.codigo = ObjectId.GenerateNewId().ToString();
+                    oRol.Codigo = ObjectId.GenerateNewId().ToString();
                 }
 
-                if (string.IsNullOrEmpty(oRol.estado))
+                if (string.IsNullOrEmpty(oRol.Estado))
                 {
-                    oRol.estado = "ACTIVO";
+                    oRol.Estado = "ACTIVO";
                 }
 
-                if (oRol.opciones_permitidas == null)
+                if (oRol.OpcionesPermitidas == null)
                 {
-                    oRol.opciones_permitidas = new List<string>();
+                    oRol.OpcionesPermitidas = new List<string>();
                 }
 
                 _rolesCollection.InsertOne(oRol);
@@ -108,12 +108,12 @@ namespace CapaDatos
         {
             try
             {
-                var filter = Builders<Rol>.Filter.Eq(r => r.codigo, oRol.codigo);
+                var filter = Builders<Rol>.Filter.Eq(r => r.Codigo, oRol.Codigo);
                 var update = Builders<Rol>.Update
-                    .Set(r => r.nombre, oRol.nombre)
-                    .Set(r => r.descripcion, oRol.descripcion)
-                    .Set(r => r.opciones_permitidas, oRol.opciones_permitidas)
-                    .Set(r => r.estado, oRol.estado);
+                    .Set(r => r.Nombre, oRol.Nombre)
+                    .Set(r => r.Descripcion, oRol.Descripcion)
+                    .Set(r => r.OpcionesPermitidas, oRol.OpcionesPermitidas)
+                    .Set(r => r.Estado, oRol.Estado);
 
                 var result = _rolesCollection.UpdateOne(filter, update);
                 return result.ModifiedCount > 0;
@@ -142,7 +142,7 @@ namespace CapaDatos
                 }
 
                 // Eliminar el rol
-                var filter = Builders<Rol>.Filter.Eq(r => r.codigo, codigo);
+                var filter = Builders<Rol>.Filter.Eq(r => r.Codigo, codigo);
                 var result = _rolesCollection.DeleteOne(filter);
                 return result.DeletedCount > 0;
             }
@@ -163,22 +163,22 @@ namespace CapaDatos
                 {
                     case "ID":
                     case "CODIGO":
-                        filter = Builders<Rol>.Filter.Regex(r => r.codigo,
+                        filter = Builders<Rol>.Filter.Regex(r => r.Codigo,
                             new BsonRegularExpression(valor, "i"));
                         break;
                     case "NOMBRE":
-                        filter = Builders<Rol>.Filter.Regex(r => r.nombre,
+                        filter = Builders<Rol>.Filter.Regex(r => r.Nombre,
                             new BsonRegularExpression(valor, "i"));
                         break;
                     case "DESCRIPCION":
-                        filter = Builders<Rol>.Filter.Regex(r => r.descripcion,
+                        filter = Builders<Rol>.Filter.Regex(r => r.Descripcion,
                             new BsonRegularExpression(valor, "i"));
                         break;
                     case "ESTADO":
-                        filter = Builders<Rol>.Filter.Eq(r => r.estado, valor);
+                        filter = Builders<Rol>.Filter.Eq(r => r.Estado, valor);
                         break;
                     default:
-                        filter = Builders<Rol>.Filter.Regex(r => r.nombre,
+                        filter = Builders<Rol>.Filter.Regex(r => r.Nombre,
                             new BsonRegularExpression(valor, "i"));
                         break;
                 }
@@ -201,13 +201,13 @@ namespace CapaDatos
 
                 if (string.IsNullOrEmpty(codigoExcluir))
                 {
-                    filter = Builders<Rol>.Filter.Eq(r => r.nombre, nombre);
+                    filter = Builders<Rol>.Filter.Eq(r => r.Nombre, nombre);
                 }
                 else
                 {
                     filter = Builders<Rol>.Filter.And(
-                        Builders<Rol>.Filter.Eq(r => r.nombre, nombre),
-                        Builders<Rol>.Filter.Ne(r => r.codigo, codigoExcluir)
+                        Builders<Rol>.Filter.Eq(r => r.Nombre, nombre),
+                        Builders<Rol>.Filter.Ne(r => r.Codigo, codigoExcluir)
                     );
                 }
 
@@ -225,7 +225,7 @@ namespace CapaDatos
         {
             try
             {
-                var filter = Builders<Rol>.Filter.Eq(r => r.codigo, codigo);
+                var filter = Builders<Rol>.Filter.Eq(r => r.Codigo, codigo);
                 var count = _rolesCollection.CountDocuments(filter);
                 var existe = count > 0;
 
@@ -239,47 +239,14 @@ namespace CapaDatos
             }
         }
 
-        public bool AgregarOpcionARol(string codigoRol, string codigoOpcion)
-        {
-            try
-            {
-                var filter = Builders<Rol>.Filter.Eq(r => r.codigo, codigoRol);
-                var update = Builders<Rol>.Update.AddToSet(r => r.opciones_permitidas, codigoOpcion);
-
-                var result = _rolesCollection.UpdateOne(filter, update);
-                return result.ModifiedCount > 0;
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine("Error en AgregarOpcionARol: " + ex.Message);
-                return false;
-            }
-        }
-
-        public bool RemoverOpcionDeRol(string codigoRol, string codigoOpcion)
-        {
-            try
-            {
-                var filter = Builders<Rol>.Filter.Eq(r => r.codigo, codigoRol);
-                var update = Builders<Rol>.Update.Pull(r => r.opciones_permitidas, codigoOpcion);
-
-                var result = _rolesCollection.UpdateOne(filter, update);
-                return result.ModifiedCount > 0;
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine("Error en RemoverOpcionDeRol: " + ex.Message);
-                return false;
-            }
-        }
 
         public bool TieneOpcion(string codigoRol, string codigoOpcion)
         {
             try
             {
                 var filter = Builders<Rol>.Filter.And(
-                    Builders<Rol>.Filter.Eq(r => r.codigo, codigoRol),
-                    Builders<Rol>.Filter.AnyEq(r => r.opciones_permitidas, codigoOpcion)
+                    Builders<Rol>.Filter.Eq(r => r.Codigo, codigoRol),
+                    Builders<Rol>.Filter.AnyEq(r => r.OpcionesPermitidas, codigoOpcion)
                 );
 
                 var count = _rolesCollection.CountDocuments(filter);
@@ -299,12 +266,12 @@ namespace CapaDatos
                 System.Diagnostics.Debug.WriteLine($"=== CD_Rol.ObtenerOpcionesPorRol ===");
                 System.Diagnostics.Debug.WriteLine($"Consultando opciones para rol: '{codigoRol}'");
 
-                var filter = Builders<Rol>.Filter.Eq(r => r.codigo, codigoRol);
+                var filter = Builders<Rol>.Filter.Eq(r => r.Codigo, codigoRol);
 
                 // Proyección para obtener solo las opciones
                 var rol = _rolesCollection.Find(filter)
                     .Project<BsonDocument>(Builders<Rol>.Projection
-                        .Include(r => r.opciones_permitidas))
+                        .Include(r => r.OpcionesPermitidas))
                     .FirstOrDefault();
 
                 if (rol != null && rol.Contains("opciones_permitidas"))
@@ -356,7 +323,7 @@ namespace CapaDatos
         {
             try
             {
-                var filter = Builders<Rol>.Filter.Eq(r => r.estado, estado);
+                var filter = Builders<Rol>.Filter.Eq(r => r.Estado, estado);
                 var roles = _rolesCollection.Find(filter).ToList();
                 return roles ?? new List<Rol>();
             }
@@ -371,7 +338,7 @@ namespace CapaDatos
         {
             try
             {
-                var filter = Builders<Rol>.Filter.AnyEq(r => r.opciones_permitidas, codigoOpcion);
+                var filter = Builders<Rol>.Filter.AnyEq(r => r.OpcionesPermitidas, codigoOpcion);
                 var roles = _rolesCollection.Find(filter).ToList();
                 return roles ?? new List<Rol>();
             }
@@ -386,7 +353,7 @@ namespace CapaDatos
         {
             try
             {
-                var filter = Builders<Rol>.Filter.Eq(r => r.estado, "ACTIVO");
+                var filter = Builders<Rol>.Filter.Eq(r => r.Estado, "ACTIVO");
                 var roles = _rolesCollection.Find(filter).ToList();
                 return roles ?? new List<Rol>();
             }

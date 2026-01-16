@@ -234,69 +234,105 @@ namespace Monster_University.Controllers
 
         private void CargarListasDesplegables()
         {
-            // Obtener sexos desde MongoDB
-            var sexos = CD_Configuracion.Instancia.ObtenerSexos();
-            var listaSexos = new List<SelectListItem>();
-
-            if (sexos != null && sexos.Count > 0)
+            try
             {
-                foreach (var valor in sexos)
+                // Obtener sexos desde MongoDB
+                var sexos = CD_Configuracion.Instancia.ObtenerSexos();
+                var listaSexos = new List<SelectListItem>();
+
+                if (sexos != null && sexos.Count > 0)
                 {
-                    if (valor.Activo)
+                    foreach (var valor in sexos)
                     {
+                        // Como no existe la propiedad Activo, mostrar todos los valores
                         listaSexos.Add(new SelectListItem
                         {
                             Value = valor.Codigo,
                             Text = valor.Nombre
                         });
                     }
+
+                    // Ordenar por código alfabéticamente si no hay orden específico
+                    listaSexos = listaSexos.OrderBy(x => x.Value).ToList();
                 }
-            }
-            else
-            {
-                listaSexos.Add(new SelectListItem { Value = "M", Text = "Masculino" });
-                listaSexos.Add(new SelectListItem { Value = "F", Text = "Femenino" });
-            }
-            ViewBag.Sexos = listaSexos;
-
-            // Obtener estados civiles desde MongoDB
-            var estadosCiviles = CD_Configuracion.Instancia.ObtenerEstadosCiviles();
-            var listaEstadosCiviles = new List<SelectListItem>();
-
-            if (estadosCiviles != null && estadosCiviles.Count > 0)
-            {
-                foreach (var valor in estadosCiviles)
+                else
                 {
-                    if (valor.Activo)
+                    
+                }
+
+               
+                ViewBag.Sexos = listaSexos;
+
+                // Obtener estados civiles desde MongoDB
+                var estadosCiviles = CD_Configuracion.Instancia.ObtenerEstadosCiviles();
+                var listaEstadosCiviles = new List<SelectListItem>();
+
+                if (estadosCiviles != null && estadosCiviles.Count > 0)
+                {
+                    foreach (var valor in estadosCiviles)
                     {
+                        // Como no existe la propiedad Activo, mostrar todos los valores
                         listaEstadosCiviles.Add(new SelectListItem
                         {
                             Value = valor.Codigo,
                             Text = valor.Nombre
                         });
                     }
-                }
-            }
-            else
-            {
-                listaEstadosCiviles.Add(new SelectListItem { Value = "S", Text = "Soltero/a" });
-                listaEstadosCiviles.Add(new SelectListItem { Value = "C", Text = "Casado/a" });
-                listaEstadosCiviles.Add(new SelectListItem { Value = "D", Text = "Divorciado/a" });
-                listaEstadosCiviles.Add(new SelectListItem { Value = "V", Text = "Viudo/a" });
-            }
-            ViewBag.EstadosCiviles = listaEstadosCiviles;
 
-            // Cargar tipos de personal
-            var tiposPersonal = new List<SelectListItem>
+                    // Ordenar por código alfabéticamente
+                    listaEstadosCiviles = listaEstadosCiviles.OrderBy(x => x.Value).ToList();
+                }
+                else
+                {
+                    
+                }
+
+              
+                ViewBag.EstadosCiviles = listaEstadosCiviles;
+
+                // Cargar tipos de personal
+                var tiposPersonal = new List<SelectListItem>
+        {
+            
+            new SelectListItem { Value = "Administrador del Sistema", Text = "Administrador del Sistema" },
+            new SelectListItem { Value = "Docente", Text = "Docente" },
+            new SelectListItem { Value = "Administrador de Matriculas", Text = "Administrador de Matriculas" },
+            new SelectListItem { Value = "Secretaría Académica", Text = "Secretaría Académica" }
+        };
+                ViewBag.TiposPersonal = tiposPersonal;
+
+                System.Diagnostics.Debug.WriteLine("✅ Listas desplegables cargadas correctamente");
+                System.Diagnostics.Debug.WriteLine($"   - Sexos: {listaSexos.Count - 1} opciones");
+                System.Diagnostics.Debug.WriteLine($"   - Estados Civiles: {listaEstadosCiviles.Count - 1} opciones");
+                System.Diagnostics.Debug.WriteLine($"   - Tipos Personal: {tiposPersonal.Count - 1} opciones");
+            }
+            catch (Exception ex)
             {
-                new SelectListItem { Value = "Administrador del Sistema", Text = "Administrador del Sistema" },
-                new SelectListItem { Value = "Docente", Text = "Docente" },
-                new SelectListItem { Value = "Estudiante", Text = "Estudiante" },
-                new SelectListItem { Value = "Personal Administrativo", Text = "Personal Administrativo" },
-                new SelectListItem { Value = "Director", Text = "Director" },
-                new SelectListItem { Value = "Coordinador", Text = "Coordinador" }
-            };
-            ViewBag.TiposPersonal = tiposPersonal;
+                System.Diagnostics.Debug.WriteLine($"💥 Error al cargar listas desplegables: {ex.Message}");
+
+                // Cargar valores por defecto en caso de error
+              
+        {
+            
+            
+        };
+
+                
+        {
+           
+           
+        };
+
+                ViewBag.TiposPersonal = new List<SelectListItem>
+        {
+
+           
+            new SelectListItem { Value = "Administrador del Sistema", Text = "Administrador del Sistema" },
+            new SelectListItem { Value = "Docente", Text = "Docente" },
+            new SelectListItem { Value = "Administrador de Matriculas", Text = "Administrador de Matriculas" },
+            new SelectListItem { Value = "Secretaría Académica", Text = "Secretaría Académica" }
+        };
+            }
         }
 
         private bool ValidarDatosPersonaBasicos(Personal persona)
