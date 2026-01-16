@@ -3,7 +3,7 @@
   "WorkspaceRootPath": "C:\\Users\\Usuario\\Documents\\MonsterU_Dotnet_Mongo\\MonsterU_Dotnet_Mongo\\Monster_University\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{0ACDA5ED-A0F5-43E2-9DA5-E0EE34936451}|Monster_University\\Monster_University.csproj|C:\\Users\\Usuario\\Documents\\MonsterU_Dotnet_Mongo\\MonsterU_Dotnet_Mongo\\Monster_University\\monster_university\\views\\login\\login.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "AbsoluteMoniker": "D:0:0:{0ACDA5ED-A0F5-43E2-9DA5-E0EE34936451}|Monster_University\\Monster_University.csproj|c:\\users\\usuario\\documents\\monsteru_dotnet_mongo\\monsteru_dotnet_mongo\\monster_university\\monster_university\\views\\login\\login.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
       "RelativeMoniker": "D:0:0:{0ACDA5ED-A0F5-43E2-9DA5-E0EE34936451}|Monster_University\\Monster_University.csproj|solutionrelative:monster_university\\views\\login\\login.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
     },
     {
@@ -39,7 +39,7 @@
       "RelativeMoniker": "D:0:0:{51AA9F46-6D17-4DA7-AFCF-BE941145936E}|CapaDatos\\CapaDatos.csproj|solutionrelative:capadatos\\conexion.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{0ACDA5ED-A0F5-43E2-9DA5-E0EE34936451}|Monster_University\\Monster_University.csproj|c:\\users\\usuario\\documents\\monsteru_dotnet_mongo\\monsteru_dotnet_mongo\\monster_university\\monster_university\\views\\controladorpersonal\\crearpersonal.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "AbsoluteMoniker": "D:0:0:{0ACDA5ED-A0F5-43E2-9DA5-E0EE34936451}|Monster_University\\Monster_University.csproj|C:\\Users\\Usuario\\Documents\\MonsterU_Dotnet_Mongo\\MonsterU_Dotnet_Mongo\\Monster_University\\monster_university\\views\\controladorpersonal\\crearpersonal.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
       "RelativeMoniker": "D:0:0:{0ACDA5ED-A0F5-43E2-9DA5-E0EE34936451}|Monster_University\\Monster_University.csproj|solutionrelative:monster_university\\views\\controladorpersonal\\crearpersonal.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
     },
     {
@@ -115,8 +115,7 @@
               "RelativeToolTip": "CapaDatos\\CD_Rol.cs",
               "ViewState": "AgIAAF4BAAAAAAAAAAAwwMoBAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-01-14T03:19:58.705Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-01-14T03:19:58.705Z"
             },
             {
               "$type": "Document",
@@ -128,8 +127,7 @@
               "RelativeToolTip": "CapaDatos\\CD_Personal.cs",
               "ViewState": "AgIAAP0BAAAAAAAAAAAcwBACAAAlAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-01-14T03:18:24.7Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-01-14T03:18:24.7Z"
             },
             {
               "$type": "Document",
@@ -139,7 +137,7 @@
               "RelativeDocumentMoniker": "Monster_University\\Controllers\\LoginController.cs",
               "ToolTip": "C:\\Users\\Usuario\\Documents\\MonsterU_Dotnet_Mongo\\MonsterU_Dotnet_Mongo\\Monster_University\\Monster_University\\Controllers\\LoginController.cs",
               "RelativeToolTip": "Monster_University\\Controllers\\LoginController.cs",
-              "ViewState": "AgIAAGcAAAAAAAAAAAAAwHMAAAA9AAAAAAAAAA==",
+              "ViewState": "AgIAAFUBAAAAAAAAAAAAwGwBAAAJAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-12-17T15:22:14.65Z",
               "EditorCaption": ""
@@ -154,8 +152,7 @@
               "RelativeToolTip": "CapaModelo\\Personal.cs",
               "ViewState": "AgIAADUAAAAAAAAAAAAAADUAAAAnAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-01-14T03:15:44.71Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-01-14T03:15:44.71Z"
             },
             {
               "$type": "Document",
@@ -167,8 +164,7 @@
               "RelativeToolTip": "CapaModelo\\Rol.cs",
               "ViewState": "AgIAAAgAAAAAAAAAAAAQwBoAAAAfAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-01-14T03:20:07.945Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-01-14T03:20:07.945Z"
             },
             {
               "$type": "Document",
@@ -180,8 +176,7 @@
               "RelativeToolTip": "Monster_University\\Views\\Home\\Index.cshtml",
               "ViewState": "AgIAAC0BAAAAAAAAAAAQwEYBAABrAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
-              "WhenOpened": "2025-12-17T15:42:49.389Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-12-17T15:42:49.389Z"
             },
             {
               "$type": "Document",
@@ -193,8 +188,7 @@
               "RelativeToolTip": "Monster_University\\Views\\Shared\\_Layout.cshtml",
               "ViewState": "AgIAALcBAAAAAAAAAAAcwNABAAAHAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
-              "WhenOpened": "2025-12-17T15:28:20.557Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-12-17T15:28:20.557Z"
             },
             {
               "$type": "Document",
@@ -206,8 +200,7 @@
               "RelativeToolTip": "CapaDatos\\Conexion.cs",
               "ViewState": "AgIAAHUAAAAAAAAAAAAwwIYAAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-01-14T03:18:48.092Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-01-14T03:18:48.092Z"
             },
             {
               "$type": "Document",
@@ -219,8 +212,7 @@
               "RelativeToolTip": "Monster_University\\Views\\ControladorPersonal\\crearpersonal.cshtml",
               "ViewState": "AgIAAKgAAAAAAAAAAAAAALQAAAAcAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
-              "WhenOpened": "2025-12-08T14:52:19.971Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-12-08T14:52:19.971Z"
             },
             {
               "$type": "Document",

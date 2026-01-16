@@ -69,68 +69,144 @@ namespace Monster_University.Controllers
                         Session["PersonalEmail"] = personal.email;
                         Session["PersonalTipo"] = personal.peperTipo;
 
-                        // Manejar el rol como objeto anidado
+                        // Manejar el rol como objeto anidado - CORREGIDO PARA ExpandoObject
                         string rolCodigo = "";
                         Rol rolObjeto = null;
+                        string rolNombre = "";
 
                         if (personal.rol != null)
                         {
                             // Intentar deserializar el rol
                             try
                             {
-                                // Si rol es un BsonDocument, convertirlo a string primero
-                                if (personal.rol is BsonDocument bsonRol)
+                                System.Diagnostics.Debug.WriteLine($"🔍 Procesando rol (Tipo: {personal.rol.GetType().Name})");
+
+                                // CASO 1: Es ExpandoObject (System.Dynamic.ExpandoObject)
+                                if (personal.rol.GetType().Name.Contains("ExpandoObject"))
                                 {
-                                    var rolJson = bsonRol.ToJson();
-                                    rolObjeto = JsonConvert.DeserializeObject<Rol>(rolJson);
+                                    System.Diagnostics.Debug.WriteLine("🎯 Detectado ExpandoObject, convirtiendo...");
+                                    rolObjeto = ConvertirExpandoObjectARol(personal.rol);
+
+                                    if (rolObjeto != null)
+                                    {
+                                        rolCodigo = rolObjeto.Codigo;
+                                        rolNombre = rolObjeto.Nombre;
+                                        System.Diagnostics.Debug.WriteLine($"✅ Rol convertido desde ExpandoObject: {rolObjeto.Codigo} - {rolObjeto.Nombre}");
+                                    }
                                 }
-                                // Si ya es un string JSON
-                                else if (personal.rol is string rolString)
+                                // CASO 2: Es BsonDocument
+                                else if (personal.rol is BsonDocument bsonRol)
                                 {
-                                    rolObjeto = JsonConvert.DeserializeObject<Rol>(rolString);
+                                    System.Diagnostics.Debug.WriteLine("🎯 Detectado BsonDocument, convirtiendo...");
+                                    rolObjeto = ConvertirBsonDocumentARol(bsonRol);
+
+                                    if (rolObjeto != null)
+                                    {
+                                        rolCodigo = rolObjeto.Codigo;
+                                        rolNombre = rolObjeto.Nombre;
+                                        System.Diagnostics.Debug.WriteLine($"✅ Rol convertido desde BsonDocument: {rolObjeto.Codigo}");
+                                    }
                                 }
-                                // Si ya es un objeto Rol
+                                // CASO 3: Es string JSON
+                                else if (personal.rol is string rolString && !string.IsNullOrWhiteSpace(rolString))
+                                {
+                                    System.Diagnostics.Debug.WriteLine("🎯 Detectado string JSON, deserializando...");
+                                    try
+                                    {
+                                        rolObjeto = JsonConvert.DeserializeObject<Rol>(rolString);
+                                        if (rolObjeto != null)
+                                        {
+                                            rolCodigo = rolObjeto.Codigo;
+                                            rolNombre = rolObjeto.Nombre;
+                                            System.Diagnostics.Debug.WriteLine($"✅ Rol deserializado desde JSON: {rolObjeto.Codigo}");
+                                        }
+                                    }
+                                    catch (JsonException jsonEx)
+                                    {
+                                        System.Diagnostics.Debug.WriteLine($"⚠️ Error al deserializar JSON: {jsonEx.Message}");
+                                    }
+                                }
+                                // CASO 4: Ya es objeto Rol
                                 else if (personal.rol is Rol)
                                 {
                                     rolObjeto = (Rol)personal.rol;
+                                    rolCodigo = rolObjeto.Codigo;
+                                    rolNombre = rolObjeto.Nombre;
+                                    System.Diagnostics.Debug.WriteLine($"✅ Ya es objeto Rol: {rolObjeto.Codigo}");
+                                }
+                                // CASO 5: Otro tipo desconocido
+                                else
+                                {
+                                    System.Diagnostics.Debug.WriteLine($"⚠️ Tipo de rol no reconocido: {personal.rol.GetType().FullName}");
+
+                                    // Intentar convertirlo a string y deserializar
+                                    string rolAsString = personal.rol.ToString();
+                                    if (!string.IsNullOrWhiteSpace(rolAsString) &&
+                                        (rolAsString.Contains("{") || rolAsString.Contains("codigo")))
+                                    {
+                                        try
+                                        {
+                                            rolObjeto = JsonConvert.DeserializeObject<Rol>(rolAsString);
+                                            if (rolObjeto != null)
+                                            {
+                                                rolCodigo = rolObjeto.Codigo;
+                                                rolNombre = rolObjeto.Nombre;
+                                                System.Diagnostics.Debug.WriteLine($"✅ Rol convertido desde string: {rolObjeto.Codigo}");
+                                            }
+                                        }
+                                        catch { }
+                                    }
                                 }
 
                                 if (rolObjeto != null)
                                 {
-                                    rolCodigo = rolObjeto.Codigo;
                                     Session["Rol"] = rolObjeto;
                                     Session["RolCodigo"] = rolObjeto.Codigo;
                                     Session["RolNombre"] = rolObjeto.Nombre;
 
-                                    System.Diagnostics.Debug.WriteLine($"✅ Rol obtenido: {rolObjeto.Codigo} - {rolObjeto.Nombre}");
-
-                                    // Obtener opciones del rol
+                                    // Obtener opciones del rol desde la base de datos
                                     var opcionesRespuesta = ObtenerOpcionesPorRol(rolObjeto.Codigo);
                                     if (opcionesRespuesta.estado && opcionesRespuesta.objeto != null)
                                     {
                                         Session["OpcionesPermitidas"] = opcionesRespuesta.objeto;
-                                        System.Diagnostics.Debug.WriteLine($"✅ Opciones cargadas: {opcionesRespuesta.objeto.Count}");
+                                        System.Diagnostics.Debug.WriteLine($"✅ Opciones cargadas desde BD: {opcionesRespuesta.objeto.Count}");
                                     }
                                     else
                                     {
-                                        Session["OpcionesPermitidas"] = new List<string>();
-                                        System.Diagnostics.Debug.WriteLine("⚠️ No se pudieron obtener opciones del rol");
+                                        // Si no hay opciones en BD, usar las del objeto rol (si las tiene)
+                                        Session["OpcionesPermitidas"] = rolObjeto.OpcionesPermitidas ?? new List<string>();
+                                        System.Diagnostics.Debug.WriteLine($"⚠️ Opciones cargadas desde objeto: {rolObjeto.OpcionesPermitidas?.Count ?? 0}");
                                     }
+                                }
+                                else
+                                {
+                                    System.Diagnostics.Debug.WriteLine("❌ No se pudo convertir el rol a objeto válido");
+                                    rolCodigo = "SIN_ROL";
+                                    rolNombre = "Sin Rol";
                                 }
                             }
                             catch (Exception ex)
                             {
                                 System.Diagnostics.Debug.WriteLine($"❌ Error al procesar rol: {ex.Message}");
-                                rolCodigo = "SIN_ROL";
+                                System.Diagnostics.Debug.WriteLine($"Stack Trace: {ex.StackTrace}");
+                                rolCodigo = "ERROR_ROL";
+                                rolNombre = "Error en Rol";
                             }
                         }
                         else
                         {
                             System.Diagnostics.Debug.WriteLine("⚠️ Personal sin rol asignado");
                             rolCodigo = "SIN_ROL";
+                            rolNombre = "Sin Rol";
                         }
 
                         Session["RolCodigo"] = rolCodigo;
+                        Session["RolNombre"] = rolNombre;
+
+                        // Guardar datos adicionales para compatibilidad
+                        Session["Usuario"] = personal; // Para compatibilidad con código antiguo
+                        Session["UsuarioID"] = personal.codigo;
+                        Session["UsuarioNombre"] = $"{personal.nombres} {personal.apellidos}";
 
                         // Obtener datos adicionales de configuración
                         CargarDatosAdicionales();
@@ -157,6 +233,134 @@ namespace Monster_University.Controllers
                 System.Diagnostics.Debug.WriteLine($"Stack Trace: {ex.StackTrace}");
                 ViewBag.Error = "Error interno del sistema. Intente nuevamente.";
                 return View();
+            }
+        }
+
+        // Métodos auxiliares para convertir el rol
+        private Rol ConvertirExpandoObjectARol(dynamic expandoRol)
+        {
+            try
+            {
+                var rol = new Rol();
+
+                // Convertir ExpandoObject a diccionario
+                var dict = expandoRol as IDictionary<string, object>;
+
+                if (dict != null)
+                {
+                    // Extraer propiedades básicas
+                    if (dict.ContainsKey("codigo"))
+                        rol.Codigo = dict["codigo"]?.ToString();
+                    else if (dict.ContainsKey("Codigo"))
+                        rol.Codigo = dict["Codigo"]?.ToString();
+
+                    if (dict.ContainsKey("nombre"))
+                        rol.Nombre = dict["nombre"]?.ToString();
+                    else if (dict.ContainsKey("Nombre"))
+                        rol.Nombre = dict["Nombre"]?.ToString();
+
+                    if (dict.ContainsKey("descripcion"))
+                        rol.Descripcion = dict["descripcion"]?.ToString();
+                    else if (dict.ContainsKey("Descripcion"))
+                        rol.Descripcion = dict["Descripcion"]?.ToString();
+
+                    if (dict.ContainsKey("estado"))
+                        rol.Estado = dict["estado"]?.ToString();
+                    else if (dict.ContainsKey("Estado"))
+                        rol.Estado = dict["Estado"]?.ToString();
+                    else
+                        rol.Estado = "ACTIVO";
+
+                    // Extraer opciones permitidas
+                    if (dict.ContainsKey("opciones_permitidas"))
+                    {
+                        var opciones = dict["opciones_permitidas"];
+                        if (opciones is List<object> opcionesList)
+                        {
+                            rol.OpcionesPermitidas = opcionesList
+                                .Where(o => o != null)
+                                .Select(o => o.ToString())
+                                .ToList();
+                        }
+                        else if (opciones is List<string> stringList)
+                        {
+                            rol.OpcionesPermitidas = stringList;
+                        }
+                    }
+                    else if (dict.ContainsKey("OpcionesPermitidas"))
+                    {
+                        var opciones = dict["OpcionesPermitidas"];
+                        if (opciones is List<object> opcionesList)
+                        {
+                            rol.OpcionesPermitidas = opcionesList
+                                .Where(o => o != null)
+                                .Select(o => o.ToString())
+                                .ToList();
+                        }
+                        else if (opciones is List<string> stringList)
+                        {
+                            rol.OpcionesPermitidas = stringList;
+                        }
+                    }
+
+                    System.Diagnostics.Debug.WriteLine($"   ✅ ExpandoObject convertido - Código: {rol.Codigo}, Nombre: {rol.Nombre}");
+                }
+                else
+                {
+                    System.Diagnostics.Debug.WriteLine("   ⚠️ No se pudo convertir ExpandoObject a diccionario");
+                }
+
+                return rol;
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"💥 Error al convertir ExpandoObject a Rol: {ex.Message}");
+                return null;
+            }
+        }
+
+        private Rol ConvertirBsonDocumentARol(BsonDocument bsonRol)
+        {
+            try
+            {
+                var rol = new Rol();
+
+                // Extraer propiedades del BsonDocument
+                rol.Codigo = bsonRol.GetValue("codigo", "").AsString;
+                if (string.IsNullOrEmpty(rol.Codigo))
+                    rol.Codigo = bsonRol.GetValue("Codigo", "").AsString;
+
+                rol.Nombre = bsonRol.GetValue("nombre", "").AsString;
+                if (string.IsNullOrEmpty(rol.Nombre))
+                    rol.Nombre = bsonRol.GetValue("Nombre", "").AsString;
+
+                rol.Descripcion = bsonRol.GetValue("descripcion", "").AsString;
+                if (string.IsNullOrEmpty(rol.Descripcion))
+                    rol.Descripcion = bsonRol.GetValue("Descripcion", "").AsString;
+
+                rol.Estado = bsonRol.GetValue("estado", "ACTIVO").AsString;
+                if (rol.Estado == "ACTIVO" && bsonRol.Contains("Estado"))
+                    rol.Estado = bsonRol.GetValue("Estado", "ACTIVO").AsString;
+
+                // Extraer opciones permitidas
+                if (bsonRol.Contains("opciones_permitidas"))
+                {
+                    var opcionesArray = bsonRol["opciones_permitidas"].AsBsonArray;
+                    rol.OpcionesPermitidas = opcionesArray.Select(o => o.AsString).ToList();
+                }
+                else if (bsonRol.Contains("OpcionesPermitidas"))
+                {
+                    var opcionesArray = bsonRol["OpcionesPermitidas"].AsBsonArray;
+                    rol.OpcionesPermitidas = opcionesArray.Select(o => o.AsString).ToList();
+                }
+
+                System.Diagnostics.Debug.WriteLine($"   ✅ BsonDocument convertido - Código: {rol.Codigo}");
+                return rol;
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"💥 Error al convertir BsonDocument a Rol: {ex.Message}");
+                return null;
             }
         }
 
