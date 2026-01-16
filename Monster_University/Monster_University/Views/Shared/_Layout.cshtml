@@ -2,22 +2,27 @@
     Layout = null;
 
     // Obtener datos directamente de la sesión
-    var usuario = Session["Usuario"] as CapaModelo.Personal;
-    var opciones = Session["OpcionesUsuario"] as List<CapaModelo.Configuracion>;
+    var personal = Session["Personal"] as CapaModelo.Personal;
+    var rol = Session["Rol"] as CapaModelo.Rol;
+    var opcionesPermitidas = Session["OpcionesPermitidas"] as List<string> ?? new List<string>();
 
-    // Funciones auxiliares locales
+    // Para compatibilidad (si aún tienes código que espera el viejo formato)
+    var rolCodigo = Session["RolCodigo"] as string;
+    var rolNombre = Session["RolNombre"] as string;
+
+    // Funciones auxiliares locales actualizadas
     bool TienePermiso(string codigoOpcion)
     {
-        return opciones?.Exists(o => o.Id == codigoOpcion) ?? false;
+        return opcionesPermitidas?.Contains(codigoOpcion) ?? false;
     }
 
     bool TienePermisoEnGrupo(params string[] codigos)
     {
-        if (opciones == null) return false;
+        if (opcionesPermitidas == null) return false;
 
         foreach (var codigo in codigos)
         {
-            if (opciones.Exists(o => o.Id == codigo))
+            if (opcionesPermitidas.Contains(codigo))
                 return true;
         }
         return false;
@@ -25,7 +30,7 @@
 
     bool TienePermisoPrefijo(string prefijo)
     {
-        return opciones?.Exists(o => o.Id != null && o.Id.StartsWith(prefijo)) ?? false;
+        return opcionesPermitidas?.Any(o => o.StartsWith(prefijo)) ?? false;
     }
 }
 
@@ -44,6 +49,7 @@
 
     <!-- Estilos personalizados -->
     <style>
+        /* Tus estilos actuales se mantienen igual */
         .layout-container {
             display: grid;
             grid-template-rows: 65px auto 60px;
@@ -132,6 +138,21 @@
             .opcion-inactiva:hover {
                 background-color: #f8f9fa !important;
             }
+
+        /* Nuevo estilo para el avatar del usuario */
+        .user-avatar {
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-right: 8px;
+            border: 2px solid #dee2e6;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+        }
     </style>
 
     @RenderSection("styles", required: false)
@@ -150,7 +171,7 @@
             <div class="user-menu">
 
                 <!-- HOME - Siempre visible si está logueado -->
-                @if (usuario != null)
+                @if (personal != null)
                 {
                     <a href="@Url.Action("Index", "Home")" class="btn btn-primary menu-btn">
                         <i class="fas fa-home"></i> Home
@@ -158,7 +179,7 @@
                 }
 
                 <!-- ACADÉMICO - Solo si tiene AC1, AC2 o ACA -->
-                @if (usuario != null && TienePermisoEnGrupo("AC1", "AC2", "ACA"))
+                @if (personal != null && TienePermisoEnGrupo("AC1", "AC2", "ACA"))
                 {
                     <div class="dropdown">
                         <button class="btn btn-secondary dropdown-toggle menu-btn" type="button" data-bs-toggle="dropdown">
@@ -186,8 +207,6 @@
                                 </li>
                             }
 
-                           
-
                             <!-- Si no tiene opciones específicas -->
                             @if (!TienePermisoEnGrupo("AC1", "AC2", "ACA"))
                             {
@@ -198,7 +217,7 @@
                 }
 
                 <!-- PERSONAL - Solo si tiene PER -->
-                @if (usuario != null && TienePermiso("PER"))
+                @if (personal != null && TienePermiso("PER"))
                 {
                     <div class="dropdown">
                         <button class="btn btn-secondary dropdown-toggle menu-btn" type="button" data-bs-toggle="dropdown">
@@ -210,12 +229,20 @@
                                     <i class="fas fa-user-plus"></i> Crear Personal
                                 </a>
                             </li>
+                            @if (TienePermiso("PE2"))
+                            {
+                                <li>
+                                    <a href="@Url.Action("listarpersonal", "ControladorPersonal")" class="dropdown-item">
+                                        <i class="fas fa-list"></i> Listar Personal
+                                    </a>
+                                </li>
+                            }
                         </ul>
                     </div>
                 }
 
                 <!-- FINANZAS - Solo si tiene FIN -->
-                @if (usuario != null && TienePermiso("FIN"))
+                @if (personal != null && TienePermiso("FIN"))
                 {
                     <div class="dropdown">
                         <button class="btn btn-secondary dropdown-toggle menu-btn" type="button" data-bs-toggle="dropdown">
@@ -228,10 +255,8 @@
                     </div>
                 }
 
-
-
                 <!-- SEGURIDAD - Solo si tiene SE1, SE2, SE3 o SEG -->
-                @if (usuario != null && TienePermisoEnGrupo("SE1", "SE2", "SE3", "SEG"))
+                @if (personal != null && TienePermisoEnGrupo("SE1", "SE2", "SE3", "SEG"))
                 {
                     <div class="dropdown">
                         <button class="btn btn-secondary dropdown-toggle menu-btn" type="button" data-bs-toggle="dropdown">
@@ -269,8 +294,6 @@
                                 </li>
                             }
 
-
-
                             <!-- Si no tiene opciones específicas -->
                             @if (!TienePermisoEnGrupo("SE1", "SE2", "SE3", "SEG"))
                             {
@@ -281,26 +304,43 @@
                 }
 
                 <!-- USUARIO LOGUEADO -->
-                @if (usuario != null)
+                @if (personal != null)
                 {
                     <div class="dropdown">
                         <button class="btn btn-outline-primary dropdown-toggle menu-btn"
                                 data-bs-toggle="dropdown">
-                            <i class="fas fa-user"></i> @usuario.username
+                            <div class="user-info">
+                                @if (!string.IsNullOrEmpty(personal.imagen_perfil))
+                                {
+                                    <img src="@personal.imagen_perfil" class="user-avatar" alt="Avatar" />
+                                }
+                                else
+                                {
+                                    <i class="fas fa-user-circle me-1" style="font-size: 1.2rem;"></i>
+                                }
+                                <span>@personal.nombres @personal.apellidos</span>
+                            </div>
                         </button>
                         <ul class="dropdown-menu">
+                            <li>
+                                <a href="@Url.Action("Perfil", "ControladorPersonal", new { codigo = personal.codigo })" class="dropdown-item">
+                                    <i class="fas fa-user-circle"></i> Mi Perfil
+                                </a>
+                            </li>
                             <li>
                                 <a href="@Url.Action("cambiarcontrasena", "ControladorUsuario")" class="dropdown-item">
                                     <i class="fas fa-key"></i> Cambiar Contraseña
                                 </a>
                             </li>
 
-                           
-
                             <!-- Información del rol -->
-                            @if (!string.IsNullOrEmpty(usuario.codigo))
+                            @if (rol != null)
                             {
-                                <li><a class="dropdown-item disabled text-muted"><i class="fas fa-user-tag"></i> Rol: @usuario.codigo</a></li>
+                                <li><a class="dropdown-item disabled text-muted"><i class="fas fa-user-tag"></i> Rol: @rol.Nombre</a></li>
+                            }
+                            else if (!string.IsNullOrEmpty(rolCodigo))
+                            {
+                                <li><a class="dropdown-item disabled text-muted"><i class="fas fa-user-tag"></i> Rol: @rolCodigo</a></li>
                             }
 
                             <li><hr class="dropdown-divider" /></li>
@@ -347,16 +387,19 @@
                     &copy; @DateTime.Now.Year - Monster University - Sistema de Gestión Académica
                 </div>
                 <div class="text-muted small">
-                    @if (usuario != null)
+                    @if (personal != null)
                     {
-                        <span>Usuario: @usuario.username</span>
-                        if (!string.IsNullOrEmpty(usuario.codigo))
+                        <span>Usuario: @personal.username</span>
+                        if (rol != null)
                         {
-                            <span> | Rol: @usuario.codigo</span>
+                            <span> | Rol: @rol.Nombre (@rol.Codigo)</span>
                         }
-                        <span> | Opciones activas: @(opciones?.Count ?? 0)</span>
-                        <span> | </span>
-                        
+                        else if (!string.IsNullOrEmpty(rolCodigo))
+                        {
+                            <span> | Rol: @rolCodigo</span>
+                        }
+                        <span> | Opciones activas: @opcionesPermitidas.Count</span>
+                        <span> | Conectado desde: @personal.fecha_ingreso.ToString("dd/MM/yyyy")</span>
                     }
                     else
                     {
@@ -403,6 +446,16 @@
                 alert('No tiene permisos para acceder a esta opción');
                 return false;
             });
+
+            // Verificar si hay mensajes de sesión
+            @if (TempData["Mensaje"] != null)
+            {
+                <text>
+                setTimeout(function() {
+                    alert('@Html.Raw(TempData["Mensaje"])');
+                }, 500);
+                </text>
+            }
         });
     </script>
 

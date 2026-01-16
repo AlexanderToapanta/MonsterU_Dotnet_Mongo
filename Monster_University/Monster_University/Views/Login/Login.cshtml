@@ -29,7 +29,7 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 <body>
-    <!-- CAMBIO AQUÍ: "ControladorUsuario" en lugar de "Views" -->
+    <!-- CAMBIO 1: Los nombres de los campos ahora son "username" y "password" -->
     @using (Html.BeginForm("Login", "Login", FormMethod.Post, new { id = "loginForm" }))
     {
         @Html.AntiForgeryToken()
@@ -52,11 +52,11 @@
                 }
 
                 <div class="form-group mb-3">
-                    <label for="XEUSU_NOMBRE" class="form-label">
+                    <label for="username" class="form-label">
                         <i class="fas fa-user me-2"></i>Usuario:
                     </label>
-                    <!-- CAMBIO AQUÍ: name="XEUSU_NOMBRE" -->
-                    <input type="text" id="XEUSU_NOMBRE" name="XEUSU_NOMBRE"
+                    <!-- CAMBIO 2: Cambiado de "XEUSU_NOMBRE" a "username" -->
+                    <input type="text" id="username" name="username"
                            class="form-control form-control-lg"
                            placeholder="Ingrese su usuario"
                            required
@@ -65,12 +65,12 @@
                 </div>
 
                 <div class="form-group mb-4">
-                    <label for="XEUSU_CONTRA" class="form-label">
+                    <label for="password" class="form-label">
                         <i class="fas fa-lock me-2"></i>Contraseña:
                     </label>
                     <div class="input-group">
-                        <!-- CAMBIO AQUÍ: name="XEUSU_CONTRA" -->
-                        <input type="password" id="XEUSU_CONTRA" name="XEUSU_CONTRA"
+                        <!-- CAMBIO 3: Cambiado de "XEUSU_CONTRA" a "password" -->
+                        <input type="password" id="password" name="password"
                                class="form-control form-control-lg"
                                placeholder="Ingrese su contraseña"
                                required
@@ -97,8 +97,8 @@
         $(document).ready(function () {
             // Toggle password visibility
             $('#btnTogglePassword').click(function () {
-                // CAMBIO AQUÍ: '#XEUSU_CONTRA' en lugar de '#password'
-                var passwordField = $('#XEUSU_CONTRA');
+                // CAMBIO 4: Actualizado a '#password'
+                var passwordField = $('#password');
                 var type = passwordField.attr('type');
                 var icon = $(this).find('i');
 
@@ -113,9 +113,9 @@
 
             // Validación del formulario
             $('#loginForm').submit(function (e) {
-                // CAMBIO AQUÍ: Usa los nuevos IDs
-                var username = $('#XEUSU_NOMBRE').val().trim();
-                var password = $('#XEUSU_CONTRA').val().trim();
+                // CAMBIO 5: Usa los nuevos nombres de campos
+                var username = $('#username').val().trim();
+                var password = $('#password').val().trim();
                 var isValid = true;
 
                 if (username === '') {
@@ -125,8 +125,8 @@
                         text: 'Por favor ingrese su usuario',
                         confirmButtonColor: '#4f46e5'
                     });
-                    // CAMBIO AQUÍ: '#XEUSU_NOMBRE'
-                    $('#XEUSU_NOMBRE').focus();
+                    // CAMBIO 6: '#username'
+                    $('#username').focus();
                     isValid = false;
                 }
                 else if (password === '') {
@@ -136,8 +136,8 @@
                         text: 'Por favor ingrese su contraseña',
                         confirmButtonColor: '#4f46e5'
                     });
-                    // CAMBIO AQUÍ: '#XEUSU_CONTRA'
-                    $('#XEUSU_CONTRA').focus();
+                    // CAMBIO 7: '#password'
+                    $('#password').focus();
                     isValid = false;
                 }
 
@@ -151,12 +151,12 @@
             });
 
             // Auto-focus en el campo de usuario
-            // CAMBIO AQUÍ: '#XEUSU_NOMBRE'
-            $('#XEUSU_NOMBRE').focus();
+            // CAMBIO 8: '#username'
+            $('#username').focus();
 
             // Permitir login con Enter
-            // CAMBIO AQUÍ: '#XEUSU_NOMBRE, #XEUSU_CONTRA'
-            $('#XEUSU_NOMBRE, #XEUSU_CONTRA').keypress(function (e) {
+            // CAMBIO 9: '#username, #password'
+            $('#username, #password').keypress(function (e) {
                 if (e.which === 13) {
                     $('#loginForm').submit();
                 }
@@ -166,6 +166,17 @@
             setTimeout(function () {
                 $('.alert').alert('close');
             }, 5000);
+
+            // Prevenir doble envío del formulario
+            var formSubmitted = false;
+            $('#loginForm').on('submit', function () {
+                if (formSubmitted) {
+                    e.preventDefault();
+                    return false;
+                }
+                formSubmitted = true;
+                return true;
+            });
         });
     </script>
 
@@ -302,6 +313,18 @@
         .login-footer {
             text-align: center;
             border-top: 1px solid #e2e8f0;
+        }
+
+        /* Agregado: Estilo para el botón de mostrar/ocultar contraseña */
+        #btnTogglePassword {
+            border-left: 0;
+            border-top-left-radius: 0;
+            border-bottom-left-radius: 0;
+        }
+
+        .input-group .form-control {
+            border-top-right-radius: 0;
+            border-bottom-right-radius: 0;
         }
     </style>
 </body>

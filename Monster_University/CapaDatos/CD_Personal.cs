@@ -1,4 +1,5 @@
 ﻿using CapaModelo;
+using MongoDB.Bson;
 using MongoDB.Driver;
 using System;
 using System.Collections.Generic;
@@ -446,7 +447,169 @@ namespace CapaDatos
                 return null;
             }
         }
-        
+        public int LoginPersonal(string username, string password)
+        {
+            try
+            {
+                System.Diagnostics.Debug.WriteLine($"🔍 Verificando login para: {username}");
+
+                // Calcular hash SHA256 de la contraseña
+                var passwordHash = CalcularSHA256(password);
+
+                var filter = Builders<Personal>.Filter.And(
+                    Builders<Personal>.Filter.Eq(p => p.username, username),
+                    Builders<Personal>.Filter.Eq(p => p.password_hash, passwordHash),
+                    Builders<Personal>.Filter.Eq(p => p.estado, "ACTIVO")
+                );
+
+                var personal = _personasCollection.Find(filter).FirstOrDefault();
+
+                if (personal != null)
+                {
+                    System.Diagnostics.Debug.WriteLine($"✅ Login exitoso para: {username}");
+                    return 1; // Éxito
+                }
+                else
+                {
+                    System.Diagnostics.Debug.WriteLine($"❌ Login fallido para: {username}");
+                    return 0; // Fallo
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"💥 Error en LoginPersonal: {ex.Message}");
+                return -1; // Error
+            }
+        }
+        public List<Personal> ObtenerPersonal()
+        {
+            try
+            {
+                return _personasCollection.Find(_ => true).ToList();
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"💥 Error al obtener personal: {ex.Message}");
+                return new List<Personal>();
+            }
+        }
+
+        public Personal ObtenerPersonalPorCodigo(string codigo)
+        {
+            try
+            {
+                var filter = Builders<Personal>.Filter.Eq(p => p.codigo, codigo);
+                return _personasCollection.Find(filter).FirstOrDefault();
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"💥 Error al obtener personal por código: {ex.Message}");
+                return null;
+            }
+        }
+
+        private string CalcularSHA256(string input)
+        {
+            using (SHA256 sha256 = SHA256.Create())
+            {
+                byte[] bytes = Encoding.UTF8.GetBytes(input);
+                byte[] hash = sha256.ComputeHash(bytes);
+                return BitConverter.ToString(hash).Replace("-", "").ToLower();
+            }
+        }
+        public Personal ObtenerPersonalPorUsername(string username)
+        {
+            try
+            {
+                System.Diagnostics.Debug.WriteLine($"🔍 Buscando personal por username: {username}");
+
+                var filter = Builders<Personal>.Filter.Eq(p => p.username, username);
+                var personal = _personasCollection.Find(filter).FirstOrDefault();
+
+                if (personal != null)
+                {
+                    // Convertir rol si es necesario
+                    personal = ConvertirRolEnPersonal(personal);
+                }
+
+                return personal;
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"💥 Error al obtener personal por username: {ex.Message}");
+                return null;
+            }
+        }
+
+        private Personal ConvertirRolEnPersonal(Personal personal)
+        {
+            try
+            {
+                if (personal.rol == null) return personal;
+
+                // Si el rol es BsonDocument
+                if (personal.rol is BsonDocument bsonDoc)
+                {
+                    var rol = new Rol
+                    {
+                        Codigo = bsonDoc.GetValue("codigo", "").AsString,
+                        Nombre = bsonDoc.GetValue("nombre", "").AsString,
+                        Descripcion = bsonDoc.GetValue("descripcion", "").AsString,
+                        Estado = bsonDoc.GetValue("estado", "ACTIVO").AsString
+                    };
+
+                    // Convertir opciones_permitidas
+                    if (bsonDoc.Contains("opciones_permitidas"))
+                    {
+                        var opcionesArray = bsonDoc["opciones_permitidas"].AsBsonArray;
+                        rol.OpcionesPermitidas = opcionesArray.Select(o => o.AsString).ToList();
+                    }
+
+                    personal.rol = rol;
+                    System.Diagnostics.Debug.WriteLine($"✅ Rol convertido de BsonDocument: {rol.Codigo}");
+                }
+                // Si el rol es ExpandoObject
+                else if (personal.rol.GetType().Name.Contains("ExpandoObject"))
+                {
+                    try
+                    {
+                        dynamic expando = personal.rol;
+                        var rol = new Rol
+                        {
+                            Codigo = expando.codigo ?? "",
+                            Nombre = expando.nombre ?? "",
+                            Descripcion = expando.descripcion ?? "",
+                            Estado = expando.estado ?? "ACTIVO"
+                        };
+
+                        // Intentar obtener opciones_permitidas
+                        try
+                        {
+                            if (expando.opciones_permitidas is List<object> opcionesList)
+                            {
+                                rol.OpcionesPermitidas = opcionesList.Select(o => o?.ToString()).ToList();
+                            }
+                        }
+                        catch { }
+
+                        personal.rol = rol;
+                        System.Diagnostics.Debug.WriteLine($"✅ Rol convertido de ExpandoObject: {rol.Codigo}");
+                    }
+                    catch (Exception ex)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"⚠️ Error al convertir ExpandoObject: {ex.Message}");
+                    }
+                }
+
+                return personal;
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"💥 Error en ConvertirRolEnPersonal: {ex.Message}");
+                return personal;
+            }
+        }
+
     }
 
 }

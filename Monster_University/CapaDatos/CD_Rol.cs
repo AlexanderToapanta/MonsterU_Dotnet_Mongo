@@ -363,5 +363,99 @@ namespace CapaDatos
                 return new List<Rol>();
             }
         }
+        private void CrearIndices()
+        {
+            try
+            {
+                // Índice único para código de rol
+                var codigoIndex = Builders<Rol>.IndexKeys.Ascending(r => r.Codigo);
+                var codigoIndexOptions = new CreateIndexOptions { Unique = true };
+                _rolesCollection.Indexes.CreateOne(
+                    new CreateIndexModel<Rol>(codigoIndex, codigoIndexOptions));
+
+                // Índice para estado
+                var estadoIndex = Builders<Rol>.IndexKeys.Ascending(r => r.Estado);
+                _rolesCollection.Indexes.CreateOne(
+                    new CreateIndexModel<Rol>(estadoIndex));
+
+                System.Diagnostics.Debug.WriteLine("✅ Índices creados para la colección roles");
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"⚠️ Error al crear índices: {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        /// Obtiene un rol por su código
+        /// </summary>
+        /// <param name="codigo">Código del rol (ej: "ROL001")</param>
+        /// <returns>Objeto Rol o null si no se encuentra</returns>
+        public Rol ObtenerRolPorCodigo(string codigo)
+        {
+            try
+            {
+                System.Diagnostics.Debug.WriteLine($"🔍 Buscando rol por código: '{codigo}'");
+
+                if (string.IsNullOrEmpty(codigo))
+                {
+                    System.Diagnostics.Debug.WriteLine("⚠️ Código de rol vacío");
+                    return null;
+                }
+
+                // Primero verificar si la colección tiene datos
+                var totalRoles = _rolesCollection.CountDocuments(FilterDefinition<Rol>.Empty);
+                System.Diagnostics.Debug.WriteLine($"📊 Total de roles en colección: {totalRoles}");
+
+                if (totalRoles == 0)
+                {
+                    System.Diagnostics.Debug.WriteLine("⚠️ La colección de roles está vacía");
+                    return null;
+                }
+
+                // Buscar por código exacto
+                var filter = Builders<Rol>.Filter.Eq(r => r.Codigo, codigo);
+                var rol = _rolesCollection.Find(filter).FirstOrDefault();
+
+                if (rol != null)
+                {
+                    System.Diagnostics.Debug.WriteLine($"✅ Rol encontrado:");
+                    System.Diagnostics.Debug.WriteLine($"   Código: {rol.Codigo}");
+                    System.Diagnostics.Debug.WriteLine($"   Nombre: {rol.Nombre}");
+                    System.Diagnostics.Debug.WriteLine($"   Descripción: {rol.Descripcion}");
+                    System.Diagnostics.Debug.WriteLine($"   Estado: {rol.Estado}");
+                    System.Diagnostics.Debug.WriteLine($"   Opciones permitidas: {rol.OpcionesPermitidas?.Count ?? 0}");
+
+                    if (rol.OpcionesPermitidas != null && rol.OpcionesPermitidas.Count > 0)
+                    {
+                        foreach (var opcion in rol.OpcionesPermitidas)
+                        {
+                            System.Diagnostics.Debug.WriteLine($"     - {opcion}");
+                        }
+                    }
+                }
+                else
+                {
+                    System.Diagnostics.Debug.WriteLine($"❌ Rol no encontrado con código: '{codigo}'");
+
+                    // Para debug: listar todos los roles disponibles
+                    var todosRoles = _rolesCollection.Find(_ => true).ToList();
+                    System.Diagnostics.Debug.WriteLine($"📋 Roles disponibles ({todosRoles.Count}):");
+                    foreach (var r in todosRoles)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"   - '{r.Codigo}': {r.Nombre} (Estado: {r.Estado})");
+                    }
+                }
+
+                return rol;
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"💥 Error al obtener rol por código '{codigo}': {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"Stack Trace: {ex.StackTrace}");
+                return null;
+            }
+        }
+
     }
 }
