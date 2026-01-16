@@ -291,6 +291,7 @@
     <Compile Include="App_Start\FilterConfig.cs" />
     <Compile Include="App_Start\RouteConfig.cs" />
     <Compile Include="Controllers\ControladorPersonalController.cs" />
+    <Compile Include="Controllers\ControladorRolController.cs" />
     <Compile Include="Controllers\LoginController.cs" />
     <Compile Include="Services\EmailService.cs" />
     <Compile Include="Views\index.aspx.cs">

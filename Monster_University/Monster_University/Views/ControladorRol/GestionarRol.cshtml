@@ -1,7 +1,8 @@
 ﻿@{
     ViewBag.Title = "Administrar Roles";
     Layout = "~/Views/Shared/_Layout.cshtml";
-    var model = ViewBag.Roles as IEnumerable<object> ?? new List<object>();
+    var roles = ViewBag.Roles as IEnumerable<CapaModelo.Rol> ?? new List<CapaModelo.Rol>();
+    var opcionesSistema = ViewBag.OpcionesSistema as IEnumerable<CapaModelo.Configuracion.ValorConfiguracion> ?? new List<CapaModelo.Configuracion.ValorConfiguracion>();
 }
 
 <style>
@@ -12,6 +13,62 @@
 
     .modal-backdrop {
         z-index: 1990 !important;
+    }
+
+    .opciones-container {
+        max-height: 300px;
+        overflow-y: auto;
+        border: 1px solid #dee2e6;
+        border-radius: 0.375rem;
+        padding: 10px;
+    }
+
+    .opcion-item {
+        padding: 8px 12px;
+        margin-bottom: 5px;
+        border: 1px solid #dee2e6;
+        border-radius: 0.375rem;
+        cursor: move;
+        background-color: #f8f9fa;
+    }
+
+        .opcion-item:hover {
+            background-color: #e9ecef;
+        }
+
+        .opcion-item.selected {
+            background-color: #cfe2ff;
+            border-color: #0d6efd;
+        }
+
+    .categoria-title {
+        font-weight: bold;
+        color: #495057;
+        margin-top: 15px;
+        margin-bottom: 8px;
+        padding-bottom: 5px;
+        border-bottom: 1px solid #dee2e6;
+    }
+
+    .opciones-list {
+        list-style: none;
+        padding-left: 0;
+        margin-bottom: 0;
+    }
+
+    .estado-badge {
+        font-size: 0.8em;
+        padding: 4px 8px;
+    }
+
+    /* Estilos para selección de filas */
+    .table-hover tbody tr:hover {
+        background-color: rgba(0, 0, 0, 0.075);
+        cursor: pointer;
+    }
+
+    .table-active {
+        background-color: rgba(0, 123, 255, 0.1) !important;
     }
 </style>
 
@@ -25,36 +82,38 @@
                     <thead>
                         <tr>
                             <th style="width:30px"><input type="checkbox" id="selectAll" /></th>
-                            <th>ID</th>
+                            <th>Código</th>
                             <th>Nombre</th>
                             <th>Descripción</th>
-                            <th>Usuarios Asignados</th>
+                            <th>Opciones</th>
+                            <th>Estado</th>
                         </tr>
                     </thead>
                     <tbody>
-                        @if (model != null && model.Any())
+                        @if (roles != null && roles.Any())
                         {
-                            foreach (var item in model)
+                            foreach (var rol in roles)
                             {
-                                var id = item.GetType().GetProperty("XEROL_ID")?.GetValue(item)?.ToString() ?? "";
-                                var nombre = item.GetType().GetProperty("XEROL_NOMBRE")?.GetValue(item)?.ToString() ?? "";
-                                var descripcion = item.GetType().GetProperty("XEROL_DESCRI")?.GetValue(item)?.ToString() ?? "";
-                                
+                                var opcionesCount = rol.OpcionesPermitidas?.Count ?? 0;
+                                var estadoClass = rol.Estado == "ACTIVO" ? "bg-success" : "bg-secondary";
 
-                                <tr data-id="@id" data-nombre="@nombre" data-descripcion="@descripcion" >
+                                <tr data-codigo="@rol.Codigo" data-nombre="@rol.Nombre" data-descripcion="@rol.Descripcion" data-estado="@rol.Estado">
                                     <td><input type="checkbox" class="row-select" /></td>
-                                    <td>@id</td>
-                                    <td>@nombre</td>
-                                    <td>@(string.IsNullOrEmpty(descripcion) ? "Sin descripción" : descripcion)</td>
+                                    <td>@rol.Codigo</td>
+                                    <td>@rol.Nombre</td>
+                                    <td>@(string.IsNullOrEmpty(rol.Descripcion) ? "Sin descripción" : rol.Descripcion)</td>
                                     <td>
-                                        <span class="badge bg-info"></span>
+                                        <span class="badge bg-info">@opcionesCount opciones</span>
+                                    </td>
+                                    <td>
+                                        <span class="badge @estadoClass estado-badge">@rol.Estado</span>
                                     </td>
                                 </tr>
                             }
                         }
                         else
                         {
-                            <tr><td colspan="5">No hay registros de roles.</td></tr>
+                            <tr><td colspan="6">No hay registros de roles.</td></tr>
                         }
                     </tbody>
                 </table>
@@ -62,11 +121,11 @@
 
             <div class="mt-3 d-flex gap-2">
                 <button id="createButton" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#createModal">
-                    <i class="fas fa-plus me-1"></i>Crear
+                    <i class="fas fa-plus me-1"></i>Crear Rol
                 </button>
 
                 <button id="viewButton" class="btn btn-info" data-bs-toggle="modal" data-bs-target="#viewModal" disabled>
-                    <i class="fas fa-eye me-1"></i>Ver
+                    <i class="fas fa-eye me-1"></i>Ver Detalles
                 </button>
 
                 <button id="editButton" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#editModal" disabled>
@@ -87,7 +146,7 @@
 
 <!-- Create Modal -->
 <div class="modal fade" id="createModal" tabindex="-1" aria-labelledby="createModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
+    <div class="modal-dialog modal-lg">
         <div class="modal-content">
             @using (Html.BeginForm("Crear", "ControladorRol", FormMethod.Post))
             {
@@ -97,26 +156,38 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <div class="mb-3">
-                        <label class="form-label">ID <span class="text-muted">(Generado automáticamente)</span></label>
-                        <input type="text" name="XEROL_ID" class="form-control" required value="@ViewBag.NewRolId" readonly />
-                        <small class="form-text text-muted">Formato: RO001, RO002, etc.</small>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Nombre del Rol <span class="text-danger">*</span></label>
-                        <input type="text" name="XEROL_NOMBRE" class="form-control" required maxlength="30" />
-                        <small class="form-text text-muted">Máximo 30 caracteres</small>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Descripción</label>
-                        <textarea name="XEROL_DESCRI" class="form-control" rows="3" maxlength="100"></textarea>
-                        <small class="form-text text-muted">Máximo 100 caracteres</small>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Código <span class="text-muted">(Generado automáticamente)</span></label>
+                                <input type="text" name="Codigo" class="form-control" required value="@ViewBag.NewRolId" readonly />
+                                <small class="form-text text-muted">Formato: ROL001, ROL002, etc.</small>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Nombre del Rol <span class="text-danger">*</span></label>
+                                <input type="text" name="Nombre" class="form-control" required maxlength="50" />
+                                <small class="form-text text-muted">Máximo 50 caracteres</small>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Descripción</label>
+                                <textarea name="Descripcion" class="form-control" rows="3" maxlength="200"></textarea>
+                                <small class="form-text text-muted">Máximo 200 caracteres</small>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Estado</label>
+                                <select name="Estado" class="form-select">
+                                    <option value="ACTIVO" selected>ACTIVO</option>
+                                    <option value="INACTIVO">INACTIVO</option>
+                                </select>
+                            </div>
+                        </div>
+
                     </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
                     <button type="button" id="regenerateIdBtn" class="btn btn-outline-info">
-                        <i class="fas fa-sync me-1"></i>Regenerar ID
+                        <i class="fas fa-sync me-1"></i>Regenerar Código
                     </button>
                     <button type="submit" class="btn btn-success">
                         <i class="fas fa-save me-1"></i>Guardar
@@ -129,28 +200,40 @@
 
 <!-- View Modal -->
 <div class="modal fade" id="viewModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog">
+    <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title">Detalles del Rol</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <dl class="row">
-                    <dt class="col-sm-4">ID</dt>
-                    <dd class="col-sm-8" id="view-id"></dd>
+                <div class="row">
+                    <div class="col-md-6">
+                        <dl class="row">
+                            <dt class="col-sm-4">Código</dt>
+                            <dd class="col-sm-8" id="view-codigo"></dd>
 
-                    <dt class="col-sm-4">Nombre</dt>
-                    <dd class="col-sm-8" id="view-nombre"></dd>
+                            <dt class="col-sm-4">Nombre</dt>
+                            <dd class="col-sm-8" id="view-nombre"></dd>
 
-                    <dt class="col-sm-4">Descripción</dt>
-                    <dd class="col-sm-8" id="view-descripcion"></dd>
+                            <dt class="col-sm-4">Descripción</dt>
+                            <dd class="col-sm-8" id="view-descripcion"></dd>
 
-                    <dt class="col-sm-4">Usuarios Asignados</dt>
-                    <dd class="col-sm-8">
-                        <span class="badge bg-info" id="view-usuarios">0</span>
-                    </dd>
-                </dl>
+                            <dt class="col-sm-4">Estado</dt>
+                            <dd class="col-sm-8">
+                                <span class="badge" id="view-estado-badge"></span>
+                            </dd>
+                        </dl>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Opciones Permitidas</label>
+                            <div id="view-opciones-container" class="opciones-container">
+                                <small class="text-muted">Cargando opciones...</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
@@ -161,7 +244,7 @@
 
 <!-- Edit Modal -->
 <div class="modal fade" id="editModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog">
+    <div class="modal-dialog modal-lg">
         <div class="modal-content">
             @using (Html.BeginForm("Editar", "ControladorRol", FormMethod.Post))
             {
@@ -171,16 +254,32 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <input type="hidden" name="XEROL_ID" id="edit-id" />
-                    <div class="mb-3">
-                        <label class="form-label">Nombre del Rol <span class="text-danger">*</span></label>
-                        <input type="text" name="XEROL_NOMBRE" id="edit-nombre" class="form-control" required maxlength="30" />
-                        <small class="form-text text-muted">Máximo 30 caracteres</small>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Descripción</label>
-                        <textarea name="XEROL_DESCRI" id="edit-descripcion" class="form-control" rows="3" maxlength="100"></textarea>
-                        <small class="form-text text-muted">Máximo 100 caracteres</small>
+                    <input type="hidden" name="Codigo" id="edit-codigo" />
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Código</label>
+                                <input type="text" name="CodigoDisplay" id="edit-codigo-display" class="form-control" readonly />
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Nombre del Rol <span class="text-danger">*</span></label>
+                                <input type="text" name="Nombre" id="edit-nombre" class="form-control" required maxlength="50" />
+                                <small class="form-text text-muted">Máximo 50 caracteres</small>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Descripción</label>
+                                <textarea name="Descripcion" id="edit-descripcion" class="form-control" rows="3" maxlength="200"></textarea>
+                                <small class="form-text text-muted">Máximo 200 caracteres</small>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Estado</label>
+                                <select name="Estado" id="edit-estado" class="form-select">
+                                    <option value="ACTIVO">ACTIVO</option>
+                                    <option value="INACTIVO">INACTIVO</option>
+                                </select>
+                            </div>
+                        </div>
+                        
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -194,80 +293,265 @@
     </div>
 </div>
 
-<!-- Delete Confirmation Form (posted by script) -->
+<!-- Delete Confirmation Form -->
 @using (Html.BeginForm("Eliminar", "ControladorRol", FormMethod.Post, new { id = "deleteForm" }))
 {
     @Html.AntiForgeryToken()
-    <input type="hidden" name="id" id="delete-id" />
+    <input type="hidden" name="codigo" id="delete-codigo" />
 }
 
 @section Scripts {
     <script>
-        $(function () {
-            // Move modals to body to avoid stacking-context issues from parent containers
+        $(document).ready(function () {
+            console.log('Document ready - inicializando funciones de roles');
+
+            // Variables globales
+            var opcionesSistema = @Html.Raw(Json.Encode(opcionesSistema));
+            var opcionesPorCategoria = {};
+
+            // Organizar opciones por categoría
+            if (opcionesSistema && opcionesSistema.length > 0) {
+                console.log('Opciones del sistema cargadas:', opcionesSistema.length);
+                opcionesSistema.forEach(function(opcion) {
+                    var categoria = opcion.Categoria || 'Sin Categoría';
+                    if (!opcionesPorCategoria[categoria]) {
+                        opcionesPorCategoria[categoria] = [];
+                    }
+                    opcionesPorCategoria[categoria].push(opcion);
+                });
+                console.log('Opciones por categoría:', opcionesPorCategoria);
+            }
+
+            // Move modals to body to avoid stacking-context issues
             $('#createModal, #viewModal, #editModal').appendTo('body');
 
             function updateButtons() {
                 var selected = $('#datalist tbody tr').has('input.row-select:checked');
                 var count = selected.length;
+                console.log('Filas seleccionadas:', count);
+
                 $('#viewButton').prop('disabled', count !== 1);
                 $('#editButton').prop('disabled', count !== 1);
                 $('#deleteButton').prop('disabled', count === 0);
             }
 
-            // row click toggles checkbox
+            // Evento simple para seleccionar filas - versión simplificada
             $('#datalist tbody').on('click', 'tr', function (e) {
-                if (e.target.type !== 'checkbox' && e.target.tagName !== 'A' && !$(e.target).closest('.btn').length) {
-                    var cb = $(this).find('input.row-select');
-                    cb.prop('checked', !cb.prop('checked'));
+                // No hacer nada si se hace clic en un checkbox directamente
+                if ($(e.target).is('input[type="checkbox"]') || $(e.target).is('button') || $(e.target).is('a')) {
+                    return;
                 }
-                $(this).toggleClass('table-active', $(this).find('input.row-select').prop('checked'));
+
+                var checkbox = $(this).find('input.row-select');
+                var isChecked = checkbox.prop('checked');
+
+                // Alternar estado del checkbox
+                checkbox.prop('checked', !isChecked);
+
+                // Actualizar clase de la fila
+                $(this).toggleClass('table-active', !isChecked);
+
+                // Actualizar botones
                 updateButtons();
+
+                // Actualizar checkbox "Seleccionar todos"
+                updateSelectAllCheckbox();
             });
 
-            // checkbox click stops row click propagation
-            $('#datalist').on('click', 'input.row-select', function (e) {
+            // Evento para checkbox individual
+            $('#datalist').on('change', 'input.row-select', function (e) {
                 e.stopPropagation();
-                $(this).closest('tr').toggleClass('table-active', $(this).prop('checked'));
+                var row = $(this).closest('tr');
+                row.toggleClass('table-active', $(this).prop('checked'));
                 updateButtons();
+                updateSelectAllCheckbox();
             });
 
+            // Checkbox "Seleccionar todos"
             $('#selectAll').on('change', function () {
                 var checked = $(this).prop('checked');
                 $('input.row-select').prop('checked', checked).trigger('change');
+                $('#datalist tbody tr').toggleClass('table-active', checked);
+                updateButtons();
             });
 
-            // View / Edit populate modal fields from first selected row
+            // Actualizar checkbox "Seleccionar todos"
+            function updateSelectAllCheckbox() {
+                var totalCheckboxes = $('input.row-select').length;
+                var checkedCheckboxes = $('input.row-select:checked').length;
+                $('#selectAll').prop('checked', totalCheckboxes > 0 && totalCheckboxes === checkedCheckboxes);
+            }
+
+            // Get first selected row data
             function getFirstSelectedData() {
                 var row = $('#datalist tbody tr').has('input.row-select:checked').first();
+                console.log('Datos de fila seleccionada:', row.data());
                 return {
-                    id: row.data('id'),
+                    codigo: row.data('codigo'),
                     nombre: row.data('nombre'),
                     descripcion: row.data('descripcion'),
-                    usuarios: row.data('usuarios')
+                    estado: row.data('estado')
                 };
             }
 
+            // View button click handler
             $('#viewButton').on('click', function () {
+                console.log('Botón Ver clickeado');
                 var d = getFirstSelectedData();
-                $('#view-id').text(d.id);
+                console.log('Datos para vista:', d);
+
+                $('#view-codigo').text(d.codigo);
                 $('#view-nombre').text(d.nombre);
                 $('#view-descripcion').text(d.descripcion || 'Sin descripción');
-                $('#view-usuarios').text(d.usuarios);
+
+                var estadoBadge = $('#view-estado-badge');
+                estadoBadge.text(d.estado);
+                estadoBadge.removeClass('bg-success bg-secondary');
+                estadoBadge.addClass(d.estado == 'ACTIVO' ? 'bg-success' : 'bg-secondary');
+
+                // Cargar opciones del rol
+                cargarOpcionesRol(d.codigo, 'view');
             });
 
+            // Edit button click handler
             $('#editButton').on('click', function () {
+                console.log('Botón Editar clickeado');
                 var d = getFirstSelectedData();
-                $('#edit-id').val(d.id);
+                console.log('Datos para edición:', d);
+
+                $('#edit-codigo').val(d.codigo);
+                $('#edit-codigo-display').val(d.codigo);
                 $('#edit-nombre').val(d.nombre);
-                $('#edit-descripcion').val(d.descripcion);
+                $('#edit-descripcion').val(d.descripcion || '');
+                $('#edit-estado').val(d.estado);
+
+                // Cargar opciones del rol y mostrar selector
+                cargarOpcionesRol(d.codigo, 'edit');
             });
 
+            // Cargar opciones de un rol
+            function cargarOpcionesRol(codigoRol, tipo) {
+                console.log('Cargando opciones para rol:', codigoRol, 'tipo:', tipo);
+
+                $.ajax({
+                    url: '@Url.Action("ObtenerOpcionesRol", "ControladorRol")',
+                    type: 'GET',
+                    data: { codigoRol: codigoRol },
+                    success: function(response) {
+                        console.log('Respuesta de opciones:', response);
+                        if (response.success) {
+                            mostrarOpciones(response.opciones, tipo);
+                        } else {
+                            mostrarError('Error al cargar opciones: ' + response.message, tipo);
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('Error AJAX:', status, error);
+                        mostrarError('Error al conectar con el servidor: ' + error, tipo);
+                    }
+                });
+            }
+
+            // Mostrar opciones en el modal
+            function mostrarOpciones(opcionesRol, tipo) {
+                console.log('Mostrando opciones:', opcionesRol, 'tipo:', tipo);
+                var container = $('#' + tipo + '-opciones-container');
+                container.empty();
+
+                if (!opcionesSistema || opcionesSistema.length === 0) {
+                    container.html('<div class="alert alert-warning">No hay opciones del sistema configuradas.</div>');
+                    return;
+                }
+
+                // Para vista (solo mostrar)
+                if (tipo === 'view') {
+                    if (!opcionesRol || opcionesRol.length === 0) {
+                        container.html('<div class="alert alert-info">Este rol no tiene opciones asignadas.</div>');
+                        return;
+                    }
+
+                    var html = '<div class="alert alert-success mb-2">Opciones asignadas: ' + opcionesRol.length + '</div>';
+
+                    // Agrupar por categoría
+                    var opcionesAgrupadas = {};
+                    opcionesRol.forEach(function(codigoOpcion) {
+                        var opcion = opcionesSistema.find(function(o) {
+                            return o.Codigo === codigoOpcion;
+                        });
+                        if (opcion) {
+                            var categoria = opcion.Categoria || 'Sin Categoría';
+                            if (!opcionesAgrupadas[categoria]) {
+                                opcionesAgrupadas[categoria] = [];
+                            }
+                            opcionesAgrupadas[categoria].push(opcion);
+                        }
+                    });
+
+                    // Mostrar por categoría
+                    for (var categoria in opcionesAgrupadas) {
+                        html += '<div class="categoria-title">' + categoria + '</div>';
+                        html += '<ul class="opciones-list">';
+                        opcionesAgrupadas[categoria].forEach(function(opcion) {
+                            html += '<li class="opcion-item">';
+                            html += '<strong>' + opcion.Codigo + '</strong>: ' + opcion.Nombre;
+                            html += '</li>';
+                        });
+                        html += '</ul>';
+                    }
+
+                    container.html(html);
+                }
+                // Para edición (checkbox)
+                else if (tipo === 'edit') {
+                    var html = '';
+                    var opcionesSeleccionadas = opcionesRol || [];
+                    console.log('Opciones seleccionadas:', opcionesSeleccionadas);
+
+                    for (var categoria in opcionesPorCategoria) {
+                        html += '<div class="categoria-title">' + categoria + '</div>';
+                        opcionesPorCategoria[categoria].forEach(function(opcion) {
+                            var checked = opcionesSeleccionadas.includes(opcion.Codigo);
+                            console.log('Opción:', opcion.Codigo, 'checked:', checked);
+                            html += '<div class="form-check">';
+                            html += '<input class="form-check-input opcion-checkbox" type="checkbox" ';
+                            html += 'value="' + opcion.Codigo + '" id="opcion-' + opcion.Codigo + '" ';
+                            html += (checked ? 'checked' : '') + '>';
+                            html += '<label class="form-check-label" for="opcion-' + opcion.Codigo + '">';
+                            html += '<strong>' + opcion.Codigo + '</strong>: ' + opcion.Nombre;
+                            html += '</label>';
+                            html += '</div>';
+                        });
+                    }
+
+                    container.html(html);
+
+                    // Actualizar campo hidden cuando cambian los checkboxes
+                    actualizarOpcionesHidden();
+                    container.find('.opcion-checkbox').on('change', actualizarOpcionesHidden);
+                }
+            }
+
+            function actualizarOpcionesHidden() {
+                var opcionesSeleccionadas = [];
+                $('#edit-opciones-container .opcion-checkbox:checked').each(function() {
+                    opcionesSeleccionadas.push($(this).val());
+                });
+                console.log('Opciones seleccionadas actualizadas:', opcionesSeleccionadas);
+                $('#edit-opciones-hidden').val(opcionesSeleccionadas.join(','));
+            }
+
+            function mostrarError(mensaje, tipo) {
+                console.error('Error:', mensaje);
+                var container = $('#' + tipo + '-opciones-container');
+                container.html('<div class="alert alert-danger">' + mensaje + '</div>');
+            }
+
+            // Delete button click handler
             $('#deleteButton').on('click', function () {
                 var ids = [];
                 var nombres = [];
                 $('#datalist tbody tr').has('input.row-select:checked').each(function () {
-                    ids.push($(this).data('id'));
+                    ids.push($(this).data('codigo'));
                     nombres.push($(this).data('nombre'));
                 });
 
@@ -281,28 +565,26 @@
                 }
                 message += '\n\n⚠️ Advertencia: No se pueden eliminar roles que tengan usuarios asignados.';
 
-                if (!confirm(message)) return;
-
-                if (ids.length === 1) {
-                    // Eliminación individual
-                    $('#delete-id').val(ids[0]);
-                    $('#deleteForm').submit();
-                } else {
-                    // Eliminación múltiple (necesitarías crear una acción para esto)
-                    alert('Para eliminar múltiples registros, contacte al administrador del sistema.');
+                if (confirm(message)) {
+                    if (ids.length === 1) {
+                        $('#delete-codigo').val(ids[0]);
+                        $('#deleteForm').submit();
+                    } else {
+                        alert('Para eliminar múltiples registros, contacte al administrador del sistema.');
+                    }
                 }
             });
 
-            // Botón para regenerar ID en modal de creación
+            // Botón para regenerar código en modal de creación
             $('#regenerateIdBtn').on('click', function () {
                 $.ajax({
                     url: '@Url.Action("RegenerarId", "ControladorRol")',
                     type: 'POST',
                     success: function (response) {
                         if (response.success) {
-                            $('input[name="XEROL_ID"]').val(response.nuevoId);
+                            $('input[name="Codigo"]').val(response.nuevoId);
                         } else {
-                            alert('Error al regenerar ID: ' + response.message);
+                            alert('Error al regenerar código: ' + response.message);
                         }
                     },
                     error: function () {
@@ -311,17 +593,17 @@
                 });
             });
 
-            // Validación de formulario de creación
+            // Validación de formularios
             $('form').on('submit', function () {
-                var nombre = $('input[name="XEROL_NOMBRE"]').val();
-                if (nombre && nombre.length > 30) {
-                    alert('El nombre del rol no puede tener más de 30 caracteres');
+                var nombre = $('input[name="Nombre"]').val();
+                if (nombre && nombre.length > 50) {
+                    alert('El nombre del rol no puede tener más de 50 caracteres');
                     return false;
                 }
 
-                var descripcion = $('textarea[name="XEROL_DESCRI"]').val();
-                if (descripcion && descripcion.length > 100) {
-                    alert('La descripción no puede tener más de 100 caracteres');
+                var descripcion = $('textarea[name="Descripcion"]').val();
+                if (descripcion && descripcion.length > 200) {
+                    alert('La descripción no puede tener más de 200 caracteres');
                     return false;
                 }
 
@@ -348,13 +630,52 @@
             }
 
             function showToast(type, message) {
-                // Implementar función para mostrar notificaciones (usando Toastr o similar)
                 if (type === 'success') {
                     alert('✅ ' + message);
                 } else {
                     alert('❌ ' + message);
                 }
             }
+
+            // Validar nombre único en tiempo real (para creación)
+            $('input[name="Nombre"]').on('blur', function() {
+                var nombre = $(this).val();
+                if (nombre && nombre.length > 0) {
+                    $.ajax({
+                        url: '@Url.Action("ValidarNombreRol", "ControladorRol")',
+                        type: 'POST',
+                        data: { nombre: nombre },
+                        success: function(response) {
+                            if (response.success && !response.esUnico) {
+                                alert('⚠️ El nombre "' + nombre + '" ya está en uso. Por favor, elija otro nombre.');
+                                $('input[name="Nombre"]').focus();
+                            }
+                        }
+                    });
+                }
+            });
+
+            // Validar nombre único en tiempo real (para edición)
+            $('#edit-nombre').on('blur', function() {
+                var nombre = $(this).val();
+                var codigo = $('#edit-codigo').val();
+                if (nombre && nombre.length > 0) {
+                    $.ajax({
+                        url: '@Url.Action("ValidarNombreRol", "ControladorRol")',
+                        type: 'POST',
+                        data: { nombre: nombre, codigoExcluir: codigo },
+                        success: function(response) {
+                            if (response.success && !response.esUnico) {
+                                alert('⚠️ El nombre "' + nombre + '" ya está en uso. Por favor, elija otro nombre.');
+                                $('#edit-nombre').focus();
+                            }
+                        }
+                    });
+                }
+            });
+
+            // Inicializar botones al cargar la página
+            updateButtons();
         });
     </script>
 }
