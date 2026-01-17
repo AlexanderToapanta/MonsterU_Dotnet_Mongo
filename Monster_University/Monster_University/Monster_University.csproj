@@ -290,6 +290,7 @@
     <Compile Include="App_Start\BundleConfig.cs" />
     <Compile Include="App_Start\FilterConfig.cs" />
     <Compile Include="App_Start\RouteConfig.cs" />
+    <Compile Include="Controllers\ControladorCarreraController.cs" />
     <Compile Include="Controllers\ControladorPersonalController.cs" />
     <Compile Include="Controllers\ControladorRolController.cs" />
     <Compile Include="Controllers\LoginController.cs" />
@@ -401,12 +402,12 @@
     <Content Include="Views\Login\Login.cshtml" />
     <Content Include="Views\Home\Index.cshtml" />
     <Content Include="Views\ControladorUsuario\cambiarcontrasena.cshtml" />
-    <Content Include="Views\ControladorCarrera\Lista.cshtml" />
     <Content Include="Views\ControladorPersonal\crearpersonal.cshtml" />
-    <Content Include="Views\ControladorCarrera\Reporte.cshtml" />
     <Content Include="Views\ControladorRol\GestionarRol.cshtml" />
     <Content Include="Views\ControladorRol\AsignarRol.cshtml" />
     <Content Include="Views\ControladorOpRoles\AsignarOpRol.cshtml" />
+    <Content Include="Views\ControladorCarrera\Lista.cshtml" />
+    <Content Include="Views\ControladorCarrera\Reporte.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

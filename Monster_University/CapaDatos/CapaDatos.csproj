@@ -147,6 +147,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CD_Carrera.cs" />
     <Compile Include="CD_Configuracion.cs" />
     <Compile Include="CD_Personal.cs" />
     <Compile Include="CD_Rol.cs" />

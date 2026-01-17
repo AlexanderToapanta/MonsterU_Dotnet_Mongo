@@ -1,7 +1,7 @@
 @{
     ViewBag.Title = "Administrar Carreras";
     Layout = "~/Views/Shared/_Layout.cshtml";
-    var model = ViewBag.Carreras as IEnumerable<object> ?? new List<object>();
+    var model = ViewBag.Carreras as IEnumerable<CapaModelo.Carrera> ?? new List<CapaModelo.Carrera>();
 }
 
 <style>
@@ -25,7 +25,7 @@
                     <thead>
                         <tr>
                             <th style="width:30px"><input type="checkbox" id="selectAll" /></th>
-                            <th>ID</th>
+                            <th>Código</th>
                             <th>Nombre</th>
                             <th>Créditos Máx.</th>
                             <th>Créditos Mín.</th>
@@ -36,17 +36,12 @@
                         {
                             foreach (var item in model)
                             {
-                                var id = item.GetType().GetProperty("mecarrId")?.GetValue(item) ?? item.GetType().GetProperty("MECARR_ID")?.GetValue(item) ?? item.GetType().GetProperty("Id")?.GetValue(item) ?? "";
-                                var nombre = item.GetType().GetProperty("mecarrNombre")?.GetValue(item) ?? item.GetType().GetProperty("MECARR_NOMBRE")?.GetValue(item) ?? item.GetType().GetProperty("Nombre")?.GetValue(item) ?? "";
-                                var maxCred = item.GetType().GetProperty("mecarrMaxCred")?.GetValue(item) ?? item.GetType().GetProperty("MECARR_MAXCRED")?.GetValue(item) ?? item.GetType().GetProperty("MaxCred")?.GetValue(item) ?? "";
-                                var minCred = item.GetType().GetProperty("mecarrMinCred")?.GetValue(item) ?? item.GetType().GetProperty("MECARR_MINCRED")?.GetValue(item) ?? item.GetType().GetProperty("MinCred")?.GetValue(item) ?? "";
-
-                                <tr data-id="@id" data-nombre="@nombre" data-maxcred="@maxCred" data-mincred="@minCred">
+                                <tr data-id="@item.codigo" data-nombre="@item.nombre" data-maxcred="@item.creditosMaximos" data-mincred="@item.creditosMinimos">
                                     <td><input type="checkbox" class="row-select" /></td>
-                                    <td>@id</td>
-                                    <td>@nombre</td>
-                                    <td>@maxCred</td>
-                                    <td>@minCred</td>
+                                    <td>@item.codigo</td>
+                                    <td>@item.nombre</td>
+                                    <td>@item.creditosMaximos</td>
+                                    <td>@item.creditosMinimos</td>
                                 </tr>
                             }
                         }
@@ -92,20 +87,20 @@
                 </div>
                 <div class="modal-body">
                     <div class="mb-3">
-                        <label class="form-label">ID</label>
-                        <input type="text" name="MECARR_ID" class="form-control" required value="@ViewBag.NewCarreraId" readonly />
+                        <label class="form-label">Código</label>
+                        <input type="text" name="codigo" class="form-control" required value="@ViewBag.NewCarreraId" readonly />
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Nombre</label>
-                        <input type="text" name="MECARR_NOMBRE" class="form-control" required />
+                        <input type="text" name="nombre" class="form-control" required />
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Créditos Máx.</label>
-                        <input type="number" name="MECARR_MAXCRED" class="form-control" />
+                        <input type="number" name="creditosMaximos" class="form-control" min="0" />
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Créditos Mín.</label>
-                        <input type="number" name="MECARR_MINCRED" class="form-control" />
+                        <input type="number" name="creditosMinimos" class="form-control" min="0" />
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -127,7 +122,7 @@
             </div>
             <div class="modal-body">
                 <dl class="row">
-                    <dt class="col-sm-4">ID</dt>
+                    <dt class="col-sm-4">Código</dt>
                     <dd class="col-sm-8" id="view-id"></dd>
 
                     <dt class="col-sm-4">Nombre</dt>
@@ -159,18 +154,18 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <input type="hidden" name="MECARR_ID" id="edit-id" />
+                    <input type="hidden" name="codigo" id="edit-id" />
                     <div class="mb-3">
                         <label class="form-label">Nombre</label>
-                        <input type="text" name="MECARR_NOMBRE" id="edit-nombre" class="form-control" required />
+                        <input type="text" name="nombre" id="edit-nombre" class="form-control" required />
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Créditos Máx.</label>
-                        <input type="number" name="MECARR_MAXCRED" id="edit-maxcred" class="form-control" />
+                        <input type="number" name="creditosMaximos" id="edit-maxcred" class="form-control" min="0" />
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Créditos Mín.</label>
-                        <input type="number" name="MECARR_MINCRED" id="edit-mincred" class="form-control" />
+                        <input type="number" name="creditosMinimos" id="edit-mincred" class="form-control" min="0" />
                     </div>
                 </div>
                 <div class="modal-footer">
