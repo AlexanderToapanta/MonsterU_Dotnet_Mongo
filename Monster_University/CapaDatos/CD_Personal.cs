@@ -13,10 +13,12 @@ namespace CapaDatos
     {
         public static CD_Personal _instancia = null;
         private IMongoCollection<Personal> _personasCollection;
+        private IMongoCollection<BsonDocument> _coleccionBson;
 
         private CD_Personal()
         {
             _personasCollection = Conexion.GetCollection<Personal>("personas");
+            _coleccionBson = Conexion.GetCollection<BsonDocument>("personas");
         }
 
         public static CD_Personal Instancia
@@ -481,18 +483,7 @@ namespace CapaDatos
                 return -1; // Error
             }
         }
-        public List<Personal> ObtenerPersonal()
-        {
-            try
-            {
-                return _personasCollection.Find(_ => true).ToList();
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"💥 Error al obtener personal: {ex.Message}");
-                return new List<Personal>();
-            }
-        }
+   
 
         public Personal ObtenerPersonalPorCodigo(string codigo)
         {
@@ -609,7 +600,138 @@ namespace CapaDatos
                 return personal;
             }
         }
+        public List<Personal> ObtenerPersonal()
+        {
+            try
+            {
+                return _personasCollection.Find(_ => true).ToList();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error al obtener personal: {ex.Message}");
+                return new List<Personal>();
+            }
+        }
 
+        // Método para obtener una persona por ID
+        public Personal ObtenerPersonalPorId(string id)
+        {
+            try
+            {
+                var filter = Builders<Personal>.Filter.Eq("_id", ObjectId.Parse(id));
+                return _personasCollection.Find(filter).FirstOrDefault();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error al obtener personal por ID: {ex.Message}");
+                return null;
+            }
+        }
+
+        // Método para actualizar el rol de una persona
+        public bool ActualizarRolPersona(string personaId, object rol)
+        {
+            try
+            {
+                var filter = Builders<BsonDocument>.Filter.Eq("_id", ObjectId.Parse(personaId));
+                var update = Builders<BsonDocument>.Update.Set("rol", rol);
+
+                var result = _coleccionBson.UpdateOne(filter, update);
+                return result.ModifiedCount > 0;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error al actualizar rol de persona: {ex.Message}");
+                return false;
+            }
+        }
+
+        // Método para buscar personas por criterio
+        public List<Personal> BuscarPersonal(string criterio, string valor)
+        {
+            try
+            {
+                FilterDefinition<Personal> filter;
+
+                switch (criterio.ToLower())
+                {
+                    case "codigo":
+                        filter = Builders<Personal>.Filter.Regex("codigo", new BsonRegularExpression(valor, "i"));
+                        break;
+                    case "nombres":
+                        filter = Builders<Personal>.Filter.Regex("nombres", new BsonRegularExpression(valor, "i"));
+                        break;
+                    case "apellidos":
+                        filter = Builders<Personal>.Filter.Regex("apellidos", new BsonRegularExpression(valor, "i"));
+                        break;
+                    case "email":
+                        filter = Builders<Personal>.Filter.Regex("email", new BsonRegularExpression(valor, "i"));
+                        break;
+                    case "estado":
+                        filter = Builders<Personal>.Filter.Eq("estado", valor);
+                        break;
+                    default:
+                        return new List<Personal>();
+                }
+
+                return _personasCollection.Find(filter).ToList();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error al buscar personal: {ex.Message}");
+                return new List<Personal>();
+            }
+        }
+
+        // Método para obtener estadísticas de roles
+        public Dictionary<string, int> ObtenerEstadisticasRoles()
+        {
+            try
+            {
+                var estadisticas = new Dictionary<string, int>
+                {
+                    { "total_personas", 0 },
+                    { "con_rol", 0 },
+                    { "sin_rol", 0 }
+                };
+
+                var personas = ObtenerPersonal();
+                estadisticas["total_personas"] = personas.Count;
+
+                foreach (var persona in personas)
+                {
+                    bool tieneRol = false;
+
+                    if (persona.rol != null)
+                    {
+                        if (persona.rol is BsonDocument bsonDoc)
+                        {
+                            tieneRol = bsonDoc.Contains("codigo") && !string.IsNullOrEmpty(bsonDoc["codigo"].AsString);
+                        }
+                        else if (persona.rol is Rol rolObj)
+                        {
+                            tieneRol = !string.IsNullOrEmpty(rolObj.Codigo);
+                        }
+                    }
+
+                    if (tieneRol)
+                    {
+                        estadisticas["con_rol"]++;
+                    }
+                    else
+                    {
+                        estadisticas["sin_rol"]++;
+                    }
+                }
+
+                return estadisticas;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error al obtener estadísticas: {ex.Message}");
+                return new Dictionary<string, int>();
+            }
+        }
     }
 
 }

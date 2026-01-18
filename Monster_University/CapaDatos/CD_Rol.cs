@@ -33,28 +33,51 @@ namespace CapaDatos
         {
             try
             {
-                var filter = Builders<Rol>.Filter.Empty;
+                Console.WriteLine("=== OBTENIENDO ROLES DESDE MONGODB ===");
+
+                // Obtener todos los roles activos
+                var filter = Builders<Rol>.Filter.Eq("estado", "ACTIVO");
                 var roles = _rolesCollection.Find(filter).ToList();
-                return roles ?? new List<Rol>();
+
+                // O si quieres todos sin filtrar:
+                // var roles = _coleccionRol.Find(_ => true).ToList();
+
+                Console.WriteLine($"Roles encontrados: {roles.Count}");
+                foreach (var rol in roles)
+                {
+                    Console.WriteLine($"- {rol.Codigo}: {rol.Nombre}");
+                }
+
+                return roles;
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine("Error en ObtenerRoles: " + ex.Message);
+                Console.WriteLine($"ERROR al obtener roles: {ex.Message}");
+                Console.WriteLine($"StackTrace: {ex.StackTrace}");
                 return new List<Rol>();
             }
         }
 
-        public Rol ObtenerDetalleRol(string codigo)
+        // Método para obtener un rol por ID
+        public Rol ObtenerDetalleRol(string id)
         {
             try
             {
-                var filter = Builders<Rol>.Filter.Eq(r => r.Codigo, codigo);
-                var rol = _rolesCollection.Find(filter).FirstOrDefault();
-                return rol;
+                if (ObjectId.TryParse(id, out ObjectId objectId))
+                {
+                    var filter = Builders<Rol>.Filter.Eq("_id", objectId);
+                    return _rolesCollection.Find(filter).FirstOrDefault();
+                }
+                else
+                {
+                    // También buscar por código si el ID no es ObjectId
+                    var filter = Builders<Rol>.Filter.Eq("codigo", id);
+                    return _rolesCollection.Find(filter).FirstOrDefault();
+                }
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine("Error en ObtenerDetalleRol: " + ex.Message);
+                Console.WriteLine($"Error al obtener detalle del rol: {ex.Message}");
                 return null;
             }
         }
