@@ -173,32 +173,7 @@
     <div id="formAsignacion">
         @Html.AntiForgeryToken()
 
-        <!-- PANEL DE DEPURACIÓN (TEMPORAL) -->
-        <div class="alert alert-info">
-            <h5><i class="fas fa-bug me-2"></i>Información de Depuración</h5>
-            @{
-                var listaRoles = ViewBag.ListaRolesOriginal as List<Rol>;
-                var selectList = ViewBag.Roles as SelectList;
-                var tieneRoles = listaRoles?.Any() ?? false;
-            }
-            <p><strong>Roles en ViewBag.ListaRolesOriginal:</strong> @(listaRoles?.Count ?? 0)</p>
-            <p><strong>Items en ViewBag.Roles (SelectList):</strong> @(selectList?.Count() ?? 0)</p>
-            <p><strong>¿Tiene roles?:</strong> @tieneRoles</p>
-
-            @if (tieneRoles)
-            {
-                <div class="mt-2">
-                    <strong>Detalles de roles encontrados:</strong>
-                    <ul class="mb-0">
-                        @foreach (var rol in listaRoles)
-                        {
-                            <li>ID: @rol.Id | Código: @rol.Codigo | Nombre: @rol.Nombre | Estado: @rol.Estado</li>
-                        }
-                    </ul>
-                </div>
-            }
-        </div>
-        <!-- FIN PANEL DE DEPURACIÓN -->
+        
         <!-- Selección de Rol -->
         <div class="mb-4">
             <label class="form-label fw-bold">Seleccionar Rol:</label>

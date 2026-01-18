@@ -1056,8 +1056,8 @@ namespace Monster_University.Controllers
         {
             try
             {
-                System.Diagnostics.Debug.WriteLine($"=== PersonasConRol ===");
-                System.Diagnostics.Debug.WriteLine($"Rol ID recibido del dropdown: {rolId}");
+                System.Diagnostics.Debug.WriteLine($"=== PersonasConRol - INICIO ===");
+                System.Diagnostics.Debug.WriteLine($"Rol ID recibido: {rolId}");
 
                 if (string.IsNullOrEmpty(rolId))
                 {
@@ -1072,35 +1072,157 @@ namespace Monster_University.Controllers
                     return Json(new { success = false, message = "Rol no encontrado" });
                 }
 
-                System.Diagnostics.Debug.WriteLine($"✅ Rol encontrado: {rol.Nombre} (Código: {rol.Codigo})");
+                System.Diagnostics.Debug.WriteLine($"✅ Rol encontrado: {rol.Nombre} (Código: {rol.Codigo}, ID: {rol.Id})");
 
                 // 2. Obtener todas las personas
                 var todasPersonas = CD_Personal.Instancia.ObtenerPersonal();
-                System.Diagnostics.Debug.WriteLine($"Total personas en BD: {todasPersonas?.Count ?? 0}");
+                System.Diagnostics.Debug.WriteLine($"Total personas obtenidas: {todasPersonas?.Count ?? 0}");
 
                 // 3. Filtrar personas por CÓDIGO del rol
                 var personasConEsteRol = new List<Personal>();
+                var totalPersonasProcesadas = 0;
+                var personasConRolNoNulo = 0;
+                var personasConRolString = 0;
+                var personasConRolDocument = 0;
+                var personasConRolObjeto = 0;
 
                 if (todasPersonas != null)
                 {
                     foreach (var persona in todasPersonas)
                     {
-                        if (persona.rol == null)
+                        totalPersonasProcesadas++;
+
+                        try
                         {
-                            continue;
+                            System.Diagnostics.Debug.WriteLine($"\n--- Persona {totalPersonasProcesadas}: {persona.nombres} {persona.apellidos} ---");
+                            System.Diagnostics.Debug.WriteLine($"Tipo de persona.rol: {(persona.rol == null ? "NULL" : persona.rol.GetType().FullName)}");
+
+                            if (persona.rol == null)
+                            {
+                                System.Diagnostics.Debug.WriteLine("  -> Rol es NULL, saltando...");
+                                continue;
+                            }
+
+                            personasConRolNoNulo++;
+
+                            string codigoRolPersona = null;
+
+                            // CASO 1: El rol es una cadena (string)
+                            if (persona.rol is string rolString)
+                            {
+                                personasConRolString++;
+                                System.Diagnostics.Debug.WriteLine($"  -> Rol es STRING: '{rolString}'");
+                                codigoRolPersona = rolString;
+                            }
+                            // CASO 2: El rol es un BsonDocument
+                            else if (persona.rol is BsonDocument bsonDoc)
+                            {
+                                personasConRolDocument++;
+                                System.Diagnostics.Debug.WriteLine($"  -> Rol es BsonDocument");
+                                System.Diagnostics.Debug.WriteLine($"  -> Contenido del documento:");
+
+                                // Listar todas las propiedades
+                                foreach (var element in bsonDoc.Elements)
+                                {
+                                    System.Diagnostics.Debug.WriteLine($"     {element.Name}: {element.Value}");
+                                }
+
+                                // Buscar código en diferentes formatos
+                                var posiblesCamposCodigo = new[] { "codigo", "Codigo", "CODIGO" };
+                                foreach (var campo in posiblesCamposCodigo)
+                                {
+                                    if (bsonDoc.Contains(campo))
+                                    {
+                                        var valor = bsonDoc[campo];
+                                        codigoRolPersona = valor.IsBsonNull ? null : valor.ToString();
+                                        System.Diagnostics.Debug.WriteLine($"     -> Código encontrado en campo '{campo}': {codigoRolPersona}");
+                                        break;
+                                    }
+                                }
+                            }
+                            // CASO 3: El rol es un diccionario (puede suceder con algunos drivers)
+                            else if (persona.rol is System.Collections.IDictionary dict)
+                            {
+                                System.Diagnostics.Debug.WriteLine($"  -> Rol es DICTIONARY");
+                                foreach (var key in dict.Keys)
+                                {
+                                    System.Diagnostics.Debug.WriteLine($"     {key}: {dict[key]}");
+                                    if (key.ToString().ToLower() == "codigo")
+                                    {
+                                        codigoRolPersona = dict[key]?.ToString();
+                                    }
+                                }
+                            }
+                            // CASO 4: Intentar convertir a Rol
+                            else
+                            {
+                                try
+                                {
+                                    // Intentar convertir el objeto a Rol
+                                    var json = Newtonsoft.Json.JsonConvert.SerializeObject(persona.rol);
+                                    var rolObj = Newtonsoft.Json.JsonConvert.DeserializeObject<Rol>(json);
+
+                                    if (rolObj != null && !string.IsNullOrEmpty(rolObj.Codigo))
+                                    {
+                                        personasConRolObjeto++;
+                                        codigoRolPersona = rolObj.Codigo;
+                                        System.Diagnostics.Debug.WriteLine($"  -> Convertido a objeto Rol");
+                                        System.Diagnostics.Debug.WriteLine($"     Código: {rolObj.Codigo}");
+                                        System.Diagnostics.Debug.WriteLine($"     Nombre: {rolObj.Nombre}");
+                                    }
+                                }
+                                catch (Exception ex)
+                                {
+                                    System.Diagnostics.Debug.WriteLine($"  -> No se pudo convertir a Rol: {ex.Message}");
+                                }
+                            }
+
+                            // COMPARAR CÓDIGOS
+                            System.Diagnostics.Debug.WriteLine($"  -> Código encontrado en persona: '{codigoRolPersona}'");
+                            System.Diagnostics.Debug.WriteLine($"  -> Código del rol buscado: '{rol.Codigo}'");
+
+                            if (!string.IsNullOrEmpty(codigoRolPersona))
+                            {
+                                if (codigoRolPersona.Trim() == rol.Codigo.Trim())
+                                {
+                                    personasConEsteRol.Add(persona);
+                                    System.Diagnostics.Debug.WriteLine($"   ✅ PERSONA INCLUIDA en la lista!");
+                                }
+                                else
+                                {
+                                    System.Diagnostics.Debug.WriteLine($"   ❌ Código NO coincide");
+                                }
+                            }
+                            else
+                            {
+                                System.Diagnostics.Debug.WriteLine($"   ⚠️ No se pudo obtener código del rol");
+                            }
                         }
-
-                        string codigoRolPersona = ObtenerCodigoRolDePersona(persona);
-
-                        if (!string.IsNullOrEmpty(codigoRolPersona) && codigoRolPersona == rol.Codigo)
+                        catch (Exception ex)
                         {
-                            personasConEsteRol.Add(persona);
-                            System.Diagnostics.Debug.WriteLine($"   ✅ {persona.nombres} {persona.apellidos} tiene rol {codigoRolPersona}");
+                            System.Diagnostics.Debug.WriteLine($"ERROR procesando persona: {ex.Message}");
+                            System.Diagnostics.Debug.WriteLine($"StackTrace: {ex.StackTrace}");
                         }
                     }
                 }
 
-                System.Diagnostics.Debug.WriteLine($"Personas con rol {rol.Codigo}: {personasConEsteRol.Count}");
+                System.Diagnostics.Debug.WriteLine($"\n=== RESUMEN ===");
+                System.Diagnostics.Debug.WriteLine($"Total personas procesadas: {totalPersonasProcesadas}");
+                System.Diagnostics.Debug.WriteLine($"Personas con rol no nulo: {personasConRolNoNulo}");
+                System.Diagnostics.Debug.WriteLine($"  -> Rol como string: {personasConRolString}");
+                System.Diagnostics.Debug.WriteLine($"  -> Rol como BsonDocument: {personasConRolDocument}");
+                System.Diagnostics.Debug.WriteLine($"  -> Rol como objeto: {personasConRolObjeto}");
+                System.Diagnostics.Debug.WriteLine($"Personas encontradas con rol {rol.Codigo}: {personasConEsteRol.Count}");
+
+                // Listar las personas encontradas
+                if (personasConEsteRol.Count > 0)
+                {
+                    System.Diagnostics.Debug.WriteLine($"Personas encontradas:");
+                    foreach (var p in personasConEsteRol)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"  - {p.nombres} {p.apellidos} ({p.codigo})");
+                    }
+                }
 
                 return Json(new
                 {
@@ -1121,12 +1243,21 @@ namespace Monster_University.Controllers
                         email = p.email,
                         estado = p.estado
                     }),
-                    total = personasConEsteRol.Count
+                    total = personasConEsteRol.Count,
+                    debug = new  // Agregar información de depuración en la respuesta
+                    {
+                        totalPersonas = totalPersonasProcesadas,
+                        personasConRolNoNulo = personasConRolNoNulo,
+                        personasConRolString = personasConRolString,
+                        personasConRolDocument = personasConRolDocument,
+                        personasConRolObjeto = personasConRolObjeto
+                    }
                 }, JsonRequestBehavior.AllowGet);
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"ERROR: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"ERROR GENERAL: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"StackTrace: {ex.StackTrace}");
                 return Json(new { success = false, message = $"Error: {ex.Message}" });
             }
         }
@@ -1217,7 +1348,6 @@ namespace Monster_University.Controllers
                     codigo = rol.Codigo,
                     nombre = rol.Nombre,
                     descripcion = rol.Descripcion,
-                    opciones_permitidas = rol.OpcionesPermitidas,
                     estado = rol.Estado
                 };
 
@@ -1283,7 +1413,6 @@ namespace Monster_University.Controllers
                     codigo = rol.Codigo,
                     nombre = rol.Nombre,
                     descripcion = rol.Descripcion,
-                    opciones_permitidas = rol.OpcionesPermitidas,
                     estado = rol.Estado
                 };
 
