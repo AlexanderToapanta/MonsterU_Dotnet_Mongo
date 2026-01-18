@@ -476,6 +476,409 @@ namespace Monster_University.Controllers
                 return Json(new { success = false, message = ex.Message });
             }
         }
+        // GET: ControladorRol/AsignarOpRol
+        public ActionResult AsignarOpRol()
+        {
+            try
+            {
+                // Obtener roles desde MongoDB
+                var roles = CD_Rol.Instancia.ObtenerRoles() ?? new List<Rol>();
+
+                // Crear SelectList usando "codigo" en lugar de "XEROL_ID"
+                ViewBag.RolesSelectList = new SelectList(roles, "Codigo", "Nombre");
+
+                // También pasar la lista por si acaso
+                ViewBag.Roles = roles;
+
+                // Obtener opciones del sistema desde configuraciones
+                var opcionesSistema = CD_Configuracion.Instancia.ObtenerValoresConfiguracion("opciones_sistema");
+                ViewBag.OpcionesSistema = opcionesSistema;
+
+                return View();
+            }
+            catch (Exception ex)
+            {
+                ViewBag.Error = $"Error: {ex.Message}";
+                ViewBag.RolesSelectList = new SelectList(new List<Rol>(), "Codigo", "Nombre");
+                ViewBag.Roles = new List<Rol>();
+                ViewBag.OpcionesSistema = new List<Configuracion.ValorConfiguracion>();
+                return View();
+            }
+        }
+
+        // POST: ControladorRol/CargarOpcionesPorRol
+        [HttpPost]
+        public JsonResult CargarOpcionesPorRol(string codigoRol)  // Antes XEROL_ID
+        {
+            try
+            {
+                // Obtener el rol desde MongoDB
+                var rol = CD_Rol.Instancia.ObtenerRolPorCodigo(codigoRol);
+                if (rol == null)
+                    return Json(new { success = false, message = "Rol no encontrado" });
+
+                // Obtener todas las opciones del sistema
+                var opcionesSistema = CD_Configuracion.Instancia.ObtenerValoresConfiguracion("opciones_sistema");
+
+                // Crear lista de opciones con estado (asignada o no)
+                var opcionesConEstado = opcionesSistema.Select(opcion => new
+                {
+                    // Cambiar XEOPC_ID por Codigo
+                    Codigo = opcion.Codigo,
+                    Nombre = opcion.Nombre,
+                    Asignada = rol.OpcionesPermitidas != null &&
+                               rol.OpcionesPermitidas.Contains(opcion.Codigo)
+                }).ToList();
+
+                return Json(new
+                {
+                    success = true,
+                    data = opcionesConEstado,
+                    rolNombre = rol.Nombre  // Antes XEROL_NOMBRE
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = "Error al cargar opciones: " + ex.Message });
+            }
+        }
+
+        // POST: ControladorRol/AsignarOpcion
+        [HttpPost]
+        public JsonResult AsignarOpcion(string codigoRol, string codigoOpcion)  // Antes XEROL_ID, XEOPC_ID
+        {
+            try
+            {
+                var rol = CD_Rol.Instancia.ObtenerRolPorCodigo(codigoRol);
+                if (rol == null)
+                    return Json(new { success = false, message = "Rol no encontrado" });
+
+                // Validar que la opción exista en configuraciones
+                var opcionesSistema = CD_Configuracion.Instancia.ObtenerValoresConfiguracion("opciones_sistema");
+                if (!opcionesSistema.Any(o => o.Codigo == codigoOpcion))
+                    return Json(new { success = false, message = "Opción no válida" });
+
+                // Inicializar lista si es null
+                if (rol.OpcionesPermitidas == null)
+                    rol.OpcionesPermitidas = new List<string>();
+
+                // Agregar opción si no existe
+                if (!rol.OpcionesPermitidas.Contains(codigoOpcion))
+                {
+                    rol.OpcionesPermitidas.Add(codigoOpcion);
+                    var resultado = CD_Rol.Instancia.ModificarRol(rol);
+
+                    return Json(new
+                    {
+                        success = resultado,
+                        message = resultado ? "Opción asignada correctamente al rol" : "Error al actualizar el rol"
+                    });
+                }
+
+                return Json(new
+                {
+                    success = true,
+                    message = "La opción ya está asignada a este rol"
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = "Error al asignar opción: " + ex.Message });
+            }
+        }
+
+        // POST: ControladorRol/RetirarOpcion
+        [HttpPost]
+        public JsonResult RetirarOpcion(string codigoRol, string codigoOpcion)  // Antes XEROL_ID, XEOPC_ID
+        {
+            try
+            {
+                var rol = CD_Rol.Instancia.ObtenerRolPorCodigo(codigoRol);
+                if (rol == null)
+                    return Json(new { success = false, message = "Rol no encontrado" });
+
+                if (rol.OpcionesPermitidas != null && rol.OpcionesPermitidas.Contains(codigoOpcion))
+                {
+                    rol.OpcionesPermitidas.Remove(codigoOpcion);
+                    var resultado = CD_Rol.Instancia.ModificarRol(rol);
+
+                    return Json(new
+                    {
+                        success = resultado,
+                        message = resultado ? "Opción retirada correctamente del rol" : "Error al actualizar el rol"
+                    });
+                }
+
+                return Json(new
+                {
+                    success = true,
+                    message = "No se pudo retirar la opción o no estaba asignada"
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = "Error al retirar opción: " + ex.Message });
+            }
+        }
+
+        // POST: ControladorRol/AsignarMultiplesOpciones
+        [HttpPost]
+        public JsonResult AsignarMultiplesOpciones(string codigoRol, List<string> opcionesIds)  // Antes XEROL_ID, XEOPC_IDS
+        {
+            try
+            {
+                if (opcionesIds == null || !opcionesIds.Any())
+                {
+                    return Json(new { success = false, message = "No se seleccionaron opciones" });
+                }
+
+                var rol = CD_Rol.Instancia.ObtenerRolPorCodigo(codigoRol);
+                if (rol == null)
+                    return Json(new { success = false, message = "Rol no encontrado" });
+
+                if (rol.OpcionesPermitidas == null)
+                    rol.OpcionesPermitidas = new List<string>();
+
+                // Validar opciones en sistema
+                var opcionesSistema = CD_Configuracion.Instancia.ObtenerValoresConfiguracion("opciones_sistema");
+                var opcionesValidas = opcionesSistema.Select(o => o.Codigo).ToList();
+
+                int asignadosExitosamente = 0;
+                List<string> errores = new List<string>();
+
+                foreach (var opcionId in opcionesIds)
+                {
+                    try
+                    {
+                        // Validar que la opción exista
+                        if (!opcionesValidas.Contains(opcionId))
+                        {
+                            errores.Add($"Opción {opcionId} no es válida");
+                            continue;
+                        }
+
+                        // Agregar si no existe
+                        if (!rol.OpcionesPermitidas.Contains(opcionId))
+                        {
+                            rol.OpcionesPermitidas.Add(opcionId);
+                            asignadosExitosamente++;
+                        }
+                        else
+                        {
+                            errores.Add($"Opción {opcionId} ya estaba asignada");
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        errores.Add($"Error con opción {opcionId}: {ex.Message}");
+                    }
+                }
+
+                // Actualizar rol en MongoDB
+                if (asignadosExitosamente > 0)
+                {
+                    var resultado = CD_Rol.Instancia.ModificarRol(rol);
+                    if (!resultado)
+                    {
+                        errores.Add("Error al guardar los cambios en la base de datos");
+                    }
+                }
+
+                return Json(new
+                {
+                    success = asignadosExitosamente > 0,
+                    message = $"Se asignaron {asignadosExitosamente} de {opcionesIds.Count} opciones",
+                    detalles = errores
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = "Error al asignar múltiples opciones: " + ex.Message });
+            }
+        }
+
+        // GET: ControladorRol/ObtenerTodasAsignaciones
+        [HttpGet]
+        public JsonResult ObtenerTodasAsignaciones()
+        {
+            try
+            {
+                var roles = CD_Rol.Instancia.ObtenerRoles();
+                var opcionesSistema = CD_Configuracion.Instancia.ObtenerValoresConfiguracion("opciones_sistema");
+
+                var asignaciones = new List<object>();
+
+                foreach (var rol in roles)
+                {
+                    if (rol.OpcionesPermitidas != null && rol.OpcionesPermitidas.Any())
+                    {
+                        foreach (var codigoOpcion in rol.OpcionesPermitidas)
+                        {
+                            var opcion = opcionesSistema.FirstOrDefault(o => o.Codigo == codigoOpcion);
+                            asignaciones.Add(new
+                            {
+                                RolCodigo = rol.Codigo,
+                                RolNombre = rol.Nombre,
+                                OpcionCodigo = codigoOpcion,
+                                OpcionNombre = opcion?.Nombre ?? "Desconocido",
+                               
+                                FechaAsignacion = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")
+                            });
+                        }
+                    }
+                }
+
+                return Json(new { success = true, data = asignaciones }, JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = "Error al obtener asignaciones: " + ex.Message }, JsonRequestBehavior.AllowGet);
+            }
+        }
+
+        // GET: ControladorRol/ObtenerOpcionesDisponibles
+        [HttpGet]
+        public JsonResult ObtenerOpcionesDisponibles()
+        {
+            try
+            {
+                // En MongoDB, las opciones están en configuraciones
+                var opciones = CD_Configuracion.Instancia.ObtenerValoresConfiguracion("opciones_sistema");
+
+                var opcionesFormateadas = opciones.Select(o => new
+                {
+                    Codigo = o.Codigo,      // Antes XEOPC_ID
+                    Nombre = o.Nombre,      // Antes XEOPC_NOMBRE
+                   
+                }).ToList();
+
+                return Json(new { success = true, data = opcionesFormateadas }, JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = "Error al obtener opciones: " + ex.Message }, JsonRequestBehavior.AllowGet);
+            }
+        }
+
+        // GET: ControladorRol/ObtenerRoles
+        [HttpGet]
+        public JsonResult ObtenerRoles()
+        {
+            try
+            {
+                var roles = CD_Rol.Instancia.ObtenerRoles();
+
+                var rolesFormateados = roles.Select(r => new
+                {
+                    Codigo = r.Codigo,          // Antes XEROL_ID
+                    Nombre = r.Nombre,          // Antes XEROL_NOMBRE
+                    Descripcion = r.Descripcion, // Antes XEROL_DESCRIPCION
+                    Estado = r.Estado,
+                    OpcionesCount = r.OpcionesPermitidas?.Count ?? 0
+                }).ToList();
+
+                return Json(new { success = true, data = rolesFormateados }, JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = "Error al obtener roles: " + ex.Message }, JsonRequestBehavior.AllowGet);
+            }
+        }
+
+        // GET: ControladorRol/ReporteAsignaciones
+        public ActionResult ReporteAsignaciones()
+        {
+            try
+            {
+                var roles = CD_Rol.Instancia.ObtenerRoles();
+                var opcionesSistema = CD_Configuracion.Instancia.ObtenerValoresConfiguracion("opciones_sistema");
+
+                var reporte = new List<object>();
+
+                foreach (var rol in roles)
+                {
+                    var opcionesAsignadas = new List<object>();
+
+                    if (rol.OpcionesPermitidas != null && rol.OpcionesPermitidas.Any())
+                    {
+                        foreach (var codigoOpcion in rol.OpcionesPermitidas)
+                        {
+                            var opcion = opcionesSistema.FirstOrDefault(o => o.Codigo == codigoOpcion);
+                            opcionesAsignadas.Add(new
+                            {
+                                Codigo = codigoOpcion,
+                                Nombre = opcion?.Nombre ?? "Desconocido",
+                               
+                            });
+                        }
+                    }
+
+                    reporte.Add(new
+                    {
+                        Rol = rol.Nombre,
+                        CodigoRol = rol.Codigo,
+                        EstadoRol = rol.Estado,
+                        TotalOpciones = rol.OpcionesPermitidas?.Count ?? 0,
+                        OpcionesAsignadas = opcionesAsignadas
+                    });
+                }
+
+                ViewBag.Reporte = reporte;
+                return View();
+            }
+            catch (Exception ex)
+            {
+                ViewBag.Error = "Error al generar reporte: " + ex.Message;
+                ViewBag.Reporte = new List<object>();
+                return View();
+            }
+        }
+
+        // GET: ControladorRol/DetalleRolOp/{id}
+        public ActionResult DetalleRolOp(string id)
+        {
+            try
+            {
+                var rol = CD_Rol.Instancia.ObtenerRolPorCodigo(id);
+                if (rol == null)
+                {
+                    return HttpNotFound();
+                }
+
+                // Obtener opciones asignadas con detalles
+                var opcionesSistema = CD_Configuracion.Instancia.ObtenerValoresConfiguracion("opciones_sistema");
+                var opcionesAsignadas = new List<Configuracion.ValorConfiguracion>();
+
+                if (rol.OpcionesPermitidas != null)
+                {
+                    foreach (var codigoOpcion in rol.OpcionesPermitidas)
+                    {
+                        var opcion = opcionesSistema.FirstOrDefault(o => o.Codigo == codigoOpcion);
+                        if (opcion != null)
+                        {
+                            opcionesAsignadas.Add(opcion);
+                        }
+                    }
+                }
+
+                ViewBag.OpcionesAsignadas = opcionesAsignadas;
+                ViewBag.OpcionesSistema = opcionesSistema;
+
+                return View(rol);
+            }
+            catch (Exception ex)
+            {
+                ViewBag.Error = "Error al cargar detalles: " + ex.Message;
+                return View();
+            }
+        }
+
+        // GET: ControladorRol/Index (redirección)
+        public ActionResult Index()
+        {
+            return RedirectToAction("AsignarOpRol");
+        }
+
 
     }
 }

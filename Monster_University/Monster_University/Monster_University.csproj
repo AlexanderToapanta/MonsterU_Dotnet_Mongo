@@ -405,13 +405,14 @@
     <Content Include="Views\ControladorPersonal\crearpersonal.cshtml" />
     <Content Include="Views\ControladorRol\GestionarRol.cshtml" />
     <Content Include="Views\ControladorRol\AsignarRol.cshtml" />
-    <Content Include="Views\ControladorOpRoles\AsignarOpRol.cshtml" />
+    <Content Include="Views\ControladorRol\AsignarOpRol.cshtml" />
     <Content Include="Views\ControladorCarrera\Lista.cshtml" />
     <Content Include="Views\ControladorCarrera\Reporte.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
     <Folder Include="Models\" />
+    <Folder Include="Views\ControladorOpRoles\" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Content\bootstrap.rtl.min.css.map" />
